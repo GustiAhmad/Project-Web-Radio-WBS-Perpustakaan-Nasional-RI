@@ -224,3 +224,79 @@ Bila Claude membutuhkan detail spesifikasi, buka berkas dokumen yang bersangkuta
 2. Kerjakan subtugas **hanya untuk 1 tahap yang sedang aktif**. Jangan melompat ke tahap berikutnya secara sepihak.
 3. Setelah seluruh subtugas pada tahap tersebut selesai dan teruji, **BERHENTI dan berikan laporan ringkas kepada pengguna (*User*)**. Minta pengguna melakukan peninjauan pada **Titik Tinjauan (*Review Gate*)**.
 4. Lanjutkan ke tahap berikutnya hanya setelah pengguna memberikan persetujuan (*approval*).
+
+---
+
+## 9. Protokol Wajib Commit Git Setiap Tahap (*Mandatory Git Commit Protocol*)
+
+> ⚠️ **ATURAN KRITIS — WAJIB DIPATUHI TANPA PENGECUALIAN**
+
+Setiap kali sebuah tahap atau subtugas yang signifikan selesai dikerjakan, Claude **WAJIB** melakukan hal berikut **sebelum mengakhiri sesi atau berpindah ke subtugas berikutnya:**
+
+### 9.1 Kapan Claude Harus Meminta Commit?
+
+Claude **WAJIB mengajukan permintaan commit kepada pengguna** pada momen-momen berikut:
+
+| Momen | Contoh Situasi |
+|---|---|
+| **Setelah setiap Titik Tinjauan (*Review Gate*)** | Setelah Tahap 1 selesai dan disetujui pengguna |
+| **Setelah komponen besar selesai** | Setelah `AudioContext.tsx` atau `PersistentPlayer.tsx` selesai dibangun |
+| **Setelah integrasi fitur kritis** | Setelah koneksi Supabase Realtime terhubung dan teruji |
+| **Sebelum mengakhiri sesi kerja** | Di akhir setiap sesi koding, tanpa terkecuali |
+| **Setelah perbaikan bug signifikan** | Setelah bug kritis Tingkat 1 atau 2 berhasil diperbaiki |
+
+### 9.2 Cara Claude Meminta Persetujuan Commit
+
+Ketika tiba waktunya commit, Claude **HARUS** menampilkan notifikasi dengan format berikut dan **menunggu jawaban pengguna sebelum mengeksekusi perintah Git apa pun**:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 PERMINTAAN COMMIT KE GITHUB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Tahap/Subtugas yang selesai : [nama tahap atau subtugas]
+File yang akan dicommit      : [daftar file baru/berubah]
+Pesan commit yang diusulkan  : [pesan commit]
+
+Apakah Anda menyetujui commit dan push ke GitHub sekarang?
+Jawab: YA untuk melanjutkan | TIDAK untuk tunda commit
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### 9.3 Perintah Git yang Akan Dieksekusi (Hanya Setelah Persetujuan)
+
+Setelah pengguna menjawab **"YA"**, Claude mengeksekusi perintah berikut secara berurutan:
+
+```bash
+# Pindah ke direktori proyek
+cd "C:\Project Radio WBS Perpusnas"
+
+# Tambahkan seluruh perubahan ke staging
+git add .
+
+# Buat commit dengan pesan deskriptif
+git commit -m "[jenis]: [deskripsi singkat perubahan dalam Bahasa Indonesia]"
+
+# Kirim ke GitHub
+git push
+```
+
+### 9.4 Konvensi Pesan Commit (*Conventional Commits*)
+
+Gunakan format standar berikut agar riwayat commit di GitHub terbaca rapi dan profesional:
+
+| Awalan (Prefix) | Kapan Digunakan | Contoh Pesan |
+|---|---|---|
+| `feat(tahap-N):` | Fitur/komponen baru selesai dibangun | `feat(tahap-1): inisialisasi vite react typescript dan konfigurasi tailwind perpusnas` |
+| `feat:` | Fitur spesifik selesai | `feat: komponen persistent audio player dengan auto-reconnect 3x` |
+| `fix:` | Perbaikan bug | `fix: audio tidak berhenti saat navigasi ke halaman jadwal` |
+| `chore:` | Konfigurasi, setup, dependensi | `chore: tambah supabase sdk dan konfigurasi env variables` |
+| `docs:` | Perubahan pada dokumentasi saja | `docs: perbarui roadmap centang tahap 1 selesai` |
+| `style:` | Perubahan tampilan/CSS tanpa logika | `style: sesuaikan warna badge on-air dengan palet biru perpusnas` |
+| `refactor:` | Perbaikan kode tanpa ubah fungsionalitas | `refactor: ekstrak logika kalkulasi waktu wib ke timeUtils.ts` |
+
+### 9.5 Aturan Tambahan yang Tidak Boleh Dilanggar
+
+- **DILARANG** mengeksekusi `git push` tanpa konfirmasi eksplisit dari pengguna terlebih dahulu.
+- **DILARANG** melakukan `force push` (`git push --force`) dalam kondisi apa pun.
+- **DILARANG** melakukan commit pada berkas yang terdaftar di `.gitignore` (terutama `.env`, `client_secret*.json`, `token*.json`).
+- Jika pengguna menjawab **"TIDAK"** atau menunda commit, Claude tetap melanjutkan pekerjaan dan **mengajukan permintaan commit ulang** di akhir subtugas berikutnya atau saat sesi akan ditutup.
