@@ -1,0 +1,19 @@
+{
+  "markdown": "Log In to UT Radio: Open Education Station for all\n \\| Universitas Terbuka\n\n\n[Back to Website](https://utradio.ut.ac.id/)\n\n[![Icon](https://utradio.ut.ac.id/assets/img/logo-color.svg)](https://utradio.ut.ac.id/)\n\n# Hallo UT Listeners! 👋\n\nMasuk ke akun anda untuk melanjutkan\n\nEmail\n\nKata Sandi\n\nIngat saya[Lupa Kata Sandi?](https://utradio.ut.ac.id/forgot-password)\n\nMasuk\n\nAtau Masuk Menggunakan SSO\n\n[![](https://upload.wikimedia.org/wikipedia/commons/0/0e/Microsoft_365_%282022%29.svg)\\\\\n\\\\\nOffice 365 MyUT](https://utradio.ut.ac.id/auth)\n\nBelum punya akun?\n[Daftar Sekarang](https://utradio.ut.ac.id/register)",
+  "warning": "This scrape job was throttled at your current concurrency limit. If you'd like to scrape faster, you can upgrade your plan.",
+  "metadata": {
+    "csrf-token": "nBMqYlwGKICphHEXecGi7s3G8Wpezukdwcd5SAO4",
+    "viewport": "width=device-width, initial-scale=1",
+    "language": "id",
+    "scrapeId": "01a1e741-7508-747b-b7a3-d41a5577e807",
+    "sourceURL": "https://utradio.ut.ac.id/login",
+    "url": "https://utradio.ut.ac.id/login",
+    "statusCode": 200,
+    "contentType": "text/html; charset=utf-8",
+    "timezone": "America/New_York",
+    "proxyUsed": "basic",
+    "cacheState": "miss",
+    "indexId": "86f5feb2-5141-4799-a640-8f03fbfc11c2",
+    "creditsUsed": 1
+  }
+}

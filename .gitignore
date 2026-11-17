@@ -1,0 +1,56 @@
+# ========================================================
+# Kredensial & Rahasia Keamanan (DILARANG KERAS DI-COMMIT)
+# ========================================================
+*client_secret*.json
+*token*.json
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ========================================================
+# Dependensi & Cache Node.js
+# ========================================================
+node_modules/
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ========================================================
+# Hasil Kompilasi Produksi (Build Outputs)
+# ========================================================
+dist/
+dist-ssr/
+build/
+*.tsbuildinfo
+
+# ========================================================
+# Berkas Riwayat Sesi & Log Sementara
+# ========================================================
+opencode/
+*.log
+
+# ========================================================
+# Berkas Sistem Operasi & Arsip Mentah Besar
+# ========================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.zip
+*.tar.gz
+*.rar
+
+# ========================================================
+# Konfigurasi Editor IDE
+# ========================================================
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
