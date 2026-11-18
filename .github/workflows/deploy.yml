@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: 4. Periksa tipe TypeScript
-        run: npm run typecheck
+        run: npm run type-check
 
       - name: 5. Bangun aset produksi
         env:
