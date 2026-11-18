@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { AlertCircle, CheckCircle2, LockKeyhole, Radio, Send, Youtube } from 'lucide-react'
 import { useRealtimeQnA } from '../../hooks/useRealtimeQnA'
+import { lacakEvent } from '../../services/ga4'
 import { supabase } from '../../services/supabase'
 import {
   BATAS_NAMA,
@@ -96,6 +97,7 @@ export default function QnAForm() {
       setPesan(`Gagal mengirim pertanyaan: ${error.message}`)
       return
     }
+    lacakEvent('submit_pertanyaan', { mode: modeLive ? 'live_youtube' : 'on_air' })
     selesaiTanpaPenyimpanan()
   }
 

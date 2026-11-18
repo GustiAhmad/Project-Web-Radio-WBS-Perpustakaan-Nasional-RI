@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { lacakEvent } from '../services/ga4'
 
 type StatusAudio = 'idle' | 'buffering' | 'playing' | 'paused' | 'offline'
 
@@ -34,6 +35,7 @@ const AudioContext = createContext<NilaiAudio | null>(null)
 export function AudioProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const inginPutarRef = useRef(false)
+  const sudahLacakPutarRef = useRef(false)
   const percobaanRef = useRef(0)
   const timerRef = useRef<number | null>(null)
 
@@ -73,6 +75,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       percobaanRef.current = 0
       setError(null)
       setStatus('playing')
+      if (!sudahLacakPutarRef.current) {
+        sudahLacakPutarRef.current = true
+        lacakEvent('radio_play')
+      }
     }
     const saatWaiting = () => setStatus('buffering')
     const saatError = () => {
@@ -121,6 +127,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   const jeda = useCallback(() => {
     inginPutarRef.current = false
+    sudahLacakPutarRef.current = false
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current)
       timerRef.current = null

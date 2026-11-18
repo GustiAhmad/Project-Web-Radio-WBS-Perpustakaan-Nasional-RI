@@ -76,6 +76,10 @@ export default function SeriesDetailPage() {
             <img
               src={sampul}
               alt={seri.teks_alternatif ?? `Sampul seri ${seri.nama}`}
+              width={1280}
+              height={720}
+              loading="eager"
+              decoding="async"
               onError={() => setCoverGagal(true)}
               className="h-full w-full object-cover"
             />

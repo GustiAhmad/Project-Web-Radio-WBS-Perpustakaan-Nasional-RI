@@ -3,17 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/LOGO-PERPUSNAS.svg" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%LOGO-PERPUSNAS.svg" />
+    <meta name="theme-color" content="#0B3B60" />
     <meta
       name="description"
       content="Dengarkan siaran radio WBS dan jelajahi katalog video siniar Widya Bahana Swara Perpustakaan Nasional RI."
     />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Radio &amp; Siniar WBS Perpusnas" />
+    <meta
+      property="og:description"
+      content="Siaran radio 24 jam dan katalog 331 video siniar Widya Bahana Swara Perpustakaan Nasional RI."
+    />
+    <meta property="og:url" content="https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        var query = window.location.search;
+        var cocok = query.match(/[?&]p=([^&]+)/);
+        if (!cocok) return;
+        var path = decodeURIComponent(cocok[1]).replace(/^\//, '');
+        var sisa = query.replace(/([?&]p=[^&]*)/, '').replace(/^&/, '?');
+        if (sisa === '?') sisa = '';
+        var base = new URL('.', window.location.href).pathname;
+        window.history.replaceState(null, '', base + path + sisa);
+      })();
+    </script>
     <title>Radio &amp; Siniar WBS Perpusnas</title>
   </head>
   <body>

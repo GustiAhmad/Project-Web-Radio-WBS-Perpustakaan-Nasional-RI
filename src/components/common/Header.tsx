@@ -44,9 +44,11 @@ export default function Header() {
           onClick={() => setMenuBuka(false)}
         >
           <img
-            src="/LOGO-PERPUSNAS.svg"
+            src={`${import.meta.env.BASE_URL}LOGO-PERPUSNAS.svg`}
             alt="Logo Perpustakaan Nasional RI"
-            className="h-10 w-auto shrink-0 object-contain"
+            width={45}
+            height={40}
+            className="h-10 w-[45px] shrink-0 object-contain"
           />
           <span className="leading-tight">
             <span className="block text-sm font-bold text-perpusnas-blue">WBS Perpusnas</span>

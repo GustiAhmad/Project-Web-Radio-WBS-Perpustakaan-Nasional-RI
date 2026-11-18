@@ -39,6 +39,10 @@ export default function YouTubeFacade({ videoId, judul }: Props) {
             <img
               src={posterYouTube(videoId, !webpGagal)}
               alt={`Poster video ${judul}`}
+              width={1280}
+              height={720}
+              loading="eager"
+              decoding="async"
               onError={() => (webpGagal ? setPosterGagal(true) : setWebpGagal(true))}
               className="h-full w-full object-cover"
             />

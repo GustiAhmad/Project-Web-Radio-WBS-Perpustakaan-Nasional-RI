@@ -19,7 +19,10 @@ export default function SeriCard({ seri, jumlahEpisode }: Props) {
           <img
             src={seri.gambar_url}
             alt={seri.teks_alternatif ?? `Sampul seri ${seri.nama}`}
+            width={480}
+            height={270}
             loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
           />
         ) : (

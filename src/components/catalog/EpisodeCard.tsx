@@ -29,7 +29,10 @@ export default function EpisodeCard({ episode, seriSlug, seriNama }: Props) {
           <img
             src={posterYouTube(episode.video_id, !webpGagal)}
             alt={`Poster episode ${episode.judul}`}
+            width={480}
+            height={270}
             loading="lazy"
+            decoding="async"
             onError={() => (webpGagal ? setPosterGagal(true) : setWebpGagal(true))}
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
           />

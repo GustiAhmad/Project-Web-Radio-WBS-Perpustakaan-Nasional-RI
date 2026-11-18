@@ -16,8 +16,8 @@
 - [x] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Selesai)*
 - [x] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Selesai)*
 - [x] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Selesai)*
-- [x] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Menunggu Review Gate 6)*
-- [ ] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Belum Dimulai)*
+- [x] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Selesai, Review Gate 6 lolos)*
+- [ ] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Menunggu Verifikasi Produksi)*
 
 ---
 
@@ -227,16 +227,18 @@
 
 ### TAHAP 7: Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages
 
-- [ ] **7.1 Audit Kualitas & Kinerja Google Lighthouse**
+- [x] **7.1 Audit Kualitas & Kinerja Google Lighthouse**
   - Jalankan audit Chrome Lighthouse: pastikan skor Performance ≥90, Accessibility ≥95, Best Practices ≥95, SEO ≥90.
   - Kompresi aset gambar dan verifikasi *Core Web Vitals* (LCP < 2.5s, CLS < 0.1).
-- [ ] **7.2 Integrasi Google Analytics 4 (GA4) Ramah Privasi**
+  - Hasil audit lokal build produksi: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1,43 s, CLS 0,00, TBT 0 ms.
+- [x] **7.2 Integrasi Google Analytics 4 (GA4) Ramah Privasi**
   - Pasang helper `ga4.ts` dengan pelacakan event kunci (`radio_play`, `submit_pertanyaan`).
   - Verifikasi parameter `anonymize_ip: true` aktif untuk melindungi privasi pemustaka.
-- [ ] **7.3 Konfigurasi Deployment GitHub Pages SPA**
+- [x] **7.3 Konfigurasi Deployment GitHub Pages SPA**
   - Buat berkas `public/404.html` dengan skrip pengalihan SPA (*Single Page App redirect*) agar tidak ada galat 404 saat pengguna me-refresh halaman rute dalam.
-  - Buat berkas alur kerja GitHub Actions `.github/workflows/deploy.yml` untuk build dan deploy otomatis ke branch `gh-pages`.
+  - Buat berkas alur kerja GitHub Actions `.github/workflows/deploy.yml` untuk build dan deploy otomatis lewat GitHub Pages Actions (environment `github-pages`).
 - [ ] **7.4 Verifikasi Produksi & Tanda Tangan Berita Acara UAT**
+  - Panduan uji produksi tersedia di `PANDUAN-DEPLOY.md`; lembar pengesahan ada di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9.
   - Uji coba akhir pada domain GitHub Pages resmi dengan protokol HTTPS aktif.
   - Penyelesaian Berita Acara Serah Terima Sistem (Dokumen `09` Bagian 9).
 

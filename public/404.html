@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mengalihkan...</title>
+    <script>
+      (function () {
+        // Base GitHub Pages project site. Perbarui juga VITE_BASE_PATH bila memakai domain kustom.
+        var BASE = '/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/';
+        var path = window.location.pathname;
+        path = path.indexOf(BASE) === 0 ? path.substring(BASE.length) : path.replace(/^\//, '');
+        window.location.replace(BASE + '?p=' + encodeURIComponent('/' + path) + window.location.search);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Mengalihkan ke halaman yang diminta...</p>
+  </body>
+</html>

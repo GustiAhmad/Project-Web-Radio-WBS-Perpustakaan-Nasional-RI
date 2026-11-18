@@ -14,9 +14,11 @@ export default function Footer() {
         <div>
           <div className="inline-flex rounded-lg bg-white p-2">
             <img
-              src="/LOGO-PERPUSNAS.svg"
+              src={`${import.meta.env.BASE_URL}LOGO-PERPUSNAS.svg`}
               alt="Logo Perpustakaan Nasional RI"
-              className="h-14 w-auto object-contain"
+              width={63}
+              height={56}
+              className="h-14 w-[63px] object-contain"
             />
           </div>
           <p className="mt-4 font-bold">WBS Perpusnas</p>
