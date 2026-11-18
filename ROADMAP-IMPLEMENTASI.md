@@ -12,7 +12,7 @@
 ## Ringkasan Progres Keseluruhan
 
 - [x] **Tahap 1:** Fondasi Proyek, Konfigurasi Lingkungan & Tata Letak Dasar *(Selesai)*
-- [ ] **Tahap 2:** Setup Basis Data Supabase, Keamanan RLS & Migrasi Data Katalog *(Belum Dimulai)*
+- [x] **Tahap 2:** Setup Basis Data Supabase, Keamanan RLS & Migrasi Data Katalog *(Selesai)*
 - [ ] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Belum Dimulai)*
 - [ ] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Belum Dimulai)*
 - [ ] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Belum Dimulai)*
@@ -54,20 +54,20 @@
 
 ### TAHAP 2: Setup Basis Data Supabase, Keamanan RLS & Migrasi Data
 
-- [ ] **2.1 Konfigurasi Klien Supabase di Frontend**
+- [x] **2.1 Konfigurasi Klien Supabase di Frontend**
   - Buat berkas `src/services/supabase.ts` untuk menginisialisasi `@supabase/supabase-js`.
   - Buat berkas definisi tipe TypeScript `src/types/database.types.ts` berdasarkan skema tabel Dokumen `07`.
-- [ ] **2.2 Penyiapan Berkas Eksekusi SQL Supabase**
+- [x] **2.2 Penyiapan Berkas Eksekusi SQL Supabase**
   - Sediakan berkas `supabase-schema.sql` siap pakai yang mencakup:
     - 9 tabel utama (`pengguna`, `seri`, `episode`, `jadwal_tetap`, `acara_mendatang`, `sesi_onair`, `pertanyaan`, `halaman_statis`, `pengaturan_situs`).
     - Aturan keamanan *Row Level Security* (RLS) lengkap (hanya Superadmin/Admin yang bisa memodifikasi; publik hanya membaca konten berstatus tayang).
     - Indeks pencarian teks bahasa Indonesia (GIN index).
-- [ ] **2.3 Eksekusi Skrip Migrasi Data Katalog (Python)**
+- [x] **2.3 Eksekusi Skrip Migrasi Data Katalog (Python)**
   - Siapkan skrip migrasi `scripts/migrate_catalog.py` (dari Dokumen `08`).
   - Rekonsiliasi 337 baris publik dari `metadata_youtube.csv` menjadi tepat **331 video unik** (249 pada 21 seri resmi + 82 pada keranjang *"Lainnya"*).
   - Impor 72 baris jadwal tetap penyiaran 24 jam ke tabel `jadwal_tetap`.
-- [ ] **2.4 Pembuatan Akun Superadmin & Admin Awal**
-  - Panduan pendaftaran akun admin pertama melalui dasbor Supabase Auth.
+- [x] **2.4 Pembuatan Akun Superadmin & Admin Awal**
+  - Panduan pendaftaran akun admin pertama melalui dasbor Supabase Auth tersedia di `PANDUAN-SETUP-SUPABASE.md`.
 
 ---
 
