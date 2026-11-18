@@ -197,6 +197,8 @@ AI pengembang **WAJIB** mematuhi seluruh instruksi dari 9 skill yang telah diint
 
 ## 7. Protokol Wajib Git Commit Bertahap
 
+Kotak permintaan commit hanya ditampilkan setelah pengguna mengonfirmasi bahwa panduan uji coba Review Gate berhasil.
+
 Setiap kali menyelesaikan sebuah tahap atau komponen penting, AI **WAJIB** meminta persetujuan commit dengan format:
 
 ```
@@ -220,4 +222,11 @@ Jawab: YA untuk melanjutkan | TIDAK untuk tunda commit
 2. Kerjakan tugas **hanya untuk 1 tahap yang sedang aktif**. Jangan melompat ke tahap berikutnya secara sepihak.
 3. Setelah seluruh subtugas pada tahap tersebut selesai dan teruji, **BERHENTI dan berikan laporan ringkas kepada pengguna**.
 4. Minta pengguna melakukan peninjauan pada **Titik Tinjauan (*Review Gate*)**.
-5. Lanjutkan ke tahap berikutnya hanya setelah pengguna memberikan persetujuan (*approval*).
+5. Setiap Review Gate wajib memuat bagian "PANDUAN UJI COBA PENGGUNA" sebelum kotak permintaan commit. Isinya:
+   - Daftar langkah bernomor, satu tindakan per langkah, memakai kata kerja konkret: buka, klik, ketik, periksa.
+   - Sertakan alamat dan kondisi uji, misalnya http://localhost:5173, lebar layar 360 px dan 1280 px, kata kunci uji "naskah".
+   - Sertakan hasil yang diharapkan pada setiap langkah, berupa teks yang muncul, perilaku yang benar, atau tampilan yang dirapikan.
+   - Akhiri dengan kalimat tanya: "Jika semua langkah lolos, jawab LOLOS. Jika ada yang gagal, sebutkan nomor langkah dan gejalanya."
+   - AI dilarang menampilkan kotak permintaan commit dan dilarang melanjutkan ke tahap berikutnya sebelum menerima konfirmasi LOLOS dari pengguna.
+   - Jika pengguna melaporkan kegagalan, AI memperbaiki masalahnya dulu, lalu mengulang panduan uji coba mulai dari langkah yang gagal.
+6. Lanjutkan ke tahap berikutnya hanya setelah pengguna memberikan persetujuan (*approval*).

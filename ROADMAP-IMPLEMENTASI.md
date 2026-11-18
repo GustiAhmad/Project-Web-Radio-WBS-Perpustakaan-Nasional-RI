@@ -11,7 +11,7 @@
 
 ## Ringkasan Progres Keseluruhan
 
-- [ ] **Tahap 1:** Fondasi Proyek, Konfigurasi Lingkungan & Tata Letak Dasar *(Belum Dimulai)*
+- [x] **Tahap 1:** Fondasi Proyek, Konfigurasi Lingkungan & Tata Letak Dasar *(Selesai)*
 - [ ] **Tahap 2:** Setup Basis Data Supabase, Keamanan RLS & Migrasi Data Katalog *(Belum Dimulai)*
 - [ ] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Belum Dimulai)*
 - [ ] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Belum Dimulai)*
@@ -25,21 +25,21 @@
 
 ### TAHAP 1: Fondasi Proyek, Konfigurasi Lingkungan & Tata Letak Dasar
 
-- [ ] **1.1 Inisialisasi Vite + React + TypeScript**
+- [x] **1.1 Inisialisasi Vite + React + TypeScript**
   - Jalankan `npm create vite@latest . -- --template react-ts` (atau inisialisasi package.json sesuai struktur standar).
-  - Pasang dependensi inti: `react-router-dom`, `lucide-react`, `@supabase/supabase-js`.
-- [ ] **1.2 Konfigurasi Tailwind CSS & Identitas Perpusnas**
+  - Pasang dependensi inti: `react-router-dom@7.18.5`, `lucide-react`, `@supabase/supabase-js`.
+- [x] **1.2 Konfigurasi Tailwind CSS & Identitas Perpusnas**
   - Pasang `tailwindcss`, `postcss`, `autoprefixer`.
   - Konfigurasi token warna resmi Perpusnas (`perpusnas-blue`, `perpusnas-gold`, dll.) di `tailwind.config.js`.
   - Pasang font Inter / font sans-serif standar pemerintah di `index.html`.
-- [ ] **1.3 Pembuatan Struktur Direktori & Variabel Lingkungan**
+- [x] **1.3 Pembuatan Struktur Direktori & Variabel Lingkungan**
   - Buat struktur folder sesuai panduan di `CLAUDE.md` (`src/components`, `src/hooks`, `src/pages`, `src/services`, dll.).
   - Buat berkas `.env.example` dan `.env` lokal.
-- [ ] **1.4 Kerangka Tata Letak Utama (Root Layout)**
+- [x] **1.4 Kerangka Tata Letak Utama (Root Layout)**
   - Bangun komponen `Header` (logo Perpusnas, 5 menu navigasi utama, bilah cari cepat).
   - Bangun wadah pemutar audio persisten kosongan (*Placeholder Bottom Bar*) di tingkat root.
   - Bangun komponen `Footer` (tautan media sosial resmi, alamat studio WBS, copyright).
-  - Konfigurasi `BrowserRouter` di `App.tsx` dengan rute dasar (`/`, `/jadwal`, `/program`, `/tentang`, `/kontak`).
+  - Konfigurasi `BrowserRouter` di `App.tsx` dengan rute dasar (`/`, `/jadwal`, `/program`, `/tentang`, `/kontak`, `/cari`).
 
 ---
 
