@@ -13,7 +13,7 @@
 
 - [x] **Tahap 1:** Fondasi Proyek, Konfigurasi Lingkungan & Tata Letak Dasar *(Selesai)*
 - [x] **Tahap 2:** Setup Basis Data Supabase, Keamanan RLS & Migrasi Data Katalog *(Selesai)*
-- [ ] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Belum Dimulai)*
+- [x] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Selesai)*
 - [ ] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Belum Dimulai)*
 - [ ] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Belum Dimulai)*
 - [ ] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Belum Dimulai)*
@@ -82,16 +82,16 @@
 
 ### TAHAP 3: Mesin Pemutar Audio Persisten & Penanda Waktu On-Air
 
-- [ ] **3.1 Global Audio State Engine (`AudioContext.tsx`)**
+- [x] **3.1 Global Audio State Engine (`AudioContext.tsx`)**
   - Bangun `AudioContext` yang mengelola objek tunggal `new Audio()` di luar siklus perutean halaman.
   - State: `isPlaying`, `isBuffering`, `isOffline`, `volume`, `currentProgram`, `error`.
   - Mekanisme sambung ulang otomatis (*auto-reconnect*) hingga 3 kali jika sinyal studio goyang.
-- [ ] **3.2 Komponen Bilah Pemutar Bawah Persisten (`PersistentPlayer.tsx`)**
+- [x] **3.2 Komponen Bilah Pemutar Bawah Persisten (`PersistentPlayer.tsx`)**
   - Tombol putar/jeda dengan indikator memuat (*loading spinner*).
   - Pengatur volume audio (slider + tombol bisu/unmute).
   - Teks informasi program: menampilkan nama program yang sedang mengudara dan program berikutnya.
   - Penanganan status siaran gangguan / offline santun (`FR-07`).
-- [ ] **3.3 Kustom Hook Deteksi Program On-Air (`useOnAirProgram.ts`)**
+- [x] **3.3 Kustom Hook Deteksi Program On-Air (`useOnAirProgram.ts`)**
   - Kalkulasi waktu nyata zona WIB (UTC+7).
   - Penanganan siklus hari siaran 24 jam (06.00 WIB s.d. 05.59 WIB keesokan harinya).
   - Penentuan jenis hari: Hari Kerja (Senin–Jumat), Sabtu, atau Minggu.

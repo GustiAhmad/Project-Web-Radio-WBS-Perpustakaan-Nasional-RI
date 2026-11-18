@@ -9,8 +9,8 @@ const ringkasan = [
   },
   {
     ikon: Youtube,
-    judul: '331 Video Siniar',
-    deskripsi: 'Jelajahi 21 seri resmi dan keranjang Lainnya berisi rekaman siaran WBS.',
+    judul: 'Video Siniar',
+    deskripsi: 'Jelajahi seri resmi dan keranjang Lainnya berisi rekaman siaran WBS.',
   },
   {
     ikon: MessagesSquare,

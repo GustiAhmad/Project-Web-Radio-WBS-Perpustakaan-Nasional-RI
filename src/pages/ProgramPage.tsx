@@ -7,7 +7,7 @@ export default function ProgramPage() {
         video Lainnya.
       </p>
       <div className="mt-8 rounded-xl border border-dashed border-perpusnas-blue/20 bg-white p-10 text-center text-sm text-perpusnas-gray-600">
-        Katalog 21 seri dan 331 episode akan tersedia pada tahap berikutnya.
+        Katalog seri dan episode akan tersedia pada tahap berikutnya.
       </div>
     </div>
   )
