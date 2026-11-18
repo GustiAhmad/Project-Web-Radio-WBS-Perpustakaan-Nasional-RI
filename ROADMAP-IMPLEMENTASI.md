@@ -16,7 +16,7 @@
 - [x] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Selesai)*
 - [x] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Selesai)*
 - [x] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Selesai)*
-- [ ] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Belum Dimulai)*
+- [x] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Menunggu Review Gate 6)*
 - [ ] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Belum Dimulai)*
 
 ---
@@ -172,28 +172,43 @@
 
 ### TAHAP 6: Antarmuka Panel Pengelola (Admin & Dasbor Studio)
 
-- [ ] **6.1 Autentikasi Pengelola & Proteksi Rute (`AuthContext.tsx`)**
+- [x] **6.1 Autentikasi Pengelola & Proteksi Rute (`AuthContext.tsx`)**
   - Halaman login admin `/admin/masuk` dengan Supabase Auth (surel & kata sandi).
   - Proteksi rute privat: pengunjung publik yang belum login otomatis dialihkan ke halaman masuk.
   - Pemisahan wewenang peran: Superadmin vs Admin biasa (`M-15`, `DR-06`).
-- [ ] **6.2 Modul Tanya Jawab On-Air Studio (`/admin/tanya-jawab`)**
+- [x] **6.2 Modul Tanya Jawab On-Air Studio (`/admin/tanya-jawab`)**
   - Tombol Buka Sesi Baru (pilih program siaran atau acara khusus YouTube) dan Tutup Sesi.
   - Tabel pertanyaan seketika: pertanyaan baru dari pendengar langsung muncul otomatis (<2 detik) tanpa refresh.
   - Tombol aksi penyiar: Tandai Dibaca, Sorot (*Pin*), Sembunyikan, dan Hapus Pertanyaan.
   - Tombol unduh laporan riwayat tanya jawab ke berkas CSV (`FR-24`).
-- [ ] **6.3 Modul Kelola Jadwal Siaran 24 Jam (`/admin/jadwal`)**
+- [x] **6.3 Modul Kelola Jadwal Siaran 24 Jam (`/admin/jadwal`)**
   - Formulir sunting nama penyiar dan jam tayang tabel jadwal tetap (ingat: **TIDAK ADA tombol playout/ganti lagu studio**).
-- [ ] **6.4 Modul Kelola Katalog Video (`/admin/episode` & `/admin/seri`)**
+- [x] **6.4 Modul Kelola Katalog Video (`/admin/episode` & `/admin/seri`)**
   - Formulir penambahan episode baru kilat (target alur selesai ≤5 menit).
   - Pilihan status konten: Draf, Tayang, atau Internal.
   - Pengaturan penomoran episode otomatis per seri.
-- [ ] **6.5 Modul Acara Mendatang & Halaman Statis**
+- [x] **6.5 Modul Acara Mendatang & Halaman Statis**
   - Tambah/sunting/hapus acara talkshow atau webinar mendatang.
   - Editor teks sederhana untuk menyunting halaman Tentang dan Kontak.
-- [ ] **6.6 Menu Khusus Superadmin (`/admin/pengaturan`)**
+- [x] **6.6 Menu Khusus Superadmin (`/admin/pengaturan`)**
   - Pengaturan URL aliran Icecast HTTPS dan pesan gangguan siaran.
   - Pengaturan ID Pengukuran Google Analytics 4 (GA4).
   - Tombol unduh berkas cadangan data sistem (*Manual JSON Backup*, `FR-48`).
+- [x] **6.7 Menu Laporan Error Internal (`/admin/laporan-error`)**
+  - Pelapor: Admin dan Superadmin. Tidak ada peran baru.
+  - Formulir judul, deskripsi error, langkah reproduksi, URL halaman, perangkat, tingkat keparahan, dan screenshot opsional.
+  - Screenshot disimpan di bucket Supabase Storage privat `laporan-error`, PNG/JPEG/WebP maksimal 2 MB. Tidak ada audio/video mentah yang diunggah.
+  - Daftar laporan masuk ke panel Superadmin; Admin hanya melihat laporannya sendiri. Superadmin mengubah status, menulis catatan internal, melihat screenshot, dan menghapus laporan.
+  - Lencana laporan baru muncul seketika lewat Supabase Realtime tanpa refresh.
+  - Notifikasi surel dikirim Supabase Edge Function memakai Resend ke alamat Superadmin aktif di tabel `pengguna`. API keyResend hanya disimpan sebagai Supabase secret, tidak pernah di frontend.
+
+- [x] **6.8 Penyempurnaan Sesi Tanya Jawab (Review Gate 6)**
+   - Dropdown sumber sesi hanya memuat program `interaktif = true` untuk hari WIB berjalan, sehingga "Opening" 06.00 yang ganda tidak muncul lagi.
+   - Urutan dropdown mendahulukan **Indonesia Pagi Ini**, **Pesona Nusantara**, dan **Ruang Literasi**.
+   - Kolom **Tanya Jawab** di `Jadwal Siaran` menampilkan penanda dan dapat dicentang saat menyunting; program tanpa penanda menolak pembukaan sesi.
+   - Penanda yang sama tampil di halaman jadwal publik.
+   - Petugas mengisi target durasi menit saat membuka sesi; jam selesai dihitung dari jam mulai ditambah durasi, sehingga acara lebih dari satu jam tidak terpotong.
+   - Penanda awal program unggulan diatur lewat `supabase-qna-tahap6.sql`.
 
 ---
 
@@ -202,7 +217,10 @@
 >   1. Login sebagai Admin dan Superadmin berjalan aman; pembatasan hak akses berfungsi presisi.
 >   2. Simulasi siaran: Admin membuka sesi tanya jawab, pertanyaan dari pengunjung di HP langsung masuk ke layar panel studio secara seketika (*realtime*).
 >   3. Menambah 1 episode baru berhasil tampil di halaman depan dalam waktu <5 menit.
->   4. 10 Skenario Pengujian UAT Mandiri Pustakawan dari Dokumen `09` teruji LULUS.
+>   4. Admin mengirim laporan error tanpa screenshot; laporan muncul di panel Superadmin lewat Realtime dalam waktu <2 detik.
+>   5. Admin mengirim laporan kedua dengan screenshot PNG/JPEG/WebP; Superadmin dapat membuka berkasnya lewat tautan bertanda tangan.
+>   6. Notifikasi surel Resend sampai ke alamat Superadmin aktif setelah webhook diaktifkan.
+>   7. 10 Skenario Pengujian UAT Mandiri Pustakawan dari Dokumen `09` teruji LULUS.
 > - **Aksi Pengembang:** Berhenti dan minta persetujuan pengguna untuk lanjut ke Tahap 7.
 
 ---

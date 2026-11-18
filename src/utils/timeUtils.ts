@@ -45,3 +45,13 @@ export function dalamRentang(jam: string, mulai: string, selesai: string): boole
   }
   return jam >= mulai && jam < selesai
 }
+
+/** Jam selesai dihitung dari jam mulai ditambah target durasi, termasuk lewat tengah malam. */
+export function jamSelesaiDariDurasi(jamMulai: string, durasiMenit: number): string {
+  const [jam, menit] = jamMulai.split(':').map(Number)
+  if (!Number.isFinite(jam) || !Number.isFinite(menit)) return jamMulai
+  const totalMenit = (((jam * 60 + menit + durasiMenit) % 1440) + 1440) % 1440
+  const jamAkhir = String(Math.floor(totalMenit / 60)).padStart(2, '0')
+  const menitAkhir = String(totalMenit % 60).padStart(2, '0')
+  return `${jamAkhir}:${menitAkhir}:00`
+}

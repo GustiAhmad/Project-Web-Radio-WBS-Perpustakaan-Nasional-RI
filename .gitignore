@@ -36,6 +36,13 @@ opencode/
 *.log
 
 # ========================================================
+# Data Lokal Supabase CLI (Bukan Bagian dari Repositori)
+# ========================================================
+supabase/.temp/
+supabase/.branches/
+.supabase/
+
+# ========================================================
 # Berkas Sistem Operasi & Arsip Mentah Besar
 # ========================================================
 .DS_Store

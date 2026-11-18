@@ -89,6 +89,19 @@ Kolom `rowsecurity` harus `true` untuk kesembilan tabel.
 
 Berkas `supabase-qna-realtime.sql` menambahkan `sesi_onair` dan `pertanyaan` ke publication `supabase_realtime`, serta mengizinkan publik melihat sesi hari ini yang sudah ditutup. Tanpa itu, kartu formulir tidak menerima kabar penutupan sesi tanpa refresh. Frontend tidak pernah meminta kolom `catatan_internal`, `dibuka_oleh`, atau `ditutup_oleh`.
 
+## 5c. Migrasi panel admin dan laporan error (Tahap 6)
+
+1. Di **SQL Editor**, klik **New query**.
+2. Salih seluruh isi berkas `supabase-admin-tahap6.sql`, lalu klik **Run**. Berkas ini menambah kolom `nama_penyiar` pada `jadwal_tetap` dan `disorot` pada `pertanyaan`.
+3. Buat query baru, salih seluruh isi berkas `supabase-laporan-error.sql`, lalu klik **Run**.
+4. Buat query baru, salih seluruh isi berkas `supabase-qna-tahap6.sql`, lalu klik **Run**. Berkas ini menandai tiga program unggulan sebagai sesi tanya jawab dan mematikan penanda program lain, termasuk **Opening**.
+5. Periksa **Storage**. Harus ada bucket privat bernama `laporan-error` dengan batas 2 MB dan tiga jenis MIME gambar.
+6. Periksa kembali `pg_tables`. Sekarang ada 11 tabel dengan `rowsecurity = true`.
+
+Screenshot laporan disimpan di bucket privat. Superadmin membuka gambar lewat tautan bertanda tangan yang hanya berlaku dua menit. Tidak ada audio atau video mentah yang disimpan di server.
+
+Dropdown **Tanya Jawab On-Air** hanya menampilkan program berpenanda `interaktif = true` untuk hari WIB berjalan, dengan **Indonesia Pagi Ini**, **Pesona Nusantara**, dan **Ruang Literasi** di urutan teratas. Program tanpa penanda tidak bisa membuka sesi. Centang penanda ini di menu **Jadwal Siaran** bila diperlukan. Saat membuka sesi, petugas mengisi target durasi dalam menit; jam selesai sesi dihitung dari jam mulai ditambah durasi tersebut, sehingga acara panjang tidak terpotong lebih awal.
+
 ## 6. Buat akun pengelola pertama
 
 1. Buka **Authentication** lalu **Users** di dasbor Supabase.
@@ -109,6 +122,84 @@ VALUES (
 ```
 
 Tambahkan akun kedua dengan peran `admin` untuk operasional harian. Proyek ini hanya mengenal dua peran: `superadmin` dan `admin`. Tidak ada peran tambahan.
+
+## 6b. Aktifkan notifikasi surel laporan error (Resend)
+
+Langkah 20 Review Gate 6 dinyatakan lolos setelah kunci Resend, secret, fungsi, webhook, penerima, dan uji kirim semuanya beres. Pengiriman surel tidak dijalankan dari browser. Frontend hanya menyimpan laporan. Edge Function membaca kunci dari Supabase secret, mencari superadmin aktif di tabel `pengguna`, lalu memanggil Resend.
+
+Semua langkah di bawah bisa dilakukan lewat dashboard, tanpa memasang Supabase CLI.
+
+### A. Kunci dan alamat Resend
+
+1. Buka https://resend.com, daftar atau masuk, lalu buka **API Keys** dan klik **Create API Key**.
+2. Beri nama `wbs-perpusnas`, pilih akses **Sending access**, lalu salin kunci `re_...`.
+3. Untuk uji coba, pakai pengirim `onboarding@resend.dev`. Pengirim bawaan Resend ini hanya boleh mengirim ke alamat surel yang dipakai saat mendaftar. Untuk produksi, verifikasi domain sendiri dan pakai `WBS Perpusnas <noreply@domain-anda>`.
+4. Tentukan penerima dengan kueri di SQL Editor:
+
+```sql
+SELECT email, nama_lengkap FROM public.pengguna
+WHERE peran = 'superadmin' AND status_aktif = true;
+```
+
+Alamat yang muncul di situlah yang akan menerima notifikasi.
+
+### B. Pasang secret di Supabase
+
+1. Buka dasbor proyek, pilih **Edge Functions**, lalu tab **Secrets**.
+2. Tambahkan tiga secret ini:
+
+| Nama | Nilai |
+|---|---|
+| `RESEND_API_KEY` | `re_...` dari langkah A |
+| `EMAIL_DARI` | `WBS Perpusnas <onboarding@resend.dev>` atau domain terverifikasi |
+| `URL_PANEL_ADMIN` | `https://<username>.github.io/<repo>/admin/laporan-error` |
+
+3. Jangan menulis nilai secret ke `.env`, berkas TypeScript, atau repositori. Edge Function mendapat `SUPABASE_URL` dan kredensial internal otomatis dari lingkungan Supabase.
+
+### C. Pasang Edge Function
+
+1. Di **Edge Functions**, klik **Deploy a new function** lalu pilih **Via Editor**.
+2. Beri nama persis `kirim-notifikasi-laporan`.
+3. Salih seluruh isi berkas `supabase/functions/kirim-notifikasi-laporan/index.ts` ke editor, lalu klik **Deploy function**.
+4. Periksa status deploy berhasil. Fungsi aktif di `https://<project-id>.supabase.co/functions/v1/kirim-notifikasi-laporan`.
+5. Cara lewat CLI juga didukung dan lebih cocok untuk pembaruan berikutnya:
+   ```powershell
+   supabase login
+   supabase link --project-ref xfybznzzwrpynrizikyd
+   $env:RESEND_API_KEY = 're_XXXX'
+   $env:EMAIL_DARI = 'WBS Perpusnas <onboarding@resend.dev>'
+   $env:URL_PANEL_ADMIN = 'https://<username>.github.io/<repo>/admin/laporan-error'
+   .\pasang-resend.ps1
+   ```
+   Skrip `pasang-resend.ps1` membaca kunci dari variabel lingkungan, menyimpan tiga secret, lalu men-deploy fungsi. Jalankan `supabase link` sekali saja; SHA kata sandi database tidak disimpan di repositori. Berkas `supabase/config.toml` sudah menonaktifkan `verify_jwt` untuk fungsi ini.
+
+Fungsi menolak pemanggil yang tidak dikenali. Webhook database mengirim kunci proyek pada header `apikey` lewat menu **Add secret key** di langkah D. Jika Anda memakai secret kustom, daftarkan `WEBHOOK_SECRET` di tab Secrets dan kirim header `x-webhook-secret` dengan nilai yang sama persis.
+
+### D. Buat Database Webhook
+
+1. Buka **Database > Webhooks**, klik **Create a new webhook**.
+2. Isi nama `laporan-error-baru`.
+3. Pilih tabel `public.laporan_error` dan centang hanya event **INSERT**.
+4. Pada **Type of webhook**, pilih **Supabase Edge Functions**, lalu pilih `kirim-notifikasi-laporan`.
+5. Klik **Add secret key** pada bagian **HTTP Headers**.
+6. Klik **Create webhook**.
+
+### E. Uji langkah 20
+
+1. Buka `/admin/laporan-error`, kirim satu laporan uji dengan judul `Uji notifikasi Resend` dan deskripsi minimal 20 karakter.
+2. Periksa kotak masuk alamat superadmin dari langkah A. Periksa folder Spam bila surel tidak muncul dalam satu menit.
+3. Jika tidak masuk, buka **Edge Functions > kirim-notifikasi-laporan > Logs** dan baca alasan galatnya.
+4. Buka **Database > Webhooks > laporan-error-baru > Logs** untuk melihat kode status tiap pengiriman.
+
+| Gejala di log | Penyebab | Perbaikan |
+|---|---|---|
+| `401 Pemanggil webhook tidak dikenali` | Header `apikey` belum ditambahkan | Ulangi langkah D.5 lalu simpan webhook |
+| `RESEND_API_KEY belum diatur` | Secret belum terpasang | Ulangi langkah B |
+| `Tidak ada penerima superadmin aktif` | Baris superadmin tidak aktif atau belum ada | Jalankan SQL pendaftaran akun di bagian 6 |
+| `Resend 403` | Pengirim `onboarding@resend.dev` mengirim ke alamat bukan pemilik akun | Pakai alamat pendaftaran Resend atau verifikasi domain sendiri |
+| Webhook tidak muncul di log | Event selain INSERT atau tabel salah | Ulangi langkah D.2 dan D.3 |
+
+Kunci Resend dan service role tidak pernah ditulis di `.env`, kode frontend, atau repositori.
 
 ## 7. Uji dari frontend
 

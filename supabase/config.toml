@@ -1,0 +1,6 @@
+# Konfigurasi Edge Function untuk deploy lewat Supabase CLI.
+# Webhook database memanggil fungsi ini tanpa JWT pengguna, jadi verify_jwt dimatikan.
+# Pemanggil tetap divalidasi lewat kunci proyek pada header apikey di dalam fungsi.
+
+[functions.kirim-notifikasi-laporan]
+verify_jwt = false

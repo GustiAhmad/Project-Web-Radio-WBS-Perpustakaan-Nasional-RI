@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Radio } from 'lucide-react'
+import { MessageCircle, Radio } from 'lucide-react'
 import { Kosong, Pemuatan } from '../components/common/StateBox'
 import { useOnAirProgram } from '../hooks/useOnAirProgram'
 import { supabase } from '../services/supabase'
@@ -18,7 +18,7 @@ const tabs: { label: string; jenis: JenisHari }[] = [
   { label: 'Minggu', jenis: 'minggu' },
 ]
 
-type JadwalRingkas = Pick<JadwalTetap, 'id' | 'jam_mulai' | 'jam_selesai' | 'nama_program' | 'interaktif' | 'deskripsi' | 'hari'>
+type JadwalRingkas = Pick<JadwalTetap, 'id' | 'jam_mulai' | 'jam_selesai' | 'nama_program' | 'nama_penyiar' | 'interaktif' | 'deskripsi' | 'hari'>
 
 export default function SchedulePage() {
   const { jam, jenisHari } = useOnAirProgram()
@@ -38,7 +38,7 @@ export default function SchedulePage() {
     let masihAktif = true
     void supabase
       .from('jadwal_tetap')
-      .select('id, jam_mulai, jam_selesai, nama_program, interaktif, deskripsi, hari')
+      .select('id, jam_mulai, jam_selesai, nama_program, nama_penyiar, interaktif, deskripsi, hari')
       .eq('status', 'terbit')
       .in('hari', ['hari_kerja', 'sabtu', 'minggu'])
       .order('jam_mulai', { ascending: true })
@@ -122,6 +122,12 @@ export default function SchedulePage() {
                       </td>
                       <td className="px-5 py-3 font-medium text-perpusnas-gray-900">
                         {item.nama_program}
+                        {item.interaktif && (
+                          <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-perpusnas-blue-light px-2 py-0.5 text-[10px] font-bold text-perpusnas-blue">
+                            <MessageCircle size={11} aria-hidden="true" />
+                            Tanya Jawab
+                          </span>
+                        )}
                         {aktif && (
                           <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-perpusnas-gold px-2 py-0.5 text-[10px] font-bold uppercase text-perpusnas-blue-dark">
                             <span className="h-1.5 w-1.5 rounded-full bg-perpusnas-blue-dark" aria-hidden="true" />
@@ -130,6 +136,11 @@ export default function SchedulePage() {
                         )}
                       </td>
                       <td className="px-5 py-3 text-xs text-perpusnas-gray-600">
+                        {item.nama_penyiar && (
+                          <span className="mb-1 block font-semibold text-perpusnas-gray-900">
+                            Penyiar: {item.nama_penyiar}
+                          </span>
+                        )}
                         {item.deskripsi ?? (item.interaktif ? 'Sesi interaktif' : 'Siaran reguler')}
                       </td>
                     </tr>

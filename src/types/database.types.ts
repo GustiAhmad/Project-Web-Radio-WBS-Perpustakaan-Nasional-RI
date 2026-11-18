@@ -159,6 +159,7 @@ export type Database = {
           jam_mulai: string
           jam_selesai: string
           nama_program: string
+          nama_penyiar: string | null
           hari: Database['public']['Enums']['jenis_hari']
           interaktif: boolean
           deskripsi: string | null
@@ -171,6 +172,7 @@ export type Database = {
           jam_mulai: string
           jam_selesai: string
           nama_program: string
+          nama_penyiar?: string | null
           hari: Database['public']['Enums']['jenis_hari']
           interaktif?: boolean
           deskripsi?: string | null
@@ -183,6 +185,7 @@ export type Database = {
           jam_mulai?: string
           jam_selesai?: string
           nama_program?: string
+          nama_penyiar?: string | null
           hari?: Database['public']['Enums']['jenis_hari']
           interaktif?: boolean
           deskripsi?: string | null
@@ -295,6 +298,7 @@ export type Database = {
           nama_pengirim: string
           isi_pertanyaan: string
           status: Database['public']['Enums']['status_pertanyaan']
+          disorot: boolean
           catatan_petugas: string | null
           ditandai_oleh: string | null
           created_at: string
@@ -306,6 +310,7 @@ export type Database = {
           nama_pengirim?: string
           isi_pertanyaan: string
           status?: Database['public']['Enums']['status_pertanyaan']
+          disorot?: boolean
           catatan_petugas?: string | null
           ditandai_oleh?: string | null
           created_at?: string
@@ -317,9 +322,73 @@ export type Database = {
           nama_pengirim?: string
           isi_pertanyaan?: string
           status?: Database['public']['Enums']['status_pertanyaan']
+          disorot?: boolean
           catatan_petugas?: string | null
           ditandai_oleh?: string | null
           created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      laporan_error: {
+        Row: {
+          id: string
+          judul: string
+          deskripsi: string
+          langkah_reproduksi: string | null
+          url_halaman: string | null
+          perangkat: string | null
+          tingkat_keparahan: Database['public']['Enums']['tingkat_keparahan']
+          status: Database['public']['Enums']['status_laporan']
+          screenshot_path: string | null
+          dilaporkan_oleh: string | null
+          nama_pelapor: string
+          email_pelapor: string
+          catatan_internal: string | null
+          ditangani_oleh: string | null
+          dibuat_pada: string
+          diproses_pada: string | null
+          selesai_pada: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          judul: string
+          deskripsi: string
+          langkah_reproduksi?: string | null
+          url_halaman?: string | null
+          perangkat?: string | null
+          tingkat_keparahan?: Database['public']['Enums']['tingkat_keparahan']
+          status?: Database['public']['Enums']['status_laporan']
+          screenshot_path?: string | null
+          dilaporkan_oleh?: string | null
+          nama_pelapor: string
+          email_pelapor: string
+          catatan_internal?: string | null
+          ditangani_oleh?: string | null
+          dibuat_pada?: string
+          diproses_pada?: string | null
+          selesai_pada?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          judul?: string
+          deskripsi?: string
+          langkah_reproduksi?: string | null
+          url_halaman?: string | null
+          perangkat?: string | null
+          tingkat_keparahan?: Database['public']['Enums']['tingkat_keparahan']
+          status?: Database['public']['Enums']['status_laporan']
+          screenshot_path?: string | null
+          dilaporkan_oleh?: string | null
+          nama_pelapor?: string
+          email_pelapor?: string
+          catatan_internal?: string | null
+          ditangani_oleh?: string | null
+          dibuat_pada?: string
+          diproses_pada?: string | null
+          selesai_pada?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -399,6 +468,8 @@ export type Database = {
       status_sesi: 'terbuka' | 'tertutup'
       status_pertanyaan: 'baru' | 'dibacakan' | 'disembunyikan'
       kanal_acara: 'youtube' | 'zoom' | 'instagram' | 'tatap_muka' | 'lainnya'
+      status_laporan: 'baru' | 'diproses' | 'selesai' | 'ditolak'
+      tingkat_keparahan: 'rendah' | 'sedang' | 'tinggi' | 'kritis'
     }
     CompositeTypes: Record<string, never>
   }
@@ -410,3 +481,8 @@ export type JadwalTetap = Database['public']['Tables']['jadwal_tetap']['Row']
 export type SesiOnAir = Database['public']['Tables']['sesi_onair']['Row']
 export type AcaraMendatang = Database['public']['Tables']['acara_mendatang']['Row']
 export type HalamanStatis = Database['public']['Tables']['halaman_statis']['Row']
+export type Pertanyaan = Database['public']['Tables']['pertanyaan']['Row']
+export type Pengguna = Database['public']['Tables']['pengguna']['Row']
+export type LaporanError = Database['public']['Tables']['laporan_error']['Row']
+export type StatusLaporan = Database['public']['Enums']['status_laporan']
+export type TingkatKeparahan = Database['public']['Enums']['tingkat_keparahan']
