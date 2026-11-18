@@ -33,6 +33,7 @@ export default function Footer() {
             <li><Link className="hover:text-white" to="/program">Jelajah Program</Link></li>
             <li><Link className="hover:text-white" to="/tentang">Tentang WBS</Link></li>
             <li><Link className="hover:text-white" to="/kontak">Kontak &amp; WhatsApp</Link></li>
+            <li><Link className="hover:text-white" to="/kebijakan-privasi">Kebijakan Privasi</Link></li>
           </ul>
         </div>
 

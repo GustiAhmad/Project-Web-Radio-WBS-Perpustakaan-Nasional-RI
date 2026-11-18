@@ -14,7 +14,7 @@
 - [x] **Tahap 1:** Fondasi Proyek, Konfigurasi Lingkungan & Tata Letak Dasar *(Selesai)*
 - [x] **Tahap 2:** Setup Basis Data Supabase, Keamanan RLS & Migrasi Data Katalog *(Selesai)*
 - [x] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Selesai)*
-- [ ] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Belum Dimulai)*
+- [x] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Selesai)*
 - [ ] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Belum Dimulai)*
 - [ ] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Belum Dimulai)*
 - [ ] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Belum Dimulai)*
@@ -110,26 +110,26 @@
 
 ### TAHAP 4: Halaman Publik Pemustaka (Katalog & Informasi)
 
-- [ ] **4.1 Halaman Beranda (`HomePage.tsx`)**
+- [x] **4.1 Halaman Beranda (`HomePage.tsx`)**
   - Hero siaran utama: kartu interaktif dengan badge *Live On-Air*, jam siaran, nama penyiar, dan tombol putar besar.
   - Blok Acara Mendatang: daftar ringkas acara talkshow/live YouTube tanpa tombol buntu (`FR-28`).
   - Blok 4 Episode Video Terbaru: menampilkan kartu video teranyar berstatus Tayang (`FR-29`).
   - Blok Program Unggulan: menampilkan maksimal 6 seri pilihan (`FR-30`).
-- [ ] **4.2 Halaman Jadwal Siaran 24 Jam (`SchedulePage.tsx`)**
+- [x] **4.2 Halaman Jadwal Siaran 24 Jam (`SchedulePage.tsx`)**
   - Bilah tab hari: Senin s.d. Minggu (`FR-04`).
   - Tabel jadwal 24 jam dengan penyorotan warna emas pada blok jam yang sedang aktif saat ini.
-- [ ] **4.3 Halaman Jelajah Seri Program (`ProgramListPage.tsx`)**
+- [x] **4.3 Halaman Jelajah Seri Program (`ProgramListPage.tsx`)**
   - Saringan kategori topik instan di sisi klien.
   - Kisi 21 kartu seri program resmi + 1 kartu keranjang *"Lainnya"* (`FR-09`, `FR-13`).
-- [ ] **4.4 Halaman Detail Seri (`SeriesDetailPage.tsx`) & Keranjang Lainnya**
+- [x] **4.4 Halaman Detail Seri (`SeriesDetailPage.tsx`) & Keranjang Lainnya**
   - Deskripsi lengkap program dan gambar sampul rasio 16:9.
   - Daftar episode berurutan dengan nomor episode baku dan tombol *"Muat Lebih Banyak"*.
-- [ ] **4.5 Halaman Detail Episode & Pemutar Video (`EpisodeDetailPage.tsx`)**
+- [x] **4.5 Halaman Detail Episode & Pemutar Video (`EpisodeDetailPage.tsx`)**
   - Komponen *Lite YouTube Facade*: gambar poster WebP ringan dengan tombol putar tiruan.
   - Aturan mutlak: **TIDAK ADA AUTOPLAY** saat halaman dibuka (`FR-11`).
   - Panel metadata lengkap: narasumber, moderator, tanggal tayang, durasi, topik, dan tombol salin tautan.
   - Penanganan santun bila video YouTube dihapus/privat (*broken link fallback*, `FR-12`).
-- [ ] **4.6 Pencarian Global & Halaman Statis**
+- [x] **4.6 Pencarian Global & Halaman Statis**
   - Halaman hasil pencarian terpilah (`SearchPage.tsx` pada rute `/cari`).
   - Halaman Tentang WBS (`/tentang`), Kontak & WhatsApp (`/kontak`), Kebijakan Privasi (`/kebijakan-privasi`), dan Halaman 404 Kustom Ramah.
 

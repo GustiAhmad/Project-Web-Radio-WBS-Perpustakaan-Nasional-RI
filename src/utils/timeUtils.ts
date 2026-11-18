@@ -7,6 +7,14 @@ export function waktuWibSekarang(): Date {
   return new Date(Date.now() + OFFSET_WIB_MS)
 }
 
+export function tanggalWibHariIni(): string {
+  const waktu = waktuWibSekarang()
+  const tahun = waktu.getUTCFullYear()
+  const bulan = String(waktu.getUTCMonth() + 1).padStart(2, '0')
+  const hari = String(waktu.getUTCDate()).padStart(2, '0')
+  return `${tahun}-${bulan}-${hari}`
+}
+
 export function jamTanpaDetik(waktu: Date): string {
   const jam = String(waktu.getUTCHours()).padStart(2, '0')
   const menit = String(waktu.getUTCMinutes()).padStart(2, '0')
