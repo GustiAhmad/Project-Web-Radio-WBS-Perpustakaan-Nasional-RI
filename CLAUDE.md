@@ -227,13 +227,207 @@ Bila Claude membutuhkan detail spesifikasi, buka berkas dokumen yang bersangkuta
 
 ---
 
-## 9. Protokol Wajib Commit Git Setiap Tahap (*Mandatory Git Commit Protocol*)
+## 9. Skills yang Ditanamkan (*Embedded Skills from C:\Kumpulan Skills*)
+
+Skills berikut dipilih dan ditanamkan langsung dari analisis folder `C:\Kumpulan Skills` oleh Antigravity. Claude **WAJIB** menerapkan seluruh instruksi skill ini selama pengerjaan proyek.
+
+---
+
+### SKILL 1 — Supabase Best Practices (Sumber: `supabase-plugin`)
+
+> **Kapan Aktif:** Setiap kali mengerjakan tugas yang melibatkan Supabase: skema database, Auth, RLS, Realtime, Storage, dan query PostgreSQL.
+
+**Prinsip Inti Supabase yang Wajib Diikuti:**
+
+1. **Supabase berubah cepat — selalu cek changelog sebelum implementasi.** Jangan mengandalkan pengetahuan lama untuk fitur Supabase. Verifikasi selalu.
+2. **Aktifkan RLS pada SETIAP tabel** di schema publik tanpa terkecuali. Ini kritis karena tabel di schema publik dapat diakses melalui Data API.
+3. **Jangan gunakan `auth.role()` yang sudah deprecated.** Gunakan klausa `TO authenticated` atau `TO anon` langsung pada policy.
+4. **`TO authenticated` saja bukan otorisasi — itu hanya autentikasi.** Selalu kombinasikan dengan predikat kepemilikan di `USING`:
+   ```sql
+   -- BENAR untuk proyek WBS:
+   create policy "admin dapat membaca semua" on seri for select
+   to authenticated
+   using ( (select auth.uid()) in (select id from pengguna where peran in ('admin','superadmin')) );
+   ```
+5. **Policy UPDATE butuh BOTH `USING` dan `WITH CHECK`** agar tidak ada manipulasi `user_id`.
+6. **Views melewati RLS secara default.** Gunakan `WITH (security_invoker = true)` di PostgreSQL 15+.
+7. **Fungsi `SECURITY DEFINER` melewati RLS.** Hindari kecuali benar-benar diperlukan; lebih baik gunakan `SECURITY INVOKER`.
+8. **Storage upsert butuh INSERT + SELECT + UPDATE.** Hanya INSERT saja akan gagal senyap saat upload ulang.
+9. **Jangan pernah expose `service_role` key di frontend.** Hanya gunakan `anon` / `publishable` key di sisi klien React.
+10. **Verifikasi setiap implementasi** dengan menjalankan kueri uji setelah perubahan. Implementasi tanpa verifikasi dianggap belum selesai.
+
+**Panduan Khusus untuk Skema 9 Tabel Proyek WBS:**
+- Baca `docs/07-model-data-dan-kamus-data.md` sebagai sumber kebenaran DDL dan kebijakan RLS.
+- Tabel `pengguna`, `seri`, `episode`, `jadwal_tetap`, `acara_mendatang`, `sesi_onair`, `pertanyaan`, `halaman_statis`, `pengaturan_situs` — semua wajib memiliki RLS aktif.
+- Kolom IP address **tidak boleh ada** di tabel mana pun (sesuai `FR-53`, privasi pemustaka).
+
+---
+
+### SKILL 2 — PostgreSQL Performance Best Practices (Sumber: `supabase-postgres-best-practices`)
+
+> **Kapan Aktif:** Saat menulis atau mengubah skema, kueri SQL, indeks, trigger, dan kebijakan RLS.
+
+**Aturan Prioritas Tinggi:**
+
+| Prioritas | Kategori | Aturan Kunci untuk Proyek WBS |
+|---|---|---|
+| **KRITIS** | Query Performance | Gunakan indeks GIN untuk pencarian teks bahasa Indonesia (sudah didefinisikan di Dok 07). Hindari `SELECT *` — selalu pilih kolom spesifik. |
+| **KRITIS** | Keamanan & RLS | Setiap perubahan skema harus melalui audit: jalankan `supabase db advisors` setelah ada perubahan DDL. |
+| **TINGGI** | Desain Skema | Gunakan tipe data yang tepat (UUID untuk PK, `timestamptz` untuk semua kolom waktu, `text` bukan `varchar` untuk Postgres). |
+| **SEDANG** | Concurrency | Hindari lock pada tabel `pertanyaan` saat Realtime WebSocket aktif; gunakan `INSERT` non-blocking. |
+
+---
+
+### SKILL 3 — Stop Slop: Hindari Pola Penulisan AI (Sumber: `stop-slop`)
+
+> **Kapan Aktif:** Saat menulis teks antarmuka (label tombol, pesan galat, pesan kosong, teks notifikasi, komentar kode), dokumentasi kode, atau memperbarui berkas Markdown.
+
+**7 Aturan Inti yang Wajib Dipatuhi:**
+
+1. **Potong frasa pengisi.** Hindari pembuka seperti "Tentu saja!", "Sangat bagus!", "Baik, saya akan..." dalam komentar kode maupun teks UI.
+2. **Gunakan kalimat aktif.** Setiap kalimat perlu subjek manusia yang melakukan sesuatu. Hindari konstruksi pasif.
+3. **Spesifik, bukan samar.** Jangan tulis `"Terjadi kesalahan"` — tulis `"Gagal memuat jadwal siaran. Periksa koneksi internet Anda."`.
+4. **Variasikan panjang kalimat.** Dua item lebih baik dari tiga. Hindari em-dash (`—`) dalam teks UI.
+5. **Percayai pengguna.** Sampaikan fakta secara langsung tanpa pelunakan berlebihan atau penghilir yang tidak perlu.
+6. **Potong kutipan bombastis.** Jika teks label tombol terdengar seperti slogan iklan, tulis ulang.
+7. **Periksa sebelum menyerahkan:** Ada adverbia? Hapus. Ada suara pasif? Temukan aktornya. Ada kata "setiap/selalu/tidak pernah" yang samar? Ganti dengan spesifik.
+
+**Contoh Penerapan di Proyek WBS:**
+```
+❌ BURUK: "Pertanyaan Anda berhasil dikirimkan dengan sukses kepada tim studio kami yang berdedikasi!"
+✅ BAIK:  "Pertanyaan terkirim ke studio."
+
+❌ BURUK: "Terjadi kesalahan saat memproses permintaan Anda."
+✅ BAIK:  "Siaran tidak terhubung. Mencoba sambung ulang..."
+
+❌ BURUK: "Silakan masukkan nama Anda di bawah ini untuk melanjutkan."
+✅ BAIK:  "Nama"
+```
+
+---
+
+### SKILL 4 — Playwright: Pengujian End-to-End (Sumber: `playwright`)
+
+> **Kapan Aktif:** Pada Tahap 7 (Optimasi & Deployment) atau ketika Claude diminta menulis tes otomatis untuk skenario kritis.
+
+**Skenario UAT yang Wajib Ditulis sebagai Tes Playwright (dari Dok 09):**
+
+1. **Audio Persistence Test:** Putar radio → navigasi ke `/jadwal` → verifikasi audio masih memutar tanpa terputus.
+2. **Mixed Content Test:** Verifikasi tidak ada peringatan Mixed Content di konsol saat memutar audio di domain HTTPS.
+3. **QnA Realtime Test:** Kirim pertanyaan dari halaman publik → verifikasi muncul di panel admin dalam <2 detik.
+4. **Admin Auth Guard Test:** Akses `/admin` tanpa login → verifikasi dialihkan ke `/admin/masuk`.
+5. **Role Separation Test:** Login sebagai `admin` biasa → coba akses `/admin/pengaturan` → verifikasi akses ditolak.
+6. **YouTube No Autoplay Test:** Buka halaman detail episode → verifikasi video tidak berputar otomatis.
+7. **404 Custom Page Test:** Buka URL ngawur → verifikasi halaman 404 kustom muncul dengan audio tetap aktif.
+
+**Perintah Dasar Playwright:**
+```bash
+npx playwright test                    # Jalankan semua tes
+npx playwright test --headed           # Jalankan dengan tampilan browser
+npx playwright test tests/audio.spec.ts  # Jalankan tes spesifik
+npx playwright show-report             # Tampilkan laporan HTML
+```
+
+---
+
+### SKILL 5 — ECC: Praktik Keamanan & Kualitas Kode (Sumber: `ECC-main`)
+
+> **Kapan Aktif:** Sepanjang seluruh tahap pembangunan — terutama sebelum setiap commit Git.
+
+**Prinsip Keamanan yang Wajib Diterapkan:**
+1. **Security-First:** Validasi semua input sebelum dimasukkan ke database. Gunakan sanitasi teks untuk mencegah XSS pada konten yang dirender di panel admin.
+2. **Immutability:** Selalu buat objek baru, jangan mutasi state yang ada (penting untuk AudioContext dan AuthContext).
+3. **Plan Before Execute:** Untuk fitur kompleks (Realtime QnA, Audio Engine), buat rencana implementasi tertulis terlebih dahulu sebelum menulis kode.
+4. **Test-Driven mindset:** Tulis kriteria penerimaan (berdasarkan Dok 09) sebelum mengimplementasikan fitur.
+5. **Never commit secrets:** `.env`, API keys, dan token Supabase tidak boleh ada dalam kode yang di-commit ke Git.
+
+**Checklist Keamanan Sebelum Setiap Commit:**
+- [ ] Tidak ada `console.log` yang menampilkan data sensitif (token, password, surel pengguna)
+- [ ] Tidak ada `service_role` key yang ter-embed di kode frontend
+- [ ] Input formulir tanya jawab telah disanitasi dari XSS (`<script>`, `onerror=`, dll.)
+- [ ] Kolom honeypot anti-spam hadir dan tersembunyi dengan benar (bukan `display:none`, tapi `position: absolute; opacity: 0`)
+- [ ] Semua variabel environment menggunakan prefix `VITE_` untuk yang aman diekspos, dan tidak ada rahasia di variabel `VITE_`
+
+---
+
+### SKILL 6 — Impeccable: Kualitas Desain Visual (Sumber: `impeccable`)
+
+> **Kapan Aktif:** Saat membangun atau merevisi komponen UI — terutama Hero Beranda, kartu program, bilah pemutar, dan panel admin.
+
+**Prinsip Desain untuk Proyek WBS:**
+
+1. **Hierarchy yang jelas.** Setiap halaman harus punya satu elemen dominan yang langsung terlihat (Hero = tombol Putar Radio besar; Panel Admin = status sesi tanya jawab).
+2. **Konsistensi token warna.** HANYA gunakan token warna Perpusnas yang sudah didefinisikan di `tailwind.config.js`: biru utama `#0B3B60`, aksen emas `#D4A017`. Jangan improvisasi warna baru.
+3. **Ruang napas (*whitespace*).** Berikan padding yang cukup antar elemen — tidak boleh terasa sesak atau penuh sesak.
+4. **Responsif sejati.** Setiap komponen diuji di 3 breakpoint: mobile 360px, tablet 768px, desktop 1280px. Tidak boleh ada pergeseran horizontal (no horizontal scroll) di mobile.
+5. **Tipografi yang terbaca.** Ukuran teks minimum 14px untuk konten; 16px untuk body teks. Kontras warna minimum WCAG 2.1 AA (rasio 4.5:1).
+6. **Hindari ornamen berlebihan.** Sesuai `K-6` dan `NG-10`: tidak ada animasi carousel berputar sendiri, tidak ada parallax, tidak ada pop-up. Efek transisi: hanya `transition-colors` dan `transition-opacity` yang halus (150ms–200ms).
+
+---
+
+### SKILL 7 — Karpathy Guidelines: Anti-Overengineering & Surgical Changes (Sumber: `andrej-karpathy-skills`)
+
+> **Kapan Aktif:** Sepanjang seluruh siklus pengembangan saat merancang, menulis, meninjau, atau merefaktor kode React, TypeScript, Tailwind, dan SQL.
+
+**4 Pilar Karpathy yang Wajib Diterapkan:**
+
+1. **Think Before Coding (Jangan Berasumsi & Jangan Sembunyikan Kebingungan):**
+   - Nyatakan asumsi secara eksplisit sebelum menulis kode. Jika ada keraguan atau ambiguitas, **tanyakan kepada pengguna**.
+   - Jika ada lebih dari satu opsi implementasi, paparkan opsinya ke pengguna — jangan memilih secara diam-diam.
+   - Jika ada pendekatan yang lebih sederhana, katakan terus terang. Dorong solusi paling simpel.
+   - Jika ada yang membingungkan dalam spesifikasi, **berhenti** dan tanyakan bagian mana yang membingungkan.
+
+2. **Simplicity First (Anti-Overengineering & Kode Minimalis):**
+   - Tulis kode **minimal** yang menyelesaikan masalah. Jangan buat kode spekulatif.
+   - Dilarang menambahkan fitur di luar apa yang diminta pada tahap yang sedang aktif.
+   - Dilarang membuat lapisan abstraksi (helper, wrapper, generic type) untuk kode yang hanya dipakai sekali.
+   - Dilarang menambahkan "fleksibilitas" atau "konfigurabilitas" yang tidak diminta.
+   - Dilarang membuat penanganan galat (*error handling*) untuk skenario mustahil.
+   - Jika Anda menulis 200 baris kode padahal bisa diselesaikan dalam 50 baris, **tulis ulang menjadi 50 baris**.
+
+3. **Surgical Changes (Perubahan Presisi Bedah):**
+   - **Sentuh HANYA apa yang harus diubah.** Jangan "mempercantik" kode, komentar, atau format di file sekitar yang tidak terkait.
+   - Jangan merefaktor kode yang tidak rusak (*don't refactor what isn't broken*).
+   - Samakan gaya penulisan dengan kode yang sudah ada, meskipun Anda lebih suka gaya lain.
+   - Jika melihat ada kode usang (*dead code*) yang tidak terkait, sebutkan kepada pengguna — jangan dihapus sendiri.
+   - Bersihkan impor, variabel, atau fungsi yang menjadi yatim (*orphan*) akibat perubahan kode Anda sendiri.
+   - **Uji Kepatuhan:** Setiap baris perubahan di *git diff* harus bisa dilacak langsung ke instruksi pengguna.
+
+4. **Goal-Driven Execution (Berorientasi Target Terverifikasi):**
+   - Ubah setiap tugas menjadi target yang terverifikasi sebelum mendeklarasikan selesai:
+     - *"Tambah validasi"* $\rightarrow$ Uji input invalid, pastikan ditolak sesuai kriteria.
+     - *"Perbaiki bug audio"* $\rightarrow$ Rekonstruksi bug, perbaiki, verifikasi audio normal di rute lain.
+   - Untuk tugas multitahap, tetapkan alur verifikasi: `Langkah -> Verifikasi -> Selesai`.
+
+---
+
+### SKILL 8 — Security Audit & Web Protocol Defense (Sumber: `security-audit-skill`)
+
+> **Kapan Aktif:** Saat membangun autentikasi admin, formulir publik tanya jawab, dan konfigurasi API eksternal.
+
+1. **Perlindungan Batas Akses (BOLA/IDOR):** Pastikan kueri Supabase tidak dapat dimanipulasi untuk mengakses data antar-pengguna secara tidak sah.
+2. **Sanitasi Vektor XSS:** Input teks pertanyaan dan nama pendengar harus disanitasi secara ketat sebelum dirender ke DOM panel admin penyiar.
+3. **Form Defense:** Honeypot anti-spam wajib disembunyikan menggunakan CSS modern (`position: absolute; opacity: 0; pointer-events: none`).
+
+---
+
+### SKILL 9 — Modern Web Platform Standards & Audio APIs (Sumber: `modern-web-guidance`)
+
+> **Kapan Aktif:** Saat mengimplementasikan pemutar audio, tata letak CSS, dan interaksi peramban.
+
+1. **Modern Audio Lifecycle:** Tangani interupsi audio di peramban ponsel (seperti panggilan telepon masuk atau kunci layar) menggunakan event standar HTML5 Audio.
+2. **Native Web Capabilities:** Gunakan kapabilitas native browser modern (CSS Grid, Flexbox, `AbortController`) alih-alih memasang pustaka atau polyfill eksternal yang membebani bundel.
+3. **Efisiensi Daya:** Pastikan audio engine melepaskan resource saat tidak digunakan untuk menghemat daya baterai perangkat pemustaka.
+
+---
+
+## 10. Protokol Wajib Commit Git Setiap Tahap (*Mandatory Git Commit Protocol*)
 
 > ⚠️ **ATURAN KRITIS — WAJIB DIPATUHI TANPA PENGECUALIAN**
 
 Setiap kali sebuah tahap atau subtugas yang signifikan selesai dikerjakan, Claude **WAJIB** melakukan hal berikut **sebelum mengakhiri sesi atau berpindah ke subtugas berikutnya:**
 
-### 9.1 Kapan Claude Harus Meminta Commit?
+### 10.1 Kapan Claude Harus Meminta Commit?
 
 Claude **WAJIB mengajukan permintaan commit kepada pengguna** pada momen-momen berikut:
 
@@ -245,7 +439,7 @@ Claude **WAJIB mengajukan permintaan commit kepada pengguna** pada momen-momen b
 | **Sebelum mengakhiri sesi kerja** | Di akhir setiap sesi koding, tanpa terkecuali |
 | **Setelah perbaikan bug signifikan** | Setelah bug kritis Tingkat 1 atau 2 berhasil diperbaiki |
 
-### 9.2 Cara Claude Meminta Persetujuan Commit
+### 10.2 Cara Claude Meminta Persetujuan Commit
 
 Ketika tiba waktunya commit, Claude **HARUS** menampilkan notifikasi dengan format berikut dan **menunggu jawaban pengguna sebelum mengeksekusi perintah Git apa pun**:
 
@@ -262,7 +456,7 @@ Jawab: YA untuk melanjutkan | TIDAK untuk tunda commit
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### 9.3 Perintah Git yang Akan Dieksekusi (Hanya Setelah Persetujuan)
+### 10.3 Perintah Git yang Akan Dieksekusi (Hanya Setelah Persetujuan)
 
 Setelah pengguna menjawab **"YA"**, Claude mengeksekusi perintah berikut secara berurutan:
 
@@ -280,7 +474,7 @@ git commit -m "[jenis]: [deskripsi singkat perubahan dalam Bahasa Indonesia]"
 git push
 ```
 
-### 9.4 Konvensi Pesan Commit (*Conventional Commits*)
+### 10.4 Konvensi Pesan Commit (*Conventional Commits*)
 
 Gunakan format standar berikut agar riwayat commit di GitHub terbaca rapi dan profesional:
 
@@ -294,7 +488,7 @@ Gunakan format standar berikut agar riwayat commit di GitHub terbaca rapi dan pr
 | `style:` | Perubahan tampilan/CSS tanpa logika | `style: sesuaikan warna badge on-air dengan palet biru perpusnas` |
 | `refactor:` | Perbaikan kode tanpa ubah fungsionalitas | `refactor: ekstrak logika kalkulasi waktu wib ke timeUtils.ts` |
 
-### 9.5 Aturan Tambahan yang Tidak Boleh Dilanggar
+### 10.5 Aturan Tambahan yang Tidak Boleh Dilanggar
 
 - **DILARANG** mengeksekusi `git push` tanpa konfirmasi eksplisit dari pengguna terlebih dahulu.
 - **DILARANG** melakukan `force push` (`git push --force`) dalam kondisi apa pun.
