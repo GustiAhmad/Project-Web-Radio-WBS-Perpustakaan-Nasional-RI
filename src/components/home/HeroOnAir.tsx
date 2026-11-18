@@ -1,4 +1,4 @@
-import { Loader2, Pause, Play, Radio } from 'lucide-react'
+import { Loader2, MessageCircle, Pause, Play, Radio } from 'lucide-react'
 import { useAudio } from '../../context/AudioContext'
 import { useOnAirProgram } from '../../hooks/useOnAirProgram'
 
@@ -22,7 +22,7 @@ export default function HeroOnAir() {
             lalu jelajahi rekaman program favorit Anda kapan saja.
           </p>
 
-          <div className="mt-7 flex flex-wrap items-center gap-4">
+          <div className="mt-7 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={toggle}
@@ -38,10 +38,21 @@ export default function HeroOnAir() {
               )}
               {isBuffering ? 'Menghubungkan...' : isPlaying ? 'Jeda siaran' : 'Dengarkan siaran'}
             </button>
-            <p className="text-sm text-white/80">
-              {program ? `Sedang mengudara: ${program.nama_program}` : 'Siaran langsung dari studio WBS'}
-            </p>
+            <button
+              type="button"
+              aria-label="Sampaikan pendapat atau pertanyaan ke studio"
+              onClick={() =>
+                document.getElementById('tanya-jawab')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+              className="inline-flex items-center gap-2 rounded-full border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              <MessageCircle size={17} aria-hidden="true" />
+              Sampaikan Pertanyaan
+            </button>
           </div>
+          <p className="mt-3 text-sm text-white/80">
+            {program ? `Sedang mengudara: ${program.nama_program}` : 'Siaran langsung dari studio WBS'}
+          </p>
         </div>
 
         <div className="rounded-xl border border-white/15 bg-white/5 p-6">

@@ -446,9 +446,10 @@ WITH CHECK (auth_is_staf());
 -- karena tidak ada kolom SELECT publik untuk staf non-login.
 -- ----------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Publik dapat membaca status sesi On-Air aktif" ON sesi_onair;
-CREATE POLICY "Publik dapat melihat hanya sesi terbuka"
+DROP POLICY IF EXISTS "Publik dapat melihat hanya sesi terbuka" ON sesi_onair;
+CREATE POLICY "Publik dapat melihat sesi hari ini dan sesi terbuka"
 ON sesi_onair FOR SELECT TO anon
-USING (status = 'terbuka');
+USING (status = 'terbuka' OR tanggal = CURRENT_DATE);
 
 DROP POLICY IF EXISTS "Staf dapat melihat semua sesi On-Air" ON sesi_onair;
 CREATE POLICY "Staf dapat melihat semua sesi On-Air"
@@ -669,3 +670,28 @@ ON CONFLICT (slug) DO NOTHING;
 INSERT INTO halaman_statis (slug, judul, ringkasan, konten_markdown) VALUES
 ('kebijakan-privasi', 'Kebijakan Privasi Layanan', 'Pelindungan data pribadi pemustaka.', 'Formulir pertanyaan On-Air mengizinkan nama samaran. Kami tidak menyimpan alamat IP mentah di basis data aplikasi. Analitik kunjungan memakai penyamaran IP untuk statistik agregat.')
 ON CONFLICT (slug) DO NOTHING;
+
+-- ----------------------------------------------------------------------------
+-- 3.5 REALTIME CDC — TANYA JAWAB ON-AIR
+-- Diperlukan agar perubahan sesi dan pertanyaan sampai ke browser tanpa refresh.
+-- ----------------------------------------------------------------------------
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'sesi_onair'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.sesi_onair;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'pertanyaan'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.pertanyaan;
+  END IF;
+END $$;

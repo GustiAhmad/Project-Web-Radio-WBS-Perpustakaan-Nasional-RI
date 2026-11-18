@@ -79,6 +79,16 @@ ORDER BY tablename;
 
 Kolom `rowsecurity` harus `true` untuk kesembilan tabel.
 
+## 5b. Aktifkan Realtime tanya jawab (Tahap 5)
+
+1. Di **SQL Editor**, klik **New query**.
+2. Salih seluruh isi berkas `supabase-qna-realtime.sql` ke editor, lalu klik **Run**.
+3. Salih seluruh isi berkas `supabase-qna-uji.sql` hanya saat menguji formulir di beranda, lalu klik **Run**.
+4. Untuk menutup sesi, jalankan seluruh isi berkas `supabase-qna-tutup.sql`. Berkas ini menutup semua sesi dengan awalan `Uji`.
+5. Untuk menguji label live YouTube, jalankan seluruh isi berkas `supabase-qna-live.sql`, lalu tutup kembali dengan `supabase-qna-tutup.sql`.
+
+Berkas `supabase-qna-realtime.sql` menambahkan `sesi_onair` dan `pertanyaan` ke publication `supabase_realtime`, serta mengizinkan publik melihat sesi hari ini yang sudah ditutup. Tanpa itu, kartu formulir tidak menerima kabar penutupan sesi tanpa refresh. Frontend tidak pernah meminta kolom `catatan_internal`, `dibuka_oleh`, atau `ditutup_oleh`.
+
 ## 6. Buat akun pengelola pertama
 
 1. Buka **Authentication** lalu **Users** di dasbor Supabase.
@@ -110,7 +120,7 @@ Tambahkan akun kedua dengan peran `admin` untuk operasional harian. Proyek ini h
 
 ## Catatan keamanan
 
-- Publik hanya bisa membaca episode berstatus `tayang`, jadwal dan acara berstatus `terbit`, serta sesi On-Air yang sedang `terbuka`.
+- Publik hanya bisa membaca episode berstatus `tayang`, jadwal dan acara berstatus `terbit`, serta sesi On-Air hari ini atau yang sedang `terbuka` tanpa kolom internal.
 - Publik tidak bisa membaca pertanyaan pendengar. Pertanyaan hanya bisa dikirim saat sesi terbuka.
 - Hanya `superadmin` yang bisa mengubah pengaturan situs dan mengelola akun.
 - Semua kredensial berada di `.env` dan tidak masuk ke repositori Git.

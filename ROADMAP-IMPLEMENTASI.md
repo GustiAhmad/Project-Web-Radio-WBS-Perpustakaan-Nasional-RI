@@ -15,7 +15,7 @@
 - [x] **Tahap 2:** Setup Basis Data Supabase, Keamanan RLS & Migrasi Data Katalog *(Selesai)*
 - [x] **Tahap 3:** Mesin Pemutar Audio Persisten & Penanda Waktu On-Air 24 Jam *(Selesai)*
 - [x] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Selesai)*
-- [ ] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Belum Dimulai)*
+- [x] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Selesai)*
 - [ ] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Belum Dimulai)*
 - [ ] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Belum Dimulai)*
 
@@ -147,15 +147,15 @@
 
 ### TAHAP 5: Fitur Interaksi Tanya Jawab On-Air (Realtime)
 
-- [ ] **5.1 Formulir Tanya Jawab Pengunjung di Beranda (`QnAForm.tsx`)**
+- [x] **5.1 Formulir Tanya Jawab Pengunjung di Beranda (`QnAForm.tsx`)**
   - Kolom nama (wajib diisi), kotak centang opsi *"Kirim sebagai Anonim"* (`M-06`).
   - Kolom teks pertanyaan pemustaka.
   - Kolom tersembunyi *Honeypot* untuk menangkal bot spam internet (`FR-25`, `DR-08`).
   - Pembatasan frekuensi pengiriman lokal (*rate limiting* 1 pertanyaan per 30 detik).
   - Status formulir: terkunci otomatis dengan pesan santun saat sesi belum dibuka oleh petugas.
-- [ ] **5.2 Adaptasi Label saat Siaran Khusus Live YouTube (`M-19`)**
+- [x] **5.2 Adaptasi Label saat Siaran Khusus Live YouTube (`M-19`)**
   - Formulir otomatis mengubah teks tombol dan judul saat admin memilih jenis acara webinar YouTube.
-- [ ] **5.3 Integrasi Supabase Realtime (CDC WebSocket)**
+- [x] **5.3 Integrasi Supabase Realtime (CDC WebSocket)**
   - Komponen hook `useRealtimeQnA.ts` yang berlangganan langsung ke pembaruan tabel `sesi_onair` dan `pertanyaan`.
   - Notifikasi umpan balik sukses hijau saat pertanyaan berhasil terkirim ke studio.
 
