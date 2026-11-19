@@ -1,8 +1,8 @@
 import { supabase } from './supabase'
-import type { AcaraMendatang, Episode, HalamanStatis, Seri } from '../types/database.types'
+import type { AcaraMendatang, Episode, HalamanStatis, Penyiar, Seri } from '../types/database.types'
 import { tanggalWibHariIni } from '../utils/timeUtils'
 
-export type { AcaraMendatang }
+export type { AcaraMendatang, Penyiar }
 
 export type SeriKatalog = Pick<
   Seri,
@@ -124,7 +124,7 @@ export async function ambilAcaraMendatang(): Promise<AcaraMendatang[]> {
   if (!supabase) return []
   const { data, error } = await supabase
     .from('acara_mendatang')
-    .select('id, judul, tanggal, jam_mulai, jam_selesai, kanal, tautan_acara, deskripsi')
+    .select('id, judul, tanggal, jam_mulai, jam_selesai, kanal, tautan_acara, gambar_url, deskripsi')
     .eq('status', 'terbit')
     .gte('tanggal', tanggalWibHariIni())
     .order('tanggal', { ascending: true })
@@ -135,6 +135,36 @@ export async function ambilAcaraMendatang(): Promise<AcaraMendatang[]> {
     return []
   }
   return (data ?? []) as AcaraMendatang[]
+}
+
+export async function ambilAcaraDetail(id: string): Promise<AcaraMendatang | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase
+    .from('acara_mendatang')
+    .select('id, judul, tanggal, jam_mulai, jam_selesai, kanal, tautan_acara, gambar_url, deskripsi, status')
+    .eq('id', id)
+    .eq('status', 'terbit')
+    .maybeSingle()
+  if (error) {
+    gagal('memuat detail acara', error.message)
+    return null
+  }
+  return (data as AcaraMendatang | null) ?? null
+}
+
+export async function ambilPenyiar(): Promise<Penyiar[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('penyiar')
+    .select('id, nama, slug, foto_url, bio, urutan')
+    .eq('aktif', true)
+    .order('urutan', { ascending: true })
+    .order('nama', { ascending: true })
+  if (error) {
+    gagal('memuat daftar penyiar', error.message)
+    return []
+  }
+  return (data ?? []) as Penyiar[]
 }
 
 export async function ambilHalaman(slug: string): Promise<HalamanStatis | null> {

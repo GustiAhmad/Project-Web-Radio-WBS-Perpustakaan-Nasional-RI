@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowUpRight, CalendarDays } from 'lucide-react'
 import { ambilAcaraMendatang, type AcaraMendatang } from '../../services/catalog'
 import { formatTanggal, labelKanal } from '../../utils/formatters'
 import { Kosong, Pemuatan } from '../common/StateBox'
+
+const posterBawaan = `${import.meta.env.BASE_URL}placeholder-poster.svg`
 
 export default function AcaraMendatang() {
   const [acara, setAcara] = useState<AcaraMendatang[]>([])
@@ -40,24 +43,37 @@ export default function AcaraMendatang() {
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {acara.map((item) => (
-              <li key={item.id} className="rounded-xl border border-perpusnas-blue/10 bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-semibold text-perpusnas-blue">
-                  <CalendarDays size={14} aria-hidden="true" />
-                  {formatTanggal(item.tanggal)} · {item.jam_mulai.slice(0, 5)} WIB · {labelKanal(item.kanal)}
+              <li key={item.id} className="flex h-full flex-col overflow-hidden rounded-xl border border-perpusnas-blue/10 bg-white shadow-sm">
+                <div className="aspect-video overflow-hidden bg-perpusnas-blue-light">
+                  <img
+                    src={item.gambar_url ?? posterBawaan}
+                    alt=""
+                    width={480}
+                    height={270}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
-                <h3 className="mt-3 text-sm font-bold text-perpusnas-gray-900">{item.judul}</h3>
-                {item.deskripsi && <p className="mt-2 line-clamp-2 text-xs text-perpusnas-gray-600">{item.deskripsi}</p>}
-                {item.tautan_acara && (
-                  <a
-                    href={item.tautan_acara}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-perpusnas-blue hover:underline"
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-perpusnas-blue">
+                    <CalendarDays size={14} aria-hidden="true" />
+                    {formatTanggal(item.tanggal)} · {item.jam_mulai.slice(0, 5)} WIB · {labelKanal(item.kanal)}
+                  </div>
+                  <h3 className="mt-3 text-sm font-bold text-perpusnas-gray-900">
+                    <Link to={`/acara/${item.id}`} className="hover:text-perpusnas-blue hover:underline">
+                      {item.judul}
+                    </Link>
+                  </h3>
+                  {item.deskripsi && <p className="mt-2 line-clamp-2 text-xs text-perpusnas-gray-600">{item.deskripsi}</p>}
+                  <Link
+                    to={`/acara/${item.id}`}
+                    className="mt-4 inline-flex items-center gap-1 self-start text-xs font-semibold text-perpusnas-blue hover:underline"
                   >
-                    Lihat acara
+                    Lihat detail acara
                     <ArrowUpRight size={13} aria-hidden="true" />
-                  </a>
-                )}
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

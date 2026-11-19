@@ -13,6 +13,7 @@ import { lacakEvent, muatPengaturanAnalitik } from './services/ga4'
 import { ujiKoneksiSupabase } from './services/supabase'
 
 const AboutPage = lazy(() => import('./pages/AboutPage'))
+const AcaraDetailPage = lazy(() => import('./pages/AcaraDetailPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const EpisodeDetailPage = lazy(() => import('./pages/EpisodeDetailPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
@@ -29,6 +30,8 @@ const AdminJadwalPage = lazy(() => import('./pages/admin/AdminJadwalPage'))
 const AdminLaporanErrorPage = lazy(() => import('./pages/admin/AdminLaporanErrorPage'))
 const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage'))
 const AdminPengaturanPage = lazy(() => import('./pages/admin/AdminPengaturanPage'))
+const AdminPenggunaPage = lazy(() => import('./pages/admin/AdminPenggunaPage'))
+const AdminPenyiarPage = lazy(() => import('./pages/admin/AdminPenyiarPage'))
 const AdminQnAPage = lazy(() => import('./pages/admin/AdminQnAPage'))
 const AdminSeriPage = lazy(() => import('./pages/admin/AdminSeriPage'))
 
@@ -58,6 +61,7 @@ function KontenAplikasi() {
           >
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/acara/:id" element={<AcaraDetailPage />} />
               <Route path="/jadwal" element={<SchedulePage />} />
               <Route path="/program" element={<ProgramListPage />} />
               <Route path="/program/:seriSlug" element={<SeriesDetailPage />} />
@@ -83,6 +87,8 @@ function KontenAplikasi() {
                 <Route path="seri" element={<AdminSeriPage />} />
                 <Route path="acara" element={<AdminAcaraPage />} />
                 <Route path="halaman" element={<AdminHalamanPage />} />
+                <Route path="penyiar" element={<AdminPenyiarPage />} />
+                <Route path="pengguna" element={<AdminPenggunaPage />} />
                 <Route path="laporan-error" element={<AdminLaporanErrorPage />} />
                 <Route
                   path="pengaturan"

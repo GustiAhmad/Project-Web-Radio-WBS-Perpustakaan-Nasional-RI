@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { CalendarDays, MessagesSquare, Radio, Youtube } from 'lucide-react'
 import AcaraMendatang from '../components/home/AcaraMendatang'
 import HeroOnAir from '../components/home/HeroOnAir'
+import OnAirPersonalities from '../components/home/OnAirPersonalities'
 import ProgramUnggulan from '../components/home/ProgramUnggulan'
 import VideoTerbaru from '../components/home/VideoTerbaru'
 import QnAForm from '../components/interaction/QnAForm'
@@ -52,6 +53,7 @@ export default function HomePage() {
 
       <div className="mt-12 space-y-12">
         <AcaraMendatang />
+        <OnAirPersonalities />
         <VideoTerbaru />
         <ProgramUnggulan />
       </div>
