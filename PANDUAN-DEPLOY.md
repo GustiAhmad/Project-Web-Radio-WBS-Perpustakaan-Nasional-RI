@@ -1,6 +1,6 @@
 # Panduan Deployment GitHub Pages — Radio & Siniar WBS Perpusnas
 
-Panduan ini dipakai untuk menyiapkan peluncuran produksi Tahap 7 dan Tahap 8. Biaya hosting tetap Rp 0 karena GitHub Pages dan Supabase tier gratis.
+Panduan ini dipakai untuk menyiapkan peluncuran produksi Tahap 7, Tahap 8, dan Tahap 9. Biaya hosting tetap Rp 0 karena GitHub Pages dan Supabase tier gratis.
 
 ## 1. Aktifkan GitHub Pages
 
@@ -67,8 +67,21 @@ supabase functions deploy kelola-pengguna --yes
 
 Hasilnya: kolom `nama_pengguna` dan `foto_url`, tabel `penyiar`, RPC `cari_email_pengguna`, bucket publik `aset-wbs`, dan Edge Function `kelola-pengguna` dengan `verify_jwt = true`. Service role key hanya dipakai di dalam Edge Function; jangan pernah ditulis ke `.env` atau repository secret GitHub.
 
-Nama pengguna awal dua akun existing di-backfill dari bagian lokal alamat surel. Pengelola bisa mengubah nama pengguna dan foto profil lewat menu **Profil Saya** di panel admin.
+Nama pengguna awal dua akun existing di-backfill dari bagian lokal alamat surel. Pengelola bisa mengubah nama pengguna, foto profil, dan kata sandi sendiri lewat menu **Profil Saya** di `/admin/profil`.
 
-## 8. Berita Acara UAT
+## 8. Penyiapan Backend Tahap 9
+
+Jalankan sekali pada proyek Supabase produksi:
+
+```
+supabase db query --remote --file supabase-tahap9.sql --yes
+supabase functions deploy kelola-pengguna --yes
+```
+
+`supabase-tahap9.sql` menambah kolom `moderator`, `narasumber`, `topik`, `seri_id`, dan `durasi_detik` pada `acara_mendatang`, lalu menyelaraskan bucket `aset-wbs` dan `laporan-error` ke batas 2 MB dengan MIME hanya `image/jpeg` dan `image/png`. Edge Function `kelola-pengguna` kini menerima kata sandi buatan Superadmin saat membuat akun dan menyediakan aksi `ubah_kata_sandi`.
+
+Semua fitur unggah gambar memakai aturan yang sama: JPG/PNG, maksimal 2 MB. Teks syarat ini tampil di form Acara, Seri, Penyiar, Profil, dan Screenshot Laporan Error. Validasi berkas berjalan sebelum data ditulis ke basis data.
+
+## 9. Berita Acara UAT
 
 Format lembar pengesahan tersedia di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9. Isi tanggal, nama pustakawan, NIP, dan pilihan hasil pengujian setelah UAT produksi dilakukan bersama pengelola layanan. Jangan mengisi nama atau tanda tangan lebih awal.

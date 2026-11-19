@@ -4,7 +4,6 @@ type HasilKelola = {
   berhasil?: boolean
   pesan?: string
   nama_pengguna?: string
-  kata_sandi_sementara?: string
 }
 
 /** Panggil Edge Function pengelola akun dengan JWT sesi pengelola yang sedang masuk. */

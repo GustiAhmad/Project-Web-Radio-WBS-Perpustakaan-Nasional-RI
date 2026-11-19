@@ -21,6 +21,22 @@ export function slugify(masukan: string): string {
     .slice(0, 90)
 }
 
+/** Beberapa narasumber disimpan dalam satu kolom teks, dipisah titik koma. */
+export function gabungNarasumber(daftar: string[], batasPerNama = 150): string {
+  const nama = daftar
+    .map((item) => bersihkanTeks(item, batasPerNama))
+    .filter(Boolean)
+  return nama.length > 0 ? nama.join('; ') : 'Belum tercatat'
+}
+
+export function pecahNarasumber(nilai: string | null | undefined): string[] {
+  const daftar = (nilai ?? '')
+    .split(';')
+    .map((item) => item.trim())
+    .filter(Boolean)
+  return daftar.length > 0 ? daftar : ['']
+}
+
 export function videoIdDariTautan(tautan: string): string | null {
   const nilai = tautan.trim()
   const pola = /(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/

@@ -23,7 +23,7 @@ export default function SeriCard({ seri, jumlahEpisode }: Props) {
             height={270}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            className="h-full w-full object-contain transition duration-300"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-white/70">

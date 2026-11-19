@@ -52,7 +52,7 @@ export default function AcaraMendatang() {
                     height={270}
                     loading="lazy"
                     decoding="async"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 </div>
                 <div className="flex flex-1 flex-col p-5">

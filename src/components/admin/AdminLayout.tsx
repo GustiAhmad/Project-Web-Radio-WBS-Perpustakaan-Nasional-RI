@@ -11,6 +11,7 @@ import {
   MessagesSquare,
   Settings,
   UserCog,
+  UserRound,
   Users,
   Video,
   X,
@@ -29,6 +30,7 @@ type MenuItem = {
 
 const menuUtama: MenuItem[] = [
   { ke: '/admin', label: 'Dasbor', ikon: LayoutDashboard, akhir: true },
+  { ke: '/admin/profil', label: 'Profil Saya', ikon: UserRound, akhir: false },
   { ke: '/admin/tanya-jawab', label: 'Tanya Jawab On-Air', ikon: MessagesSquare, akhir: false },
   { ke: '/admin/jadwal', label: 'Jadwal Siaran', ikon: CalendarDays, akhir: false },
   { ke: '/admin/episode', label: 'Kelola Episode', ikon: Video, akhir: false },
@@ -130,7 +132,7 @@ export default function AdminLayout() {
               alt={profil?.foto_url ? `Foto ${profil.nama_lengkap}` : 'Foto profil belum tersedia'}
               width={36}
               height={36}
-              className="h-9 w-9 shrink-0 rounded-full bg-perpusnas-blue-light object-cover"
+              className="h-9 w-9 shrink-0 rounded-full bg-perpusnas-blue-light object-contain"
             />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-perpusnas-gray-900">

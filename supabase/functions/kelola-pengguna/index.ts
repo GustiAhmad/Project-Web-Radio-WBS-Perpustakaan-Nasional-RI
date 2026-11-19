@@ -4,7 +4,13 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-type Aksi = 'tambah_pengguna' | 'ubah_status' | 'ubah_peran' | 'ubah_nama_pengguna' | 'ubah_foto'
+type Aksi =
+  | 'tambah_pengguna'
+  | 'ubah_status'
+  | 'ubah_peran'
+  | 'ubah_nama_pengguna'
+  | 'ubah_foto'
+  | 'ubah_kata_sandi'
 
 type Badan = {
   aksi?: Aksi
@@ -49,14 +55,6 @@ function slugify(nilai: string): string {
     .replace(/[^a-z0-9._]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 60)
-}
-
-function kataSandiBaru(): string {
-  const abjad = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#'
-  const acak = new Uint32Array(16)
-  crypto.getRandomValues(acak)
-  const hasil = Array.from(acak, (nilai) => abjad[nilai % abjad.length]).join('')
-  return `${hasil}aA1!`
 }
 
 const emailSah = (nilai: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(nilai)
@@ -130,6 +128,11 @@ Deno.serve(async (req: Request) => {
     const namaPengguna = slugify(teks(badan.nama_pengguna, 60)) || slugify(email.split('@')[0] ?? '')
     if (!namaPengguna) return balas({ pesan: 'Nama pengguna tidak valid.' }, 400)
 
+    const kataSandi = teks(badan.kata_sandi, 128)
+    if (kataSandi.length < 8) {
+      return balas({ pesan: 'Kata sandi akun minimal 8 karakter.' }, 400)
+    }
+
     const [emailDipakai, namaDipakai] = await Promise.all([
       emailTerpakai(email),
       namaTerpakai(namaPengguna),
@@ -137,7 +140,6 @@ Deno.serve(async (req: Request) => {
     if (emailDipakai) return balas({ pesan: 'Surel itu sudah terdaftar.' }, 409)
     if (namaDipakai) return balas({ pesan: 'Nama pengguna itu sudah dipakai.' }, 409)
 
-    const kataSandi = kataSandiBaru()
     const { data: akunBaru, error: galatAkun } = await supabase.auth.admin.createUser({
       email,
       password: kataSandi,
@@ -166,8 +168,7 @@ Deno.serve(async (req: Request) => {
     return balas({
       berhasil: true,
       nama_pengguna: namaPengguna,
-      kata_sandi_sementara: kataSandi,
-      pesan: 'Akun dibuat. Sampaikan kata sandi sementara ke pustakawan yang bersangkutan.',
+      pesan: 'Akun dibuat dengan kata sandi yang Anda tetapkan.',
     })
   }
 
@@ -272,6 +273,37 @@ Deno.serve(async (req: Request) => {
       .eq('id', id)
     if (error) return balas({ pesan: error.message }, 500)
     return balas({ berhasil: true, pesan: fotoUrl ? 'Foto profil tersimpan.' : 'Foto profil dihapus.' })
+  }
+
+  // -------------------------------------------------------------------
+  // Ubah kata sandi (diri sendiri, atau Superadmin untuk akun lain)
+  // -------------------------------------------------------------------
+  if (badan.aksi === 'ubah_kata_sandi') {
+    const id = teks(badan.id, 40) || pemanggil.id
+    if (!superadmin && id !== pemanggil.id) {
+      return balas({ pesan: 'Anda hanya dapat mengubah kata sandi sendiri.' }, 403)
+    }
+    const kataSandi = teks(badan.kata_sandi, 128)
+    if (kataSandi.length < 8) {
+      return balas({ pesan: 'Kata sandi baru minimal 8 karakter.' }, 400)
+    }
+
+    const { data: target, error: galatTarget } = await supabase
+      .from('pengguna')
+      .select('id, auth_user_id')
+      .eq('id', id)
+      .maybeSingle()
+    if (galatTarget) return balas({ pesan: galatTarget.message }, 500)
+    if (!target?.auth_user_id) return balas({ pesan: 'Akun tidak ditemukan.' }, 404)
+
+    const { error } = await supabase.auth.admin.updateUserById(target.auth_user_id, {
+      password: kataSandi,
+    })
+    if (error) {
+      console.error(`[WBS] Gagal mengubah kata sandi: ${error.message}`)
+      return balas({ pesan: 'Kata sandi gagal diperbarui.' }, 500)
+    }
+    return balas({ berhasil: true, pesan: 'Kata sandi diperbarui.' })
   }
 
   return balas({ pesan: 'Aksi tidak dikenali.' }, 400)

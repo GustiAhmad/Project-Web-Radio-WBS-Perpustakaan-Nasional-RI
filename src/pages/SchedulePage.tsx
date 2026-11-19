@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { MessageCircle, Radio, X } from 'lucide-react'
+import { MessageCircle, Radio } from 'lucide-react'
 import { Kosong, Pemuatan } from '../components/common/StateBox'
 import { useOnAirProgram } from '../hooks/useOnAirProgram'
-import { ambilPenyiar } from '../services/catalog'
 import { supabase } from '../services/supabase'
 import type { JadwalTetap } from '../types/database.types'
 import { dalamRentang, jenisHariSiaran, waktuWibSekarang } from '../utils/timeUtils'
@@ -31,28 +29,6 @@ export default function SchedulePage() {
   })
   const [jadwal, setJadwal] = useState<JadwalRingkas[]>([])
   const [memuat, setMuat] = useState(true)
-  const [params, setParams] = useSearchParams()
-  const slugPenyiar = params.get('penyiar') ?? ''
-  const [namaPenyiar, setNamaPenyiar] = useState('')
-  const [penyiarTidakDitemukan, setPenyiarTidakDitemukan] = useState(false)
-
-  useEffect(() => {
-    if (!slugPenyiar) {
-      setNamaPenyiar('')
-      setPenyiarTidakDitemukan(false)
-      return
-    }
-    let masihAktif = true
-    void ambilPenyiar().then((daftarPenyiar) => {
-      if (!masihAktif) return
-      const cocok = daftarPenyiar.find((orang) => orang.slug === slugPenyiar)
-      setNamaPenyiar(cocok?.nama ?? '')
-      setPenyiarTidakDitemukan(!cocok)
-    })
-    return () => {
-      masihAktif = false
-    }
-  }, [slugPenyiar])
 
   useEffect(() => {
     if (!supabase) {
@@ -78,11 +54,7 @@ export default function SchedulePage() {
   }, [])
 
   const tab = tabs[tabAktif]
-  const daftar = jadwal.filter((item) => {
-    if (item.hari !== tab.jenis) return false
-    if (!namaPenyiar) return true
-    return item.nama_penyiar?.toLowerCase().includes(namaPenyiar.toLowerCase()) ?? false
-  })
+  const daftar = jadwal.filter((item) => item.hari === tab.jenis)
   const jamSekarang = jam
   const hariIniSesuai = tab.jenis === jenisHari
 
@@ -98,26 +70,6 @@ export default function SchedulePage() {
         <Radio size={17} aria-hidden="true" />
         Waktu sekarang: <strong className="tabular-nums">{jam.slice(0, 5)} WIB</strong>
       </div>
-
-      {slugPenyiar && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-perpusnas-blue/20 bg-white px-4 py-3 text-sm text-perpusnas-gray-900">
-          <span>
-            {penyiarTidakDitemukan
-              ? 'Penyiar tidak ditemukan. Menampilkan seluruh jadwal.'
-              : namaPenyiar
-                ? `Menampilkan jadwal untuk ${namaPenyiar}.`
-                : 'Mencari profil penyiar...'}
-          </span>
-          <button
-            type="button"
-            onClick={() => setParams({})}
-            className="inline-flex items-center gap-1 rounded-full bg-perpusnas-blue-light px-3 py-1 text-xs font-semibold text-perpusnas-blue"
-          >
-            <X size={13} aria-hidden="true" />
-            Hapus filter
-          </button>
-        </div>
-      )}
 
       <div className="mt-6 flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Pilih hari siaran">
         {tabs.map((item, indeks) => {

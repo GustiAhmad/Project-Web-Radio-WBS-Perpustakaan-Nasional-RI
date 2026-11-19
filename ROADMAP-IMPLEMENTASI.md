@@ -272,5 +272,35 @@
 
 ---
 
+### TAHAP 9: Perbaikan Hasil UAT Review Gate 8
+
+- [x] **9.1 Tampilan Gambar Utuh & Aturan Unggah Seragam**
+  - Seluruh gambar (poster acara, sampul seri, foto penyiar, foto profil, pratinjau admin) memakai `object-contain` agar tidak terpotong.
+  - Satu aturan unggah untuk semua fitur: JPG/PNG, maksimal 2 MB. Teks syarat tampil di semua kolom unggah, termasuk screenshot laporan error.
+  - Bucket `aset-wbs` dan `laporan-error` diselaraskan ke 2 MB dan hanya `image/jpeg`, `image/png` lewat `supabase-tahap9.sql`.
+  - Validasi berkas dipindah sebelum penulisan ke basis data di form Acara, Seri, dan Penyiar.
+- [x] **9.2 Halaman Video Terbaru Khusus**
+  - Rute `/video-terbaru` menampilkan seluruh episode tayang terurut terbaru sampai terlama, 12 video per halaman dengan pagination nomor lewat `?halaman=`.
+  - Tautan "Jelajahi semua" di beranda diarahkan ke `/video-terbaru`, bukan lagi ke `/program`.
+- [x] **9.3 Narasumber Jamak & Konversi Acara ke Episode**
+  - Form Kelola Episode dan Acara Mendatang menerima beberapa narasumber dalam satu episode, disimpan di kolom teks `narasumber` dengan pemisah `; `.
+  - Form Acara Mendatang ditambah seri, topik, moderator, dan narasumber jamak; durasi dihitung otomatis dari jam mulai dan selesai.
+  - Detail acara publik menampilkan moderator, narasumber, dan topik.
+  - Setelah acara selesai, admin memilih "Ambil dari acara yang sudah selesai" di form episode; data terisi otomatis, admin hanya menambah tautan YouTube.
+- [x] **9.4 Penyederhanaan Jadwal & Akun**
+  - Filter "Jadwal Penyiar" (`?penyiar=`) dan tautan "Lihat jadwal" dihapus; jadwal selalu menampilkan seluruh program.
+  - "Profil Saya" jadi menu tersendiri di `/admin/profil`, terpisah dari Kelola Pengguna.
+  - Kolom kata sandi memakai komponen `KolomSandi` dengan tombol mata tampil/sembunyi di login, profil, buat akun, dan ubah sandi.
+  - Setelah login, admin selalu diarahkan ke `/admin`.
+  - Akun baru memakai kata sandi yang diisi Superadmin, bukan kata sandi sementara; Superadmin dapat mengubah kata sandi akun Admin lewat aksi `ubah_kata_sandi` di Edge Function. Peran tetap dua: `superadmin` dan `admin`.
+- [x] **9.5 Verifikasi Teknis**
+  - `supabase db query --remote --file supabase-tahap9.sql --yes` berhasil; kedua bucket terverifikasi 2 MB dan JPG/PNG.
+  - Edge Function `kelola-pengguna` di-deploy ulang dengan aksi `ubah_kata_sandi`.
+  - `npm run type-check` dan `npm run build` lolos tanpa galat.
+- [ ] **9.6 Review Gate 9**
+  - Panduan uji bernomor disajikan pada percakapan Review Gate 9; menunggu konfirmasi `LOLOS` dari pengguna sebelum commit dan push.
+
+---
+
 > 🏁 **TITIK AKHIR: PELUNCURAN RESMI (GO-LIVE)**
 > Website Radio & Siniar WBS Perpusnas resmi mengudara ke publik dengan biaya operasional Rp 0 (gratis selamanya) dan diserahkan kepada pustakawan pengelola layanan.

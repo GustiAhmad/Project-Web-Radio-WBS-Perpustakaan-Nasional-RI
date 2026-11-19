@@ -37,7 +37,7 @@ export default function VideoTerbaru() {
           <h2 id="judul-video-terbaru" className="text-xl font-bold text-perpusnas-blue sm:text-2xl">Video Terbaru</h2>
           <p className="mt-1 text-sm text-perpusnas-gray-600">Rekaman siaran dan siniar yang baru tayang.</p>
         </div>
-        <Link to="/program" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-perpusnas-blue hover:underline">
+        <Link to="/video-terbaru" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-perpusnas-blue hover:underline">
           Jelajahi semua
           <ArrowRight size={15} aria-hidden="true" />
         </Link>

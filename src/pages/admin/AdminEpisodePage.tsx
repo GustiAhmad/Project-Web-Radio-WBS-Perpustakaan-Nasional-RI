@@ -1,15 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react'
+import DaftarNarasumberField from '../../components/admin/DaftarNarasumberField'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
 import { supabase } from '../../services/supabase'
-import type { Database, Episode, Seri } from '../../types/database.types'
-import { bersihkanTeks, slugify, videoIdDariTautan } from '../../utils/stringUtils'
+import type { AcaraMendatang, Database, Episode, Seri } from '../../types/database.types'
+import { bersihkanTeks, gabungNarasumber, pecahNarasumber, slugify, videoIdDariTautan } from '../../utils/stringUtils'
+import { tanggalWibHariIni } from '../../utils/timeUtils'
 
 type StatusEpisode = Database['public']['Enums']['status_episode']
 
 export default function AdminEpisodePage() {
   const [episode, setEpisode] = useState<Episode[]>([])
   const [seri, setSeri] = useState<Seri[]>([])
+  const [acaraSelesai, setAcaraSelesai] = useState<AcaraMendatang[]>([])
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
   const [pesan, setPesan] = useState('')
@@ -20,7 +23,7 @@ export default function AdminEpisodePage() {
   const [tautan, setTautan] = useState('')
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10))
   const [topik, setTopik] = useState('')
-  const [narasumber, setNarasumber] = useState('')
+  const [narasumber, setNarasumber] = useState<string[]>([''])
   const [moderator, setModerator] = useState('')
   const [menit, setMenit] = useState('60')
   const [deskripsi, setDeskripsi] = useState('')
@@ -33,14 +36,21 @@ export default function AdminEpisodePage() {
       setGalat('Koneksi ke studio belum tersedia.')
       return
     }
-    const [dataEpisode, dataSeri] = await Promise.all([
+    const [dataEpisode, dataSeri, dataAcara] = await Promise.all([
       supabase.from('episode').select('*').order('created_at', { ascending: false }).limit(100),
       supabase.from('seri').select('*').order('urutan'),
+      supabase
+        .from('acara_mendatang')
+        .select('id, judul, tanggal, narasumber, moderator, topik, deskripsi, seri_id, jam_mulai, jam_selesai, durasi_detik')
+        .lt('tanggal', tanggalWibHariIni())
+        .order('tanggal', { ascending: false })
+        .limit(50),
     ])
     if (dataEpisode.error) setGalat(`Gagal memuat episode: ${dataEpisode.error.message}`)
     if (dataSeri.error) setGalat(`Gagal memuat seri: ${dataSeri.error.message}`)
     setEpisode((dataEpisode.data as Episode[] | null) ?? [])
     setSeri((dataSeri.data as Seri[] | null) ?? [])
+    setAcaraSelesai((dataAcara.data as AcaraMendatang[] | null) ?? [])
     if (!seriId && dataSeri.data && dataSeri.data.length > 0) {
       setSeriId((dataSeri.data[0] as Seri).id)
     }
@@ -50,6 +60,31 @@ export default function AdminEpisodePage() {
   useEffect(() => {
     void muat()
   }, [])
+
+  function pilihAcara(id: string): void {
+    if (!id) return
+    const acara = acaraSelesai.find((item) => item.id === id)
+    if (!acara) return
+    const keMenit = (jam: string): number => {
+      const [jamValue, menitValue] = jam.split(':').map(Number)
+      return (jamValue ?? 0) * 60 + (menitValue ?? 0)
+    }
+    const selisih = acara.jam_selesai ? keMenit(acara.jam_selesai) - keMenit(acara.jam_mulai) : 0
+    const menitAcara = acara.durasi_detik > 0
+      ? Math.round(acara.durasi_detik / 60)
+      : Math.max(0, selisih < 0 ? selisih + 1440 : selisih)
+    setSeriId(acara.seri_id ?? '')
+    setJudul(acara.judul)
+    setTanggal(acara.tanggal)
+    setTopik(acara.topik)
+    setNarasumber(pecahNarasumber(acara.narasumber))
+    setModerator(acara.moderator)
+    setMenit(String(menitAcara))
+    setDeskripsi(acara.deskripsi ?? '')
+    setTautan('')
+    setGalat('')
+    setPesan('Data acara sudah diisi. Tambahkan tautan YouTube lalu simpan episode.')
+  }
 
   async function simpan(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault()
@@ -92,7 +127,7 @@ export default function AdminEpisodePage() {
       nomor_episode: nomorEpisode,
       tanggal_tayang: tanggal,
       durasi_detik: Math.max(0, Number(menit) || 0) * 60,
-      narasumber: bersihkanTeks(narasumber, 150) || '-',
+      narasumber: gabungNarasumber(narasumber),
       moderator: bersihkanTeks(moderator, 150) || '-',
       topik: bersihkanTeks(topik, 150) || 'Siaran WBS',
       tautan_youtube: `https://www.youtube.com/watch?v=${videoId}`,
@@ -111,7 +146,7 @@ export default function AdminEpisodePage() {
     setJudul('')
     setTautan('')
     setTopik('')
-    setNarasumber('')
+    setNarasumber([''])
     setModerator('')
     setDeskripsi('')
     await muat()
@@ -153,6 +188,29 @@ export default function AdminEpisodePage() {
       <section className="mt-6 rounded-2xl border border-perpusnas-blue/10 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-bold text-perpusnas-blue">Tambah Episode Baru</h2>
         <form onSubmit={(e) => void simpan(e)} className="mt-4 grid gap-4 md:grid-cols-2">
+          {acaraSelesai.length > 0 && (
+            <div className="md:col-span-2 rounded-xl border border-perpusnas-gold/40 bg-perpusnas-gold-light p-4">
+              <label htmlFor="ep-acara" className="block text-sm font-semibold text-perpusnas-blue-dark">
+                Ambil dari acara yang sudah selesai
+              </label>
+              <select
+                id="ep-acara"
+                defaultValue=""
+                onChange={(e) => pilihAcara(e.target.value)}
+                className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 bg-white px-3 py-2.5 text-sm"
+              >
+                <option value="">Isi manual</option>
+                {acaraSelesai.map((acara) => (
+                  <option key={acara.id} value={acara.id}>
+                    {acara.tanggal} - {acara.judul}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-xs text-perpusnas-gray-600">
+                Data acara terisi otomatis. Anda hanya perlu menambahkan tautan YouTube.
+              </p>
+            </div>
+          )}
           <div>
             <label htmlFor="ep-seri" className="block text-sm font-semibold text-perpusnas-gray-900">Seri</label>
             <select
@@ -232,14 +290,8 @@ export default function AdminEpisodePage() {
               className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm"
             />
           </div>
-          <div>
-            <label htmlFor="ep-narasumber" className="block text-sm font-semibold text-perpusnas-gray-900">Narasumber</label>
-            <input
-              id="ep-narasumber"
-              value={narasumber}
-              onChange={(e) => setNarasumber(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm"
-            />
+          <div className="md:col-span-2">
+            <DaftarNarasumberField idPrefix="ep-narasumber" nilai={narasumber} onChange={setNarasumber} />
           </div>
           <div>
             <label htmlFor="ep-moderator" className="block text-sm font-semibold text-perpusnas-gray-900">Moderator</label>

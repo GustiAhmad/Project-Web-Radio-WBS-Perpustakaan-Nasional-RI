@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
 import UnggahGambarField from '../../components/admin/UnggahGambarField'
-import { terimaBerkas, unggahGambar } from '../../services/aset'
+import { PESAN_GAMBAR_TIDAK_VALID, terimaBerkas, unggahGambar } from '../../services/aset'
 import { supabase } from '../../services/supabase'
 import type { Penyiar } from '../../types/database.types'
 import { slugify } from '../../utils/stringUtils'
@@ -66,6 +66,10 @@ export default function AdminPenyiarPage() {
       setGalat('Nama penyiar wajib diisi.')
       return
     }
+    if (foto && !terimaBerkas(foto)) {
+      setGalat(PESAN_GAMBAR_TIDAK_VALID)
+      return
+    }
 
     const isi = {
       nama: namaBersih,
@@ -93,10 +97,6 @@ export default function AdminPenyiarPage() {
 
     let urlFoto = fotoUrl
     if (foto && idPenyiar) {
-      if (!terimaBerkas(foto)) {
-        setGalat('Pilih gambar JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.')
-        return
-      }
       try {
         urlFoto = await unggahGambar('penyiar', idPenyiar, foto)
       } catch (galatUnggah) {
@@ -136,7 +136,7 @@ export default function AdminPenyiarPage() {
         <div>
           <h1 className="text-2xl font-bold text-perpusnas-blue">Kelola Penyiar</h1>
           <p className="mt-2 text-sm text-perpusnas-gray-600">
-            Tambah foto dan bio On-Air Personalities. Penyiar aktif tampil di halaman beranda dan bisa dipilih untuk memfilter jadwal.
+            Tambah foto dan bio On-Air Personalities. Penyiar aktif tampil di halaman beranda.
           </p>
         </div>
         <button
@@ -229,7 +229,7 @@ export default function AdminPenyiarPage() {
                     alt={item.foto_url ? `Foto ${item.nama}` : 'Foto penyiar belum tersedia'}
                     width={56}
                     height={56}
-                    className="h-14 w-14 shrink-0 rounded-full bg-perpusnas-blue-light object-cover"
+                    className="h-14 w-14 shrink-0 rounded-full bg-perpusnas-blue-light object-contain"
                   />
                   <div className="min-w-0 flex-1">
                     <h2 className="font-bold text-perpusnas-blue">{item.nama}</h2>

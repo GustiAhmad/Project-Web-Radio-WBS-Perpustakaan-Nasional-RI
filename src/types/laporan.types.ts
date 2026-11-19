@@ -4,7 +4,7 @@ export const BATAS_JUDUL = 150
 export const BATAS_DESKRIPSI = 2000
 export const BATAS_LANGKAH = 2000
 export const UKURAN_MAKSIMAL_SCREENSHOT = 2 * 1024 * 1024
-export const MIME_SCREENSHOT = ['image/png', 'image/jpeg', 'image/webp'] as const
+export const MIME_SCREENSHOT = ['image/png', 'image/jpeg'] as const
 
 export const labelStatusLaporan: Record<StatusLaporan, string> = {
   baru: 'Baru',

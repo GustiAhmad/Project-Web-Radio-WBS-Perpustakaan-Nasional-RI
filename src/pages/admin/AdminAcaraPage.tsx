@@ -1,11 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
+import DaftarNarasumberField from '../../components/admin/DaftarNarasumberField'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
 import UnggahGambarField from '../../components/admin/UnggahGambarField'
-import { terimaBerkas, unggahGambar } from '../../services/aset'
+import { PESAN_GAMBAR_TIDAK_VALID, terimaBerkas, unggahGambar } from '../../services/aset'
 import { supabase } from '../../services/supabase'
-import type { AcaraMendatang, Database } from '../../types/database.types'
+import type { AcaraMendatang, Database, Seri } from '../../types/database.types'
 import { labelKanal } from '../../utils/formatters'
+import { gabungNarasumber, pecahNarasumber } from '../../utils/stringUtils'
 
 type Kanal = Database['public']['Enums']['kanal_acara']
 type Status = Database['public']['Enums']['status_publikasi']
@@ -14,6 +16,7 @@ const daftarKanal: Kanal[] = ['youtube', 'zoom', 'instagram', 'tatap_muka', 'lai
 
 export default function AdminAcaraPage() {
   const [acara, setAcara] = useState<AcaraMendatang[]>([])
+  const [seri, setSeri] = useState<Seri[]>([])
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
   const [pesan, setPesan] = useState('')
@@ -26,6 +29,10 @@ export default function AdminAcaraPage() {
   const [jamSelesai, setJamSelesai] = useState('10:00')
   const [kanal, setKanal] = useState<Kanal>('youtube')
   const [tautan, setTautan] = useState('')
+  const [seriId, setSeriId] = useState('')
+  const [moderator, setModerator] = useState('')
+  const [narasumber, setNarasumber] = useState<string[]>([''])
+  const [topik, setTopik] = useState('')
   const [deskripsi, setDeskripsi] = useState('')
   const [status, setStatus] = useState<Status>('terbit')
   const [poster, setPoster] = useState<File | null>(null)
@@ -37,9 +44,14 @@ export default function AdminAcaraPage() {
       setGalat('Koneksi ke studio belum tersedia.')
       return
     }
-    const { data, error } = await supabase.from('acara_mendatang').select('*').order('tanggal', { ascending: false })
-    if (error) setGalat(`Gagal memuat acara: ${error.message}`)
-    setAcara((data as AcaraMendatang[] | null) ?? [])
+    const [dataAcara, dataSeri] = await Promise.all([
+      supabase.from('acara_mendatang').select('*').order('tanggal', { ascending: false }),
+      supabase.from('seri').select('id, nama').order('urutan', { ascending: true }),
+    ])
+    if (dataAcara.error) setGalat(`Gagal memuat acara: ${dataAcara.error.message}`)
+    if (dataSeri.error) setGalat(`Gagal memuat seri: ${dataSeri.error.message}`)
+    setAcara((dataAcara.data as AcaraMendatang[] | null) ?? [])
+    setSeri((dataSeri.data as Seri[] | null) ?? [])
     setMuat(false)
   }
 
@@ -58,6 +70,10 @@ export default function AdminAcaraPage() {
     setJamSelesai(item?.jam_selesai?.slice(0, 5) ?? '10:00')
     setKanal(item?.kanal ?? 'youtube')
     setTautan(item?.tautan_acara ?? '')
+    setSeriId(item?.seri_id ?? '')
+    setModerator(item?.moderator ?? '')
+    setNarasumber(pecahNarasumber(item?.narasumber))
+    setTopik(item?.topik ?? '')
     setDeskripsi(item?.deskripsi ?? '')
     setStatus(item?.status ?? 'terbit')
     setPoster(null)
@@ -68,6 +84,16 @@ export default function AdminAcaraPage() {
     e.preventDefault()
     if (!supabase) return
     setGalat('')
+    if (poster && !terimaBerkas(poster)) {
+      setGalat(PESAN_GAMBAR_TIDAK_VALID)
+      return
+    }
+    const keMenit = (jam: string): number => {
+      const [jamValue, menitValue] = jam.split(':').map(Number)
+      return (jamValue ?? 0) * 60 + (menitValue ?? 0)
+    }
+    const selisih = jamSelesai ? keMenit(jamSelesai) - keMenit(jamMulai) : 0
+    const durasiDetik = Math.max(0, selisih < 0 ? selisih + 1440 : selisih) * 60
     const isi = {
       judul: judul.trim(),
       tanggal,
@@ -75,6 +101,11 @@ export default function AdminAcaraPage() {
       jam_selesai: jamSelesai ? `${jamSelesai}:00` : null,
       kanal,
       tautan_acara: tautan.trim() || null,
+      seri_id: seriId || null,
+      moderator: moderator.trim() || 'Belum tercatat',
+      narasumber: gabungNarasumber(narasumber),
+      topik: topik.trim() || 'Siaran WBS',
+      durasi_detik: durasiDetik,
       deskripsi: deskripsi.trim() || null,
       status,
     }
@@ -96,10 +127,6 @@ export default function AdminAcaraPage() {
 
     let urlPoster = posterUrl
     if (poster && idAcara) {
-      if (!terimaBerkas(poster)) {
-        setGalat('Pilih gambar JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.')
-        return
-      }
       try {
         urlPoster = await unggahGambar('poster-acara', idAcara, poster)
       } catch (galatUnggah) {
@@ -188,6 +215,24 @@ export default function AdminAcaraPage() {
             <div className="md:col-span-2">
               <label htmlFor="ac-tautan" className="block text-sm font-semibold text-perpusnas-gray-900">Tautan acara (opsional)</label>
               <input id="ac-tautan" value={tautan} onChange={(e) => setTautan(e.target.value)} className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm" />
+            </div>
+            <div>
+              <label htmlFor="ac-seri" className="block text-sm font-semibold text-perpusnas-gray-900">Seri program</label>
+              <select id="ac-seri" value={seriId} onChange={(e) => setSeriId(e.target.value)} className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 bg-white px-3 py-2.5 text-sm">
+                <option value="">Belum ditentukan</option>
+                {seri.map((item) => <option key={item.id} value={item.id}>{item.nama}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="ac-topik" className="block text-sm font-semibold text-perpusnas-gray-900">Topik</label>
+              <input id="ac-topik" value={topik} onChange={(e) => setTopik(e.target.value)} className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm" />
+            </div>
+            <div>
+              <label htmlFor="ac-moderator" className="block text-sm font-semibold text-perpusnas-gray-900">Moderator</label>
+              <input id="ac-moderator" value={moderator} onChange={(e) => setModerator(e.target.value)} className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm" />
+            </div>
+            <div className="md:col-span-2">
+              <DaftarNarasumberField idPrefix="ac-narasumber" nilai={narasumber} onChange={setNarasumber} />
             </div>
             <div className="md:col-span-2">
               <label htmlFor="ac-deskripsi" className="block text-sm font-semibold text-perpusnas-gray-900">Deskripsi (opsional)</label>

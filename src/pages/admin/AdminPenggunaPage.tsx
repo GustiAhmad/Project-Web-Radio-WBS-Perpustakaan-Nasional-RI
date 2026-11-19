@@ -1,16 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Copy, ShieldCheck, UserCog, UserPlus } from 'lucide-react'
+import { KeyRound, ShieldCheck, UserPlus } from 'lucide-react'
+import KolomSandi from '../../components/admin/KolomSandi'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
-import UnggahGambarField from '../../components/admin/UnggahGambarField'
 import { useAuth } from '../../context/AuthContext'
-import { terimaBerkas, unggahGambar } from '../../services/aset'
 import { panggilKelolaPengguna } from '../../services/pengguna'
 import { supabase } from '../../services/supabase'
 import type { Pengguna } from '../../types/database.types'
 import { formatTanggal } from '../../utils/formatters'
 
 export default function AdminPenggunaPage() {
-  const { profil, peran, segarProfil } = useAuth()
+  const { profil, peran } = useAuth()
   const [daftar, setDaftar] = useState<Pengguna[]>([])
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
@@ -21,11 +20,10 @@ export default function AdminPenggunaPage() {
   const [email, setEmail] = useState('')
   const [namaPengguna, setNamaPengguna] = useState('')
   const [peranBaru, setPeranBaru] = useState<'admin' | 'superadmin'>('admin')
-  const [sandiSementara, setSandiSementara] = useState('')
+  const [sandiAwal, setSandiAwal] = useState('')
 
-  const [namaSaya, setNamaSaya] = useState('')
-  const [fotoSaya, setFotoSaya] = useState<File | null>(null)
-  const [hapusFotoSaya, setHapusFotoSaya] = useState(false)
+  const [idSandi, setIdSandi] = useState<string | null>(null)
+  const [sandiBaru, setSandiBaru] = useState('')
 
   async function muat(): Promise<void> {
     if (!supabase) {
@@ -45,10 +43,6 @@ export default function AdminPenggunaPage() {
     void muat()
   }, [])
 
-  useEffect(() => {
-    setNamaSaya(profil?.nama_pengguna ?? '')
-  }, [profil?.nama_pengguna])
-
   function tanganiGalat(err: unknown): void {
     setGalat(err instanceof Error ? err.message : 'Permintaan gagal. Coba lagi.')
   }
@@ -57,7 +51,10 @@ export default function AdminPenggunaPage() {
     e.preventDefault()
     setGalat('')
     setPesan('')
-    setSandiSementara('')
+    if (sandiAwal.length < 8) {
+      setGalat('Kata sandi akun minimal 8 karakter.')
+      return
+    }
     setMemproses(true)
     try {
       const hasil = await panggilKelolaPengguna({
@@ -66,12 +63,13 @@ export default function AdminPenggunaPage() {
         email,
         nama_pengguna: namaPengguna,
         peran: peranBaru,
+        kata_sandi: sandiAwal,
       })
       setPesan(hasil.pesan ?? 'Akun dibuat.')
-      setSandiSementara(hasil.kata_sandi_sementara ?? '')
       setNamaLengkap('')
       setEmail('')
       setNamaPengguna('')
+      setSandiAwal('')
       await muat()
     } catch (err) {
       tanganiGalat(err)
@@ -112,32 +110,25 @@ export default function AdminPenggunaPage() {
     }
   }
 
-  async function simpanProfilSaya(e: FormEvent<HTMLFormElement>): Promise<void> {
+  async function simpanSandi(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault()
-    if (!profil) return
+    if (!idSandi) return
+    if (sandiBaru.length < 8) {
+      setGalat('Kata sandi baru minimal 8 karakter.')
+      return
+    }
     setGalat('')
     setPesan('')
     setMemproses(true)
     try {
-      const namaBersih = namaSaya.trim()
-      const pesan: string[] = []
-      if (namaBersih && namaBersih !== profil.nama_pengguna) {
-        const hasil = await panggilKelolaPengguna({ aksi: 'ubah_nama_pengguna', nama_pengguna: namaBersih })
-        pesan.push(hasil.pesan ?? 'Nama pengguna tersimpan.')
-      }
-      if (fotoSaya) {
-        if (!terimaBerkas(fotoSaya)) throw new Error('Pilih gambar JPG, PNG, atau WebP maksimal 5 MB.')
-        const url = await unggahGambar('profil', profil.auth_user_id ?? profil.id, fotoSaya)
-        const hasil = await panggilKelolaPengguna({ aksi: 'ubah_foto', foto_url: url })
-        pesan.push(hasil.pesan ?? 'Foto profil tersimpan.')
-        setFotoSaya(null)
-      } else if (hapusFotoSaya) {
-        const hasil = await panggilKelolaPengguna({ aksi: 'ubah_foto', foto_url: null })
-        pesan.push(hasil.pesan ?? 'Foto profil dihapus.')
-        setHapusFotoSaya(false)
-      }
-      setPesan(pesan.join(' ') || 'Tidak ada perubahan.')
-      await segarProfil()
+      const hasil = await panggilKelolaPengguna({
+        aksi: 'ubah_kata_sandi',
+        id: idSandi,
+        kata_sandi: sandiBaru,
+      })
+      setPesan(hasil.pesan ?? 'Kata sandi akun diperbarui.')
+      setIdSandi(null)
+      setSandiBaru('')
     } catch (err) {
       tanganiGalat(err)
     } finally {
@@ -148,12 +139,12 @@ export default function AdminPenggunaPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-perpusnas-blue">
-        {peran === 'superadmin' ? 'Kelola Akun Pengelola' : 'Profil & Pengelola'}
+        Kelola Pengguna
       </h1>
       <p className="mt-2 text-sm text-perpusnas-gray-600">
         {peran === 'superadmin'
-          ? 'Tambah pengelola, aktifkan atau nonaktifkan akun, dan tetapkan peran. Hanya dua peran yang dikenal: Admin dan Superadmin.'
-          : 'Perbarui profil Anda dan tambah rekan pengelola berperan Admin. Pengaktifan akun dan perubahan peran tetap menjadi wewenang Superadmin.'}
+          ? 'Tambah pengelola, tetapkan kata sandi, aktifkan atau nonaktifkan akun, dan ubah kata sandi Admin. Hanya dua peran yang dikenal: Admin dan Superadmin.'
+          : 'Tambah rekan pengelola berperan Admin. Pengaktifan akun, peran, dan kata sandi akun lain tetap menjadi wewenang Superadmin.'}
       </p>
 
       {galat && (
@@ -164,45 +155,6 @@ export default function AdminPenggunaPage() {
       )}
 
       <section className="mt-6 rounded-2xl border border-perpusnas-blue/10 bg-white p-6 shadow-sm">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-perpusnas-blue">
-          <UserCog size={18} aria-hidden="true" />
-          Profil Saya
-        </h2>
-        <form onSubmit={(e) => void simpanProfilSaya(e)} className="mt-4 space-y-4">
-          <div>
-            <label htmlFor="pro-nama" className="block text-sm font-semibold text-perpusnas-gray-900">Nama pengguna</label>
-            <input
-              id="pro-nama"
-              value={namaSaya}
-              onChange={(e) => setNamaSaya(e.target.value)}
-              className="mt-2 w-full max-w-sm rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm"
-            />
-            <p className="mt-1 text-xs text-perpusnas-gray-600">Nama ini bisa dipakai untuk masuk, selain alamat surel.</p>
-          </div>
-          <UnggahGambarField
-            id="pro-foto"
-            label="Foto profil"
-            nilai={hapusFotoSaya ? null : (profil?.foto_url ?? null)}
-            berkas={fotoSaya}
-            padaPilih={(berkas) => {
-              setFotoSaya(berkas)
-              if (berkas) setHapusFotoSaya(false)
-            }}
-            padaHapus={() => setHapusFotoSaya(true)}
-            placeholder={`${import.meta.env.BASE_URL}placeholder-penyiar.svg`}
-            bantuan="Foto tampil di bagian atas panel admin."
-          />
-          <button
-            type="submit"
-            disabled={memproses}
-            className="rounded-full bg-perpusnas-blue px-6 py-3 text-sm font-bold text-white disabled:opacity-60"
-          >
-            Simpan Profil
-          </button>
-        </form>
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-perpusnas-blue/10 bg-white p-6 shadow-sm">
         <h2 className="flex items-center gap-2 text-lg font-bold text-perpusnas-blue">
               <UserPlus size={18} aria-hidden="true" />
               Tambah Pengelola
@@ -236,29 +188,22 @@ export default function AdminPenggunaPage() {
                 )}
               </div>
               <div className="md:col-span-2">
+                <KolomSandi
+                  id="ak-sandi"
+                  label="Kata sandi akun"
+                  nilai={sandiAwal}
+                  onChange={setSandiAwal}
+                  autoComplete="new-password"
+                  bantuan="Minimal 8 karakter. Kata sandi ini langsung dipakai akun baru."
+                />
+              </div>
+              <div className="md:col-span-2">
                 <button type="submit" disabled={memproses} className="inline-flex items-center gap-2 rounded-full bg-perpusnas-blue px-6 py-3 text-sm font-bold text-white disabled:opacity-60">
                   <UserPlus size={16} aria-hidden="true" />
                   Buat Akun
                 </button>
               </div>
             </form>
-            {sandiSementara && (
-              <div className="mt-5 rounded-xl border border-perpusnas-gold/40 bg-perpusnas-gold-light p-4">
-                <p className="text-sm font-semibold text-perpusnas-blue-dark">Kata sandi sementara (tampil sekali)</p>
-                <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <code className="rounded-lg bg-white px-3 py-2 text-sm font-bold text-perpusnas-blue-dark">{sandiSementara}</code>
-                  <button
-                    type="button"
-                    onClick={() => void navigator.clipboard.writeText(sandiSementara)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-perpusnas-blue/20 px-3 py-2 text-xs font-semibold text-perpusnas-blue"
-                  >
-                    <Copy size={13} aria-hidden="true" />
-                    Salin
-                  </button>
-                </div>
-                <p className="mt-2 text-xs text-perpusnas-gray-600">Sampaikan ke pustakawan yang bersangkutan, lalu minta mengganti kata sandi.</p>
-              </div>
-            )}
           </section>
 
       {peran === 'superadmin' && (
@@ -279,7 +224,7 @@ export default function AdminPenggunaPage() {
                           alt={item.foto_url ? `Foto ${item.nama_lengkap}` : 'Foto profil belum tersedia'}
                           width={44}
                           height={44}
-                          className="h-11 w-11 shrink-0 rounded-full bg-perpusnas-blue-light object-cover"
+                          className="h-11 w-11 shrink-0 rounded-full bg-perpusnas-blue-light object-contain"
                         />
                         <div className="min-w-0">
                           <p className="truncate font-bold text-perpusnas-blue">{item.nama_lengkap}</p>
@@ -318,7 +263,48 @@ export default function AdminPenggunaPage() {
                         >
                           {item.status_aktif ? 'Nonaktifkan' : 'Aktifkan'}
                         </button>
+                        {item.id !== profil?.id && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIdSandi(idSandi === item.id ? null : item.id)
+                              setSandiBaru('')
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-perpusnas-blue/20 px-3 py-1.5 text-xs font-semibold text-perpusnas-blue"
+                          >
+                            <KeyRound size={13} aria-hidden="true" />
+                            Ubah Sandi
+                          </button>
+                        )}
                       </div>
+                      {idSandi === item.id && (
+                        <form onSubmit={(e) => void simpanSandi(e)} className="w-full rounded-lg bg-perpusnas-gray-50 p-4">
+                          <KolomSandi
+                            id={`sandi-${item.id}`}
+                            label={`Kata sandi baru untuk ${item.nama_lengkap}`}
+                            nilai={sandiBaru}
+                            onChange={setSandiBaru}
+                            autoComplete="new-password"
+                            bantuan="Minimal 8 karakter."
+                          />
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="submit"
+                              disabled={memproses}
+                              className="rounded-full bg-perpusnas-blue px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+                            >
+                              Simpan Sandi
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIdSandi(null)}
+                              className="rounded-full border border-perpusnas-blue/20 px-4 py-2 text-xs font-semibold text-perpusnas-blue"
+                            >
+                              Batal
+                            </button>
+                          </div>
+                        </form>
+                      )}
                     </article>
                   ))}
                 </div>

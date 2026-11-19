@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Check, Pencil, X } from 'lucide-react'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
 import UnggahGambarField from '../../components/admin/UnggahGambarField'
-import { terimaBerkas, unggahGambar } from '../../services/aset'
+import { PESAN_GAMBAR_TIDAK_VALID, terimaBerkas, unggahGambar } from '../../services/aset'
 import { supabase } from '../../services/supabase'
 import type { Database, Seri } from '../../types/database.types'
 
@@ -61,6 +61,10 @@ export default function AdminSeriPage() {
 
   async function simpan(id: string): Promise<void> {
     if (!supabase || !draft) return
+    if (draft.gambar && !terimaBerkas(draft.gambar)) {
+      setGalat(PESAN_GAMBAR_TIDAK_VALID)
+      return
+    }
     const { error } = await supabase
       .from('seri')
       .update({
@@ -78,10 +82,6 @@ export default function AdminSeriPage() {
 
     let urlGambar = draft.gambarUrl
     if (draft.gambar) {
-      if (!terimaBerkas(draft.gambar)) {
-        setGalat('Pilih gambar JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.')
-        return
-      }
       try {
         urlGambar = await unggahGambar('seri', id, draft.gambar)
       } catch (galatUnggah) {

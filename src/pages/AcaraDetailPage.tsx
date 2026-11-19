@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, CalendarDays, Clock3 } from 'lucide-react'
 import { Kosong, Pemuatan } from '../components/common/StateBox'
 import { ambilAcaraDetail, type AcaraMendatang } from '../services/catalog'
 import { formatTanggal, labelKanal } from '../utils/formatters'
+import { pecahNarasumber } from '../utils/stringUtils'
 
 const posterBawaan = `${import.meta.env.BASE_URL}placeholder-poster.svg`
 
@@ -63,7 +64,7 @@ export default function AcaraDetailPage() {
           alt={acara.gambar_url ? `Poster acara ${acara.judul}` : 'Poster acara belum tersedia'}
           width={1280}
           height={720}
-          className="aspect-video w-full bg-perpusnas-blue-light object-cover"
+          className="aspect-video w-full bg-perpusnas-blue-light object-contain"
         />
         <div className="p-6 sm:p-8">
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-perpusnas-blue">
@@ -82,6 +83,27 @@ export default function AcaraDetailPage() {
           </div>
 
           <h1 className="mt-5 text-2xl font-bold leading-tight text-perpusnas-blue sm:text-3xl">{acara.judul}</h1>
+
+          <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
+            {acara.moderator && acara.moderator !== 'Belum tercatat' && (
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-perpusnas-gray-600">Moderator</dt>
+                <dd className="mt-1 font-medium text-perpusnas-gray-900">{acara.moderator}</dd>
+              </div>
+            )}
+            <div className={acara.moderator && acara.moderator !== 'Belum tercatat' ? '' : 'sm:col-span-2'}>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-perpusnas-gray-600">Narasumber / Pemateri</dt>
+              <dd className="mt-1 font-medium text-perpusnas-gray-900">
+                {pecahNarasumber(acara.narasumber).join(', ')}
+              </dd>
+            </div>
+            {acara.topik && (
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-perpusnas-gray-600">Topik</dt>
+                <dd className="mt-1 font-medium text-perpusnas-gray-900">{acara.topik}</dd>
+              </div>
+            )}
+          </dl>
 
           {acara.deskripsi ? (
             <div className="mt-5 whitespace-pre-line text-sm leading-relaxed text-perpusnas-gray-600 sm:text-base">

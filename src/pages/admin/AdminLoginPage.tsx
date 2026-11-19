@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { AlertCircle, LockKeyhole } from 'lucide-react'
+import KolomSandi from '../../components/admin/KolomSandi'
 import { useAuth } from '../../context/AuthContext'
 
 export default function AdminLoginPage() {
@@ -10,7 +11,6 @@ export default function AdminLoginPage() {
   const [galat, setGalat] = useState('')
   const [memproses, setMemproses] = useState(false)
   const navigate = useNavigate()
-  const lokasi = useLocation()
 
   if (!memuat && penggunaAuth && profil?.status_aktif) return <Navigate to="/admin" replace />
 
@@ -24,8 +24,7 @@ export default function AdminLoginPage() {
       setGalat(pesanGalat)
       return
     }
-    const state = lokasi.state as { dari?: string } | null
-    navigate(state?.dari?.startsWith('/admin') ? state.dari : '/admin', { replace: true })
+    navigate('/admin', { replace: true })
   }
 
   return (
@@ -69,20 +68,13 @@ export default function AdminLoginPage() {
             />
             <p className="mt-1 text-xs text-perpusnas-gray-600">Nama pengguna dan alamat surel sama-sama diterima.</p>
           </div>
-          <div>
-            <label htmlFor="admin-sandi" className="block text-sm font-semibold text-perpusnas-gray-900">
-              Kata sandi
-            </label>
-            <input
-              id="admin-sandi"
-              type="password"
-              required
-              value={kataSandi}
-              onChange={(e) => setKataSandi(e.target.value)}
-              autoComplete="current-password"
-              className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm outline-none focus:border-perpusnas-blue focus:ring-2 focus:ring-perpusnas-blue/20"
-            />
-          </div>
+          <KolomSandi
+            id="admin-sandi"
+            nilai={kataSandi}
+            onChange={setKataSandi}
+            required
+            autoComplete="current-password"
+          />
 
           {galat && (
             <p

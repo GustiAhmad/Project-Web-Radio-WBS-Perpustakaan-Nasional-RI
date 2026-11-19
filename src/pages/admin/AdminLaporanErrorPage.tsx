@@ -80,7 +80,7 @@ export default function AdminLaporanErrorPage() {
       return
     }
     if (!MIME_SCREENSHOT.includes(file.type as (typeof MIME_SCREENSHOT)[number])) {
-      setGagal('Screenshot harus berupa PNG, JPEG, atau WebP.')
+      setGagal('Screenshot harus berupa JPG atau PNG.')
       setBerkas(null)
       e.target.value = ''
       return
@@ -311,12 +311,12 @@ export default function AdminLaporanErrorPage() {
           </div>
           <div>
             <label htmlFor="lap-screenshot" className="block text-sm font-semibold text-perpusnas-gray-900">
-              Screenshot (opsional, maks. 2 MB)
+              Screenshot (opsional, maksimal 2 MB, format JPG/PNG)
             </label>
             <input
               id="lap-screenshot"
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/png,image/jpeg"
               onChange={pilihBerkas}
               className="mt-2 w-full text-sm text-perpusnas-gray-600 file:mr-3 file:rounded-full file:border-0 file:bg-perpusnas-blue-light file:px-4 file:py-2 file:text-sm file:font-semibold file:text-perpusnas-blue"
             />

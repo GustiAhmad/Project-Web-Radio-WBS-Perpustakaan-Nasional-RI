@@ -22,6 +22,7 @@ const ProgramListPage = lazy(() => import('./pages/ProgramListPage'))
 const SchedulePage = lazy(() => import('./pages/SchedulePage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
 const SeriesDetailPage = lazy(() => import('./pages/SeriesDetailPage'))
+const VideoTerbaruPage = lazy(() => import('./pages/VideoTerbaruPage'))
 const AdminAcaraPage = lazy(() => import('./pages/admin/AdminAcaraPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminEpisodePage = lazy(() => import('./pages/admin/AdminEpisodePage'))
@@ -32,6 +33,7 @@ const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage'))
 const AdminPengaturanPage = lazy(() => import('./pages/admin/AdminPengaturanPage'))
 const AdminPenggunaPage = lazy(() => import('./pages/admin/AdminPenggunaPage'))
 const AdminPenyiarPage = lazy(() => import('./pages/admin/AdminPenyiarPage'))
+const AdminProfilPage = lazy(() => import('./pages/admin/AdminProfilPage'))
 const AdminQnAPage = lazy(() => import('./pages/admin/AdminQnAPage'))
 const AdminSeriPage = lazy(() => import('./pages/admin/AdminSeriPage'))
 
@@ -63,6 +65,7 @@ function KontenAplikasi() {
               <Route path="/" element={<HomePage />} />
               <Route path="/acara/:id" element={<AcaraDetailPage />} />
               <Route path="/jadwal" element={<SchedulePage />} />
+              <Route path="/video-terbaru" element={<VideoTerbaruPage />} />
               <Route path="/program" element={<ProgramListPage />} />
               <Route path="/program/:seriSlug" element={<SeriesDetailPage />} />
               <Route path="/program/:seriSlug/:episodeSlug" element={<EpisodeDetailPage />} />
@@ -81,6 +84,7 @@ function KontenAplikasi() {
                 }
               >
                 <Route index element={<AdminDashboardPage />} />
+                <Route path="profil" element={<AdminProfilPage />} />
                 <Route path="tanya-jawab" element={<AdminQnAPage />} />
                 <Route path="jadwal" element={<AdminJadwalPage />} />
                 <Route path="episode" element={<AdminEpisodePage />} />

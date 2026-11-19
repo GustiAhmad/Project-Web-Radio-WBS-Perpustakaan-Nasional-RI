@@ -84,6 +84,26 @@ export async function ambilEpisodeTerbaru(batas = 4): Promise<EpisodeKatalog[]> 
   return (data ?? []) as EpisodeKatalog[]
 }
 
+export async function ambilHalamanVideoTerbaru(
+  halaman: number,
+  batas = 12
+): Promise<{ episode: EpisodeKatalog[]; total: number }> {
+  if (!supabase) return { episode: [], total: 0 }
+  const awal = (halaman - 1) * batas
+  const { data, error, count } = await supabase
+    .from('episode')
+    .select(kolomEpisode, { count: 'exact' })
+    .eq('status', 'tayang')
+    .order('tanggal_tayang', { ascending: false })
+    .order('created_at', { ascending: false })
+    .range(awal, awal + batas - 1)
+  if (error) {
+    gagal('memuat halaman video terbaru', error.message)
+    return { episode: [], total: 0 }
+  }
+  return { episode: (data ?? []) as EpisodeKatalog[], total: count ?? 0 }
+}
+
 export async function ambilEpisodeSeri(seriId: string): Promise<EpisodeKatalog[]> {
   if (!supabase) return []
   const { data, error } = await supabase
@@ -141,7 +161,7 @@ export async function ambilAcaraDetail(id: string): Promise<AcaraMendatang | nul
   if (!supabase) return null
   const { data, error } = await supabase
     .from('acara_mendatang')
-    .select('id, judul, tanggal, jam_mulai, jam_selesai, kanal, tautan_acara, gambar_url, deskripsi, status')
+    .select('id, judul, tanggal, jam_mulai, jam_selesai, kanal, tautan_acara, gambar_url, deskripsi, moderator, narasumber, topik, status')
     .eq('id', id)
     .eq('status', 'terbit')
     .maybeSingle()

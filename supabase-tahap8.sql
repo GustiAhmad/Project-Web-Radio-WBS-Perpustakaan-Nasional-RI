@@ -107,8 +107,8 @@ values (
   'aset-wbs',
   'aset-wbs',
   true,
-  5242880,
-  array['image/jpeg', 'image/png', 'image/webp']::text[]
+  2097152,
+  array['image/jpeg', 'image/png']::text[]
 )
 on conflict (id) do update
 set public = excluded.public,

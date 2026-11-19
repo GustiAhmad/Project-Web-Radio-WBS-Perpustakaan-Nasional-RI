@@ -251,6 +251,11 @@ export type Database = {
           tautan_acara: string | null
           gambar_url: string | null
           deskripsi: string | null
+          moderator: string
+          narasumber: string
+          topik: string
+          seri_id: string | null
+          durasi_detik: number
           status: Database['public']['Enums']['status_publikasi']
           buka_sesi: boolean
           created_at: string
@@ -266,6 +271,11 @@ export type Database = {
           tautan_acara?: string | null
           gambar_url?: string | null
           deskripsi?: string | null
+          moderator?: string
+          narasumber?: string
+          topik?: string
+          seri_id?: string | null
+          durasi_detik?: number
           status?: Database['public']['Enums']['status_publikasi']
           buka_sesi?: boolean
           created_at?: string
@@ -281,6 +291,11 @@ export type Database = {
           tautan_acara?: string | null
           gambar_url?: string | null
           deskripsi?: string | null
+          moderator?: string
+          narasumber?: string
+          topik?: string
+          seri_id?: string | null
+          durasi_detik?: number
           status?: Database['public']['Enums']['status_publikasi']
           buka_sesi?: boolean
           created_at?: string

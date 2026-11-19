@@ -47,13 +47,13 @@ export default function UnggahGambarField({
           alt="Pratinjau gambar"
           width={160}
           height={90}
-          className="h-24 w-40 rounded-lg border border-perpusnas-blue/10 bg-perpusnas-blue-light object-cover"
+          className="h-24 w-40 rounded-lg border border-perpusnas-blue/10 bg-perpusnas-blue-light object-contain"
         />
         <div className="min-w-0 flex-1">
           <input
             id={id}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png"
             onChange={pilih}
             className="block w-full text-xs text-perpusnas-gray-600 file:mr-3 file:rounded-full file:border-0 file:bg-perpusnas-blue-light file:px-4 file:py-2 file:text-xs file:font-semibold file:text-perpusnas-blue"
           />
@@ -76,6 +76,7 @@ export default function UnggahGambarField({
               Belum ada gambar. Placeholder dipakai sampai diunggah.
             </p>
           )}
+          <p className="mt-1 text-xs text-perpusnas-gray-600">Maksimal 2 MB, format JPG/PNG.</p>
           {bantuan && <p className="mt-1 text-xs text-perpusnas-gray-600">{bantuan}</p>}
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { CalendarDays, Mic2 } from 'lucide-react'
+import { Mic2 } from 'lucide-react'
 import { ambilPenyiar, type Penyiar } from '../../services/catalog'
 import { Kosong, Pemuatan } from '../common/StateBox'
 
@@ -50,20 +49,13 @@ export default function OnAirPersonalities() {
                   height={96}
                   loading="lazy"
                   decoding="async"
-                  className="h-24 w-24 rounded-full border-4 border-perpusnas-blue-light object-cover"
+                  className="h-24 w-24 rounded-full border-4 border-perpusnas-blue-light bg-perpusnas-blue-light object-contain"
                 />
                 <h3 className="mt-4 flex items-center justify-center gap-1.5 text-sm font-bold text-perpusnas-gray-900">
                   <Mic2 size={14} aria-hidden="true" className="shrink-0 text-perpusnas-gold" />
                   {orang.nama}
                 </h3>
                 {orang.bio && <p className="mt-2 line-clamp-3 text-xs text-perpusnas-gray-600">{orang.bio}</p>}
-                <Link
-                  to={`/jadwal?penyiar=${encodeURIComponent(orang.slug)}`}
-                  className="mt-auto inline-flex items-center gap-1.5 pt-4 text-xs font-semibold text-perpusnas-blue hover:underline"
-                >
-                  <CalendarDays size={13} aria-hidden="true" />
-                  Lihat jadwal
-                </Link>
               </li>
             ))}
           </ul>
