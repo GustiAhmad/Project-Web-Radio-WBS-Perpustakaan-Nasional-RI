@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
+import UnggahGambarField from '../../components/admin/UnggahGambarField'
+import { terimaBerkas, unggahGambar } from '../../services/aset'
 import { supabase } from '../../services/supabase'
 import type { AcaraMendatang, Database } from '../../types/database.types'
 import { labelKanal } from '../../utils/formatters'
@@ -26,6 +28,8 @@ export default function AdminAcaraPage() {
   const [tautan, setTautan] = useState('')
   const [deskripsi, setDeskripsi] = useState('')
   const [status, setStatus] = useState<Status>('terbit')
+  const [poster, setPoster] = useState<File | null>(null)
+  const [posterUrl, setPosterUrl] = useState<string | null>(null)
 
   async function muat(): Promise<void> {
     if (!supabase) {
@@ -56,6 +60,8 @@ export default function AdminAcaraPage() {
     setTautan(item?.tautan_acara ?? '')
     setDeskripsi(item?.deskripsi ?? '')
     setStatus(item?.status ?? 'terbit')
+    setPoster(null)
+    setPosterUrl(item?.gambar_url ?? null)
   }
 
   async function simpan(e: FormEvent<HTMLFormElement>): Promise<void> {
@@ -72,17 +78,49 @@ export default function AdminAcaraPage() {
       deskripsi: deskripsi.trim() || null,
       status,
     }
-    const hasil = suntingId
-      ? await supabase.from('acara_mendatang').update(isi).eq('id', suntingId)
-      : await supabase.from('acara_mendatang').insert(isi)
+    let idAcara = suntingId
+    if (suntingId) {
+      const { error } = await supabase.from('acara_mendatang').update(isi).eq('id', suntingId)
+      if (error) {
+        setGalat(`Gagal menyimpan acara: ${error.message}`)
+        return
+      }
+    } else {
+      const { data, error } = await supabase.from('acara_mendatang').insert(isi).select('id').single()
+      if (error) {
+        setGalat(`Gagal menyimpan acara: ${error.message}`)
+        return
+      }
+      idAcara = data.id
+    }
 
-    if (hasil.error) {
-      setGalat(`Gagal menyimpan acara: ${hasil.error.message}`)
+    let urlPoster = posterUrl
+    if (poster && idAcara) {
+      if (!terimaBerkas(poster)) {
+        setGalat('Pilih gambar JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.')
+        return
+      }
+      try {
+        urlPoster = await unggahGambar('poster-acara', idAcara, poster)
+      } catch (galatUnggah) {
+        setGalat(galatUnggah instanceof Error ? galatUnggah.message : 'Poster gagal diunggah.')
+        return
+      }
+    }
+    const { error: galatPoster } = await supabase
+      .from('acara_mendatang')
+      .update({ gambar_url: urlPoster })
+      .eq('id', idAcara ?? '')
+    if (galatPoster) {
+      setGalat(`Poster gagal disimpan: ${galatPoster.message}`)
       return
     }
+
     setPesan(suntingId ? 'Acara diperbarui.' : 'Acara ditambahkan.')
     setMenampilkanForm(false)
     setSuntingId(null)
+    setPoster(null)
+    setPosterUrl(null)
     await muat()
   }
 
@@ -154,6 +192,18 @@ export default function AdminAcaraPage() {
             <div className="md:col-span-2">
               <label htmlFor="ac-deskripsi" className="block text-sm font-semibold text-perpusnas-gray-900">Deskripsi (opsional)</label>
               <textarea id="ac-deskripsi" rows={3} value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} className="mt-2 w-full resize-y rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm" />
+            </div>
+            <div className="md:col-span-2">
+              <UnggahGambarField
+                id="ac-poster"
+                label="Poster acara"
+                nilai={posterUrl}
+                berkas={poster}
+                padaPilih={setPoster}
+                padaHapus={() => setPosterUrl(null)}
+                placeholder={`${import.meta.env.BASE_URL}placeholder-poster.svg`}
+                bantuan="Poster tampil di kartu acara dan halaman detail. Kosongkan untuk memakai placeholder."
+              />
             </div>
             <div>
               <label htmlFor="ac-status" className="block text-sm font-semibold text-perpusnas-gray-900">Status</label>

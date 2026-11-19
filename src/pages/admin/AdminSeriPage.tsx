@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Check, Pencil, X } from 'lucide-react'
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
+import UnggahGambarField from '../../components/admin/UnggahGambarField'
+import { terimaBerkas, unggahGambar } from '../../services/aset'
 import { supabase } from '../../services/supabase'
 import type { Database, Seri } from '../../types/database.types'
 
@@ -22,7 +24,16 @@ const labelKategori: Record<Kategori, string> = {
   semua_kategori: 'Semua Kategori',
 }
 
-type Draft = { nama: string; deskripsi: string; kategori: Kategori; urutan: number; unggulan: boolean }
+type Draft = {
+  nama: string
+  deskripsi: string
+  kategori: Kategori
+  urutan: number
+  unggulan: boolean
+  gambarUrl: string | null
+  gambar: File | null
+  teksAlternatif: string
+}
 
 export default function AdminSeriPage() {
   const [seri, setSeri] = useState<Seri[]>([])
@@ -64,6 +75,32 @@ export default function AdminSeriPage() {
       setGalat(`Gagal menyimpan seri: ${error.message}`)
       return
     }
+
+    let urlGambar = draft.gambarUrl
+    if (draft.gambar) {
+      if (!terimaBerkas(draft.gambar)) {
+        setGalat('Pilih gambar JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.')
+        return
+      }
+      try {
+        urlGambar = await unggahGambar('seri', id, draft.gambar)
+      } catch (galatUnggah) {
+        setGalat(galatUnggah instanceof Error ? galatUnggah.message : 'Gambar seri gagal diunggah.')
+        return
+      }
+    }
+    const { error: galatGambar } = await supabase
+      .from('seri')
+      .update({
+        gambar_url: urlGambar,
+        teks_alternatif: draft.teksAlternatif.trim() || null,
+      })
+      .eq('id', id)
+    if (galatGambar) {
+      setGalat(`Gambar seri gagal disimpan: ${galatGambar.message}`)
+      return
+    }
+
     setSunting(null)
     setDraft(null)
     setPesan('Seri tersimpan.')
@@ -108,6 +145,26 @@ export default function AdminSeriPage() {
                         onChange={(e) => setDraft({ ...draft, deskripsi: e.target.value })}
                         className="w-full resize-y rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm"
                       />
+                      <UnggahGambarField
+                        id={`gambar-seri-${item.id}`}
+                        label="Gambar seri"
+                        nilai={draft.gambarUrl}
+                        berkas={draft.gambar}
+                        padaPilih={(berkas) => setDraft({ ...draft, gambar: berkas })}
+                        padaHapus={() => setDraft({ ...draft, gambarUrl: null })}
+                        placeholder={`${import.meta.env.BASE_URL}placeholder-poster.svg`}
+                        bantuan="Sampul tampil di kartu program. Kosongkan untuk memakai placeholder."
+                      />
+                      <label className="block text-sm font-semibold text-perpusnas-gray-900">
+                        Teks alternatif gambar
+                        <input
+                          aria-label="Teks alternatif gambar seri"
+                          value={draft.teksAlternatif}
+                          onChange={(e) => setDraft({ ...draft, teksAlternatif: e.target.value })}
+                          placeholder="Misalnya: Sampul seri Naskah Nusantara"
+                          className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm font-normal"
+                        />
+                      </label>
                       <div className="flex flex-wrap gap-3">
                         <select
                           aria-label="Kategori seri"
@@ -163,6 +220,9 @@ export default function AdminSeriPage() {
                               kategori: item.kategori,
                               urutan: item.urutan,
                               unggulan: item.unggulan,
+                              gambarUrl: item.gambar_url,
+                              gambar: null,
+                              teksAlternatif: item.teks_alternatif ?? '',
                             })
                           }}
                           aria-label={`Sunting ${item.nama}`}

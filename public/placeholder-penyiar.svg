@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Foto penyiar belum tersedia">
+  <rect width="200" height="200" fill="#E8F1F8"/>
+  <circle cx="100" cy="76" r="34" fill="#9DBBD1"/>
+  <path d="M36 188c0-36 29-64 64-64s64 28 64 64Z" fill="#9DBBD1"/>
+  <circle cx="100" cy="100" r="94" fill="none" stroke="#0B3B60" stroke-opacity="0.15" stroke-width="4"/>
+</svg>

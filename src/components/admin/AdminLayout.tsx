@@ -10,6 +10,8 @@ import {
   Menu,
   MessagesSquare,
   Settings,
+  UserCog,
+  Users,
   Video,
   X,
   Layers3,
@@ -33,6 +35,8 @@ const menuUtama: MenuItem[] = [
   { ke: '/admin/seri', label: 'Kelola Seri', ikon: Layers3, akhir: false },
   { ke: '/admin/acara', label: 'Acara Mendatang', ikon: CalendarDays, akhir: false },
   { ke: '/admin/halaman', label: 'Halaman Statis', ikon: FileText, akhir: false },
+  { ke: '/admin/penyiar', label: 'Kelola Penyiar', ikon: UserCog, akhir: false },
+  { ke: '/admin/pengguna', label: 'Kelola Pengguna', ikon: Users, akhir: false },
   { ke: '/admin/laporan-error', label: 'Laporan Error', ikon: Bug, akhir: false, laporan: true },
 ]
 
@@ -121,12 +125,19 @@ export default function AdminLayout() {
             >
               <Menu size={20} aria-hidden="true" />
             </button>
+            <img
+              src={profil?.foto_url ?? `${import.meta.env.BASE_URL}placeholder-penyiar.svg`}
+              alt={profil?.foto_url ? `Foto ${profil.nama_lengkap}` : 'Foto profil belum tersedia'}
+              width={36}
+              height={36}
+              className="h-9 w-9 shrink-0 rounded-full bg-perpusnas-blue-light object-cover"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-perpusnas-gray-900">
                 {profil?.nama_lengkap ?? 'Pengelola'}
               </p>
               <p className="text-[11px] uppercase tracking-wide text-perpusnas-gray-600">
-                {peran === 'superadmin' ? 'Superadmin' : 'Admin'}
+                {peran === 'superadmin' ? 'Superadmin' : 'Admin'} · @{profil?.nama_pengguna ?? 'pengelola'}
               </p>
             </div>
             <a
