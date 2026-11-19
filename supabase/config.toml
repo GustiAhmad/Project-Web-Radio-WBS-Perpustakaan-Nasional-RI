@@ -4,3 +4,8 @@
 
 [functions.kirim-notifikasi-laporan]
 verify_jwt = false
+
+# Panel admin memanggil fungsi ini dengan JWT pengguna, jadi verify_jwt aktif.
+# Peran pemanggil tetap divalidasi ulang di dalam fungsi.
+[functions.kelola-pengguna]
+verify_jwt = true

@@ -15,6 +15,8 @@ export type Database = {
           auth_user_id: string | null
           email: string
           nama_lengkap: string
+          nama_pengguna: string
+          foto_url: string | null
           peran: Database['public']['Enums']['peran_pengguna']
           status_aktif: boolean
           created_at: string
@@ -25,6 +27,8 @@ export type Database = {
           auth_user_id?: string | null
           email: string
           nama_lengkap: string
+          nama_pengguna: string
+          foto_url?: string | null
           peran?: Database['public']['Enums']['peran_pengguna']
           status_aktif?: boolean
           created_at?: string
@@ -35,8 +39,49 @@ export type Database = {
           auth_user_id?: string | null
           email?: string
           nama_lengkap?: string
+          nama_pengguna?: string
+          foto_url?: string | null
           peran?: Database['public']['Enums']['peran_pengguna']
           status_aktif?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      penyiar: {
+        Row: {
+          id: string
+          nama: string
+          slug: string
+          foto_url: string | null
+          bio: string | null
+          urutan: number
+          aktif: boolean
+          dibuat_oleh: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nama: string
+          slug: string
+          foto_url?: string | null
+          bio?: string | null
+          urutan?: number
+          aktif?: boolean
+          dibuat_oleh?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          nama?: string
+          slug?: string
+          foto_url?: string | null
+          bio?: string | null
+          urutan?: number
+          aktif?: boolean
+          dibuat_oleh?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -444,6 +489,10 @@ export type Database = {
     }
     Views: Record<string, never>
     Functions: {
+      cari_email_pengguna: {
+        Args: { p_identifikator: string }
+        Returns: string
+      }
       auth_is_superadmin: {
         Args: Record<string, never>
         Returns: boolean
@@ -483,6 +532,7 @@ export type AcaraMendatang = Database['public']['Tables']['acara_mendatang']['Ro
 export type HalamanStatis = Database['public']['Tables']['halaman_statis']['Row']
 export type Pertanyaan = Database['public']['Tables']['pertanyaan']['Row']
 export type Pengguna = Database['public']['Tables']['pengguna']['Row']
+export type Penyiar = Database['public']['Tables']['penyiar']['Row']
 export type LaporanError = Database['public']['Tables']['laporan_error']['Row']
 export type StatusLaporan = Database['public']['Enums']['status_laporan']
 export type TingkatKeparahan = Database['public']['Enums']['tingkat_keparahan']
