@@ -1,6 +1,6 @@
 # Panduan Deployment GitHub Pages — Radio & Siniar WBS Perpusnas
 
-Panduan ini dipakai untuk menyiapkan peluncuran produksi Tahap 7. Biaya hosting tetap Rp 0 karena GitHub Pages dan Supabase tier gratis.
+Panduan ini dipakai untuk menyiapkan peluncuran produksi Tahap 7 dan Tahap 8. Biaya hosting tetap Rp 0 karena GitHub Pages dan Supabase tier gratis.
 
 ## 1. Aktifkan GitHub Pages
 
@@ -56,6 +56,19 @@ Jika keduanya ada, nilai env yang dipakai lebih dulu. Semua konfigurasi memakai 
 
 Audit lokal terhadap build produksi sudah menghasilkan **Performance 100, Accessibility 100, Best Practices 100, SEO 100**, dengan LCP 1,43 detik, CLS 0,00, dan TBT 0 ms. Ulangi pengukuran pada alamat produksi setelah deploy karena jaringan dan CDN nyata tetap berpengaruh.
 
-## 7. Berita Acara UAT
+## 7. Penyiapan Backend Tahap 8
+
+Jalankan sekali pada proyek Supabase produksi lewat Supabase CLI yang sudah terhubung:
+
+```
+supabase db query --remote --file supabase-tahap8.sql --yes
+supabase functions deploy kelola-pengguna --yes
+```
+
+Hasilnya: kolom `nama_pengguna` dan `foto_url`, tabel `penyiar`, RPC `cari_email_pengguna`, bucket publik `aset-wbs`, dan Edge Function `kelola-pengguna` dengan `verify_jwt = true`. Service role key hanya dipakai di dalam Edge Function; jangan pernah ditulis ke `.env` atau repository secret GitHub.
+
+Nama pengguna awal dua akun existing di-backfill dari bagian lokal alamat surel. Pengelola bisa mengubah nama pengguna dan foto profil lewat menu **Profil Saya** di panel admin.
+
+## 8. Berita Acara UAT
 
 Format lembar pengesahan tersedia di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9. Isi tanggal, nama pustakawan, NIP, dan pilihan hasil pengujian setelah UAT produksi dilakukan bersama pengelola layanan. Jangan mengisi nama atau tanda tangan lebih awal.

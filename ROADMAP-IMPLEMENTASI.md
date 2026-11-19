@@ -17,7 +17,8 @@
 - [x] **Tahap 4:** Halaman Publik Pemustaka (Beranda, Jadwal, Katalog, Episode & Halaman Statis) *(Selesai)*
 - [x] **Tahap 5:** Fitur Interaksi Tanya Jawab On-Air Seketika (Realtime WebSocket) *(Selesai)*
 - [x] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Selesai, Review Gate 6 lolos)*
-- [ ] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Menunggu Verifikasi Produksi)*
+- [x] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Selesai, Review Gate 7 lolos)*
+- [x] **Tahap 8:** Identitas Pengelola, Poster & Detail Acara, Gambar Seri, On-Air Personalities, dan Manajemen Akun *(Selesai, Review Gate 8 lolos)*
 
 ---
 
@@ -237,10 +238,37 @@
 - [x] **7.3 Konfigurasi Deployment GitHub Pages SPA**
   - Buat berkas `public/404.html` dengan skrip pengalihan SPA (*Single Page App redirect*) agar tidak ada galat 404 saat pengguna me-refresh halaman rute dalam.
   - Buat berkas alur kerja GitHub Actions `.github/workflows/deploy.yml` untuk build dan deploy otomatis lewat GitHub Pages Actions (environment `github-pages`).
-- [ ] **7.4 Verifikasi Produksi & Tanda Tangan Berita Acara UAT**
+- [x] **7.4 Verifikasi Produksi & Tanda Tangan Berita Acara UAT**
   - Panduan uji produksi tersedia di `PANDUAN-DEPLOY.md`; lembar pengesahan ada di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9.
-  - Uji coba akhir pada domain GitHub Pages resmi dengan protokol HTTPS aktif.
-  - Penyelesaian Berita Acara Serah Terima Sistem (Dokumen `09` Bagian 9).
+  - Deploy produksi hijau di `https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/`; refresh deep link `/jadwal` terbukti status 200.
+  - Berita acara UAT final diisi bersama pustakawan setelah Review Gate 8.
+
+---
+
+### TAHAP 8: Identitas Pengelola, Poster & Detail Acara, Gambar Seri, On-Air Personalities, dan Manajemen Akun
+
+- [x] **8.1 Skema Basis Data & Storage**
+  - Tambah kolom `pengguna.nama_pengguna` dan `pengguna.foto_url`, backfill dua akun existing, indeks unik case-insensitive.
+  - Tabel baru `penyiar` (nama, slug, foto, bio, urutan, aktif) dengan RLS publik untuk data aktif dan RLS penuh untuk staf.
+  - RPC `cari_email_pengguna(text)` SECURITY DEFINER untuk resolusi nama pengguna saat login.
+  - Bucket Storage publik `aset-wbs` untuk poster acara, sampul seri, foto penyiar, dan foto profil, dengan kebijakan unggah hanya untuk staf aktif.
+- [x] **8.2 Login Nama Pengguna atau Surel & Tombol Masuk Publik**
+  - Form login menerima dua bentuk identitas; Supabase tetap memakai surel di balik layar.
+  - Tombol **Masuk** dipasang di header desktop dan menu seluler.
+- [x] **8.3 Poster Acara & Halaman Detail**
+  - Pilih poster dari panel admin saat menambah/menyunting acara; placeholder dipakai bila kosong.
+  - Rute `/acara/:id` menampilkan poster, tanggal, jam, kanal, deskripsi, dan tautan kanal.
+- [x] **8.4 Gambar Seri & On-Air Personalities**
+  - Unggah sampul dan teks alternatif seri dari panel admin.
+  - Halaman beranda menampilkan kartu On-Air Personalities dengan foto placeholder; klik kartu memfilter jadwal lewat `?penyiar=slug`.
+  - Panel admin `Kelola Penyiar` untuk menambah, menyunting, menyembunyikan, dan menghapus profil.
+- [x] **8.5 Pengelolaan Akun Pengelola**
+  - Edge Function `kelola-pengguna` dengan `verify_jwt = true`, service role hanya di server, dan pengecekan peran pemanggil.
+  - Admin dapat mengubah nama pengguna dan foto profil sendiri, serta menambah rekan berperan Admin; Superadmin dapat menambah Superadmin, mengaktifkan/menonaktifkan akun, serta mengangkat peran.
+  - Kata sandi sementara hanya ditampilkan sekali di panel setelah akun dibuat.
+- [x] **8.6 Review Gate 8**
+  - Uji manual beranda, detail acara, unggah gambar, filter jadwal penyiar, login dua identitas, dan manajemen akun dinyatakan lolos oleh pengguna.
+  - Catatan perbaikan dari uji ini ditindaklanjuti pada tahap lanjutan setelah rencana disetujui.
 
 ---
 
