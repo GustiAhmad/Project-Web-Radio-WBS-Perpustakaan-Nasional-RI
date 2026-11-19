@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 
 export default function AdminLoginPage() {
   const { masuk, penggunaAuth, profil, memuat, galatProfil, keluar } = useAuth()
-  const [email, setEmail] = useState('')
+  const [identifikator, setIdentifikator] = useState('')
   const [kataSandi, setKataSandi] = useState('')
   const [galat, setGalat] = useState('')
   const [memproses, setMemproses] = useState(false)
@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setGalat('')
     setMemproses(true)
-    const pesanGalat = await masuk(email, kataSandi)
+    const pesanGalat = await masuk(identifikator, kataSandi)
     setMemproses(false)
     if (pesanGalat) {
       setGalat(pesanGalat)
@@ -54,18 +54,20 @@ export default function AdminLoginPage() {
 
         <form onSubmit={(e) => void kirim(e)} className="mt-7 space-y-5">
           <div>
-            <label htmlFor="admin-email" className="block text-sm font-semibold text-perpusnas-gray-900">
-              Alamat surel
+            <label htmlFor="admin-identifikator" className="block text-sm font-semibold text-perpusnas-gray-900">
+              Nama pengguna atau surel
             </label>
             <input
-              id="admin-email"
-              type="email"
+              id="admin-identifikator"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={identifikator}
+              onChange={(e) => setIdentifikator(e.target.value)}
               autoComplete="username"
+              placeholder="misalnya: pustakawan.wbs"
               className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2.5 text-sm outline-none focus:border-perpusnas-blue focus:ring-2 focus:ring-perpusnas-blue/20"
             />
+            <p className="mt-1 text-xs text-perpusnas-gray-600">Nama pengguna dan alamat surel sama-sama diterima.</p>
           </div>
           <div>
             <label htmlFor="admin-sandi" className="block text-sm font-semibold text-perpusnas-gray-900">

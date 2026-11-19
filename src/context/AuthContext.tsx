@@ -11,8 +11,9 @@ type NilaiAuth = {
   peran: Peran | null
   memuat: boolean
   galatProfil: string | null
-  masuk: (email: string, kataSandi: string) => Promise<string | null>
+  masuk: (identifikator: string, kataSandi: string) => Promise<string | null>
   keluar: () => Promise<void>
+  segarProfil: () => Promise<void>
 }
 
 const AuthContext = createContext<NilaiAuth | null>(null)
@@ -31,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const { data, error } = await supabase
       .from('pengguna')
-      .select('id, auth_user_id, email, nama_lengkap, peran, status_aktif')
+      .select('id, auth_user_id, email, nama_lengkap, nama_pengguna, foto_url, peran, status_aktif')
       .eq('auth_user_id', user.id)
       .maybeSingle()
 
@@ -78,11 +79,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [muatProfil])
 
-  const masuk = useCallback(async (email: string, kataSandi: string): Promise<string | null> => {
+  const masuk = useCallback(async (identifikator: string, kataSandi: string): Promise<string | null> => {
     if (!supabase) return 'Koneksi ke studio belum tersedia. Periksa pengaturan Supabase.'
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: kataSandi })
+    const nilai = identifikator.trim()
+    if (!nilai) return 'Isi nama pengguna atau surel.'
+
+    let email = nilai
+    if (!nilai.includes('@')) {
+      const { data, error } = await supabase.rpc('cari_email_pengguna', { p_identifikator: nilai })
+      if (error) {
+        console.error(`[WBS] Gagal mencari akun pengelola: ${error.message}`)
+        return 'Gagal mencari akun. Periksa koneksi internet Anda.'
+      }
+      if (typeof data !== 'string' || !data) return 'Nama pengguna atau surel tidak ditemukan.'
+      email = data
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password: kataSandi })
     if (!error) return null
-    if (error.message.includes('Invalid login credentials')) return 'Surel atau kata sandi tidak cocok.'
+    if (error.message.includes('Invalid login credentials')) return 'Nama pengguna, surel, atau kata sandi tidak cocok.'
     return `Gagal masuk: ${error.message}`
   }, [])
 
@@ -90,6 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return
     await supabase.auth.signOut()
   }, [])
+
+  const segarProfil = useCallback(async (): Promise<void> => {
+    await muatProfil(penggunaAuth)
+  }, [muatProfil, penggunaAuth])
 
   const nilai = useMemo<NilaiAuth>(
     () => ({
@@ -100,8 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       galatProfil,
       masuk,
       keluar,
+      segarProfil,
     }),
-    [penggunaAuth, profil, memuat, galatProfil, masuk, keluar]
+    [penggunaAuth, profil, memuat, galatProfil, masuk, keluar, segarProfil]
   )
 
   return <AuthContext.Provider value={nilai}>{children}</AuthContext.Provider>

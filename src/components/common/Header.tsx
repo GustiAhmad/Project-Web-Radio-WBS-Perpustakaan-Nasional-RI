@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Menu, Search, X } from 'lucide-react'
+import { LogIn, Menu, Search, X } from 'lucide-react'
 
 const navigasi = [
   { label: 'Beranda', ke: '/' },
@@ -69,7 +69,7 @@ export default function Header() {
           ))}
         </nav>
 
-        <form onSubmit={cari} role="search" className="hidden w-60 lg:block">
+        <form onSubmit={cari} role="search" className="hidden w-52 xl:w-60 lg:block">
           <div className="relative">
             <Search
               size={16}
@@ -86,6 +86,14 @@ export default function Header() {
             />
           </div>
         </form>
+
+        <Link
+          to="/admin/masuk"
+          className="ml-auto hidden shrink-0 items-center gap-1.5 rounded-full border border-perpusnas-blue/20 px-3 py-2 text-xs font-semibold text-perpusnas-blue transition hover:bg-perpusnas-blue-light lg:inline-flex"
+        >
+          <LogIn size={15} aria-hidden="true" />
+          Masuk
+        </Link>
 
         <button
           type="button"
@@ -131,6 +139,14 @@ export default function Header() {
               </NavLink>
             ))}
           </nav>
+          <Link
+            to="/admin/masuk"
+            onClick={() => setMenuBuka(false)}
+            className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-perpusnas-blue px-4 py-3 text-sm font-semibold text-white"
+          >
+            <LogIn size={16} aria-hidden="true" />
+            Masuk Panel Pengelola
+          </Link>
         </div>
       )}
     </header>
