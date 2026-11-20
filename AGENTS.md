@@ -220,7 +220,7 @@ Jawab: YA untuk melanjutkan | TIDAK untuk tunda commit
 
 ## 8. Alur Kerja Eksekusi (*Execution Workflow*)
 
-1. Baca berkas [`ROADMAP-IMPLEMENTASI.md`](ROADMAP-IMPLEMENTASI.md).
+1. Baca berkas [`docs/roadmap-implementasi.md`](docs/roadmap-implementasi.md).
 2. Kerjakan tugas **hanya untuk 1 tahap yang sedang aktif**. Jangan melompat ke tahap berikutnya secara sepihak.
 3. Setelah seluruh subtugas pada tahap tersebut selesai dan teruji, **BERHENTI dan berikan laporan ringkas kepada pengguna**.
 4. Minta pengguna melakukan peninjauan pada **Titik Tinjauan (*Review Gate*)**.

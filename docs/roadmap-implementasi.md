@@ -1,4 +1,4 @@
-# ROADMAP-IMPLEMENTASI.md — Lembar Kerja Bertahap & Titik Tinjauan (Review Gates)
+# roadmap-implementasi.md — Lembar Kerja Bertahap & Titik Tinjauan (Review Gates)
 ## Website Layanan Radio dan Siniar WBS Perpustakaan Nasional RI
 
 > **ATURAN KERJA CLAUDE & PENGEMBANG:**
@@ -63,7 +63,7 @@
   - Buat berkas `src/services/supabase.ts` untuk menginisialisasi `@supabase/supabase-js`.
   - Buat berkas definisi tipe TypeScript `src/types/database.types.ts` berdasarkan skema tabel Dokumen `07`.
 - [x] **2.2 Penyiapan Berkas Eksekusi SQL Supabase**
-  - Sediakan berkas `supabase-schema.sql` siap pakai yang mencakup:
+  - Sediakan berkas `supabase/schema.sql` siap pakai yang mencakup:
     - 9 tabel utama (`pengguna`, `seri`, `episode`, `jadwal_tetap`, `acara_mendatang`, `sesi_onair`, `pertanyaan`, `halaman_statis`, `pengaturan_situs`).
     - Aturan keamanan *Row Level Security* (RLS) lengkap (hanya Superadmin/Admin yang bisa memodifikasi; publik hanya membaca konten berstatus tayang).
     - Indeks pencarian teks bahasa Indonesia (GIN index).
@@ -72,7 +72,7 @@
   - Rekonsiliasi 337 baris publik dari `metadata_youtube.csv` menjadi tepat **331 video unik** (249 pada 21 seri resmi + 82 pada keranjang *"Lainnya"*).
   - Impor 72 baris jadwal tetap penyiaran 24 jam ke tabel `jadwal_tetap`.
 - [x] **2.4 Pembuatan Akun Superadmin & Admin Awal**
-  - Panduan pendaftaran akun admin pertama melalui dasbor Supabase Auth tersedia di `PANDUAN-SETUP-SUPABASE.md`.
+  - Panduan pendaftaran akun admin pertama melalui dasbor Supabase Auth tersedia di `panduan-setup-supabase.md`.
 
 ---
 
@@ -213,7 +213,7 @@
    - Kolom **Tanya Jawab** di `Jadwal Siaran` menampilkan penanda dan dapat dicentang saat menyunting; program tanpa penanda menolak pembukaan sesi.
    - Penanda yang sama tampil di halaman jadwal publik.
    - Petugas mengisi target durasi menit saat membuka sesi; jam selesai dihitung dari jam mulai ditambah durasi, sehingga acara lebih dari satu jam tidak terpotong.
-   - Penanda awal program unggulan diatur lewat `supabase-qna-tahap6.sql`.
+   - Penanda awal program unggulan kini menjadi bagian dari data awal `supabase/schema.sql` (tidak lagi memakai skrip SQL terpisah).
 
 ---
 
@@ -243,7 +243,7 @@
   - Buat berkas `public/404.html` dengan skrip pengalihan SPA (*Single Page App redirect*) agar tidak ada galat 404 saat pengguna me-refresh halaman rute dalam.
   - Buat berkas alur kerja GitHub Actions `.github/workflows/deploy.yml` untuk build dan deploy otomatis lewat GitHub Pages Actions (environment `github-pages`).
 - [x] **7.4 Verifikasi Produksi & Tanda Tangan Berita Acara UAT**
-  - Panduan uji produksi tersedia di `PANDUAN-DEPLOY.md`; lembar pengesahan ada di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9.
+  - Panduan uji produksi tersedia di `panduan-deploy.md`; lembar pengesahan ada di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9.
   - Deploy produksi hijau di `https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/`; refresh deep link `/jadwal` terbukti status 200.
   - Berita acara UAT final diisi bersama pustakawan setelah Review Gate 8.
 
@@ -281,7 +281,7 @@
 - [x] **9.1 Tampilan Gambar Utuh & Aturan Unggah Seragam**
   - Seluruh gambar (poster acara, sampul seri, foto penyiar, foto profil, pratinjau admin) memakai `object-contain` agar tidak terpotong.
   - Satu aturan unggah untuk semua fitur: JPG/PNG, maksimal 2 MB. Teks syarat tampil di semua kolom unggah, termasuk screenshot laporan error.
-  - Bucket `aset-wbs` dan `laporan-error` diselaraskan ke 2 MB dan hanya `image/jpeg`, `image/png` lewat `supabase-tahap9.sql`.
+  - Bucket `aset-wbs` dan `laporan-error` diselaraskan ke 2 MB dan hanya `image/jpeg`, `image/png` lewat `supabase/migrations/005-tahap9.sql`.
   - Validasi berkas dipindah sebelum penulisan ke basis data di form Acara, Seri, dan Penyiar.
 - [x] **9.2 Halaman Video Terbaru Khusus**
   - Rute `/video-terbaru` menampilkan seluruh episode tayang terurut terbaru sampai terlama, 12 video per halaman dengan pagination nomor lewat `?halaman=`.
@@ -298,7 +298,7 @@
   - Setelah login, admin selalu diarahkan ke `/admin`.
   - Akun baru memakai kata sandi yang diisi Superadmin, bukan kata sandi sementara; Superadmin dapat mengubah kata sandi akun Admin lewat aksi `ubah_kata_sandi` di Edge Function. Peran tetap dua: `superadmin` dan `admin`.
 - [x] **9.5 Verifikasi Teknis**
-  - `supabase db query --remote --file supabase-tahap9.sql --yes` berhasil; kedua bucket terverifikasi 2 MB dan JPG/PNG.
+  - `supabase db query --remote --file supabase/migrations/005-tahap9.sql --yes` berhasil; kedua bucket terverifikasi 2 MB dan JPG/PNG.
   - Edge Function `kelola-pengguna` di-deploy ulang dengan aksi `ubah_kata_sandi`.
   - `npm run type-check` dan `npm run build` lolos tanpa galat.
 - [x] **9.6 Review Gate 9**
@@ -346,7 +346,7 @@
 - [x] **11.1 Skema & Migrasi Chat**
   - Tabel lama `sesi_onair` dan `pertanyaan` dihapus beserta datanya; tidak ada migrasi data lama.
   - Tabel baru `sesi_chat` dan `chat_pesan` dengan enum `status_sesi_chat` dan `status_chat_pesan`.
-  - `supabase-tahap11-chat.sql` untuk migrasi; `supabase-schema.sql` diperbarui untuk fresh install.
+  - `supabase/migrations/006-tahap11-chat.sql` untuk migrasi; `supabase/schema.sql` diperbarui untuk fresh install.
   - RLS: publik hanya melihat sesi terbuka dan pesan `terlihat`; staf penuh; hapus riwayat sesi hanya `superadmin`.
   - Realtime CDC diaktifkan pada kedua tabel; indeks `idx_chat_pesan_sesi_waktu`, `idx_chat_pesan_sesi_status`, dan `idx_sesi_chat_status`.
 - [x] **11.2 Tipe, Service, dan Hook Chat**
@@ -367,7 +367,7 @@
   - `src/utils/formatChat.ts` menyatukan format waktu, label status, dan format CSV antara sesi aktif dan arsip.
   - Dasbor, menu admin, dan daftar cadangan diperbarui ke tabel chat.
 - [x] **11.5 Dokumen Pendukung**
-  - `AGENTS.md`, `CLAUDE.md`, dan `PANDUAN-SETUP-SUPABASE.md` diselaraskan dengan terminologi Chat live dan menu Berita ke-6.
+  - `AGENTS.md`, `CLAUDE.md`, dan `panduan-setup-supabase.md` diselaraskan dengan terminologi Chat live dan menu Berita ke-6.
   - `docs/12-rencana-analitik-ga4.md` memakai `chat_sesi_dibuka`, `chat_sesi_ditutup`, `chat_dibuka`, dan `chat_pesan_kirim`; aktivasi GA4 tetap ditunda sampai go-live.
 - [x] **11.6 Verifikasi Teknis**
   - `npm run type-check` dan `npm run build` lolos tanpa galat (termasuk setelah penambahan halaman riwayat tersendiri).
@@ -386,9 +386,9 @@
   - Kategori tetap: `berita`, `artikel`, `pengumuman`. Status memakai enum `status_publikasi` (`draf`/`terbit`).
   - Tiga artikel terbaru tampil di beranda; artikel draf tidak pernah tampil ke publik.
 - [x] **12.2 Skema & Migrasi**
-  - `supabase-tahap12-artikel.sql` membuat enum `kategori_artikel`, tabel `artikel`, indeks `idx_artikel_terbit` dan `idx_artikel_kategori`, indeks GIN FTS bahasa Indonesia, serta RLS.
+  - `supabase/migrations/007-tahap12-artikel.sql` membuat enum `kategori_artikel`, tabel `artikel`, indeks `idx_artikel_terbit` dan `idx_artikel_kategori`, indeks GIN FTS bahasa Indonesia, serta RLS.
   - Publik hanya membaca artikel terbit yang waktunya sudah tiba; Admin dan Superadmin membaca, menambah, menyunting, dan menghapus semua artikel.
-  - `supabase-schema.sql` diperbarui untuk instalasi baru. Sampul memakai bucket publik `aset-wbs` folder `artikel/`; tidak ada audio/video mentah yang disimpan.
+  - `supabase/schema.sql` diperbarui untuk instalasi baru. Sampul memakai bucket publik `aset-wbs` folder `artikel/`; tidak ada audio/video mentah yang disimpan.
 - [x] **12.3 Tipe, Sanitasi, dan Service**
   - `database.types.ts` menambah `Artikel`, `KategoriArtikel`, `StatusPublikasi`, dan tabel `artikel`.
   - `sanitasiHtml.ts` membatasi tag HTML dan memaksa tautan `noopener noreferrer nofollow`; `formatArtikel.ts` menyeragamkan label kategori dan tanggal WIB.
@@ -412,7 +412,7 @@
   - `AdminPengaturanPage` memasukkan tabel `artikel` ke unduhan cadangan.
 - [x] **12.6 Analitik & Dokumen**
   - `docs/12-rencana-analitik-ga4.md` menambah `artikel_filter`, `artikel_halaman`, dan `artikel_view`; `menu_click` kini mencakup Berita.
-  - `PANDUAN-SETUP-SUPABASE.md` memuat langkah migrasi Tahap 12 dan jumlah tabel terbaru.
+  - `panduan-setup-supabase.md` memuat langkah migrasi Tahap 12 dan jumlah tabel terbaru.
 - [x] **12.7 Verifikasi Teknis**
   - `npm run type-check` dan `npm run build` lolos tanpa galat setelah perbaikan editor dan gaya artikel.
 - [x] **12.8 Review Gate 12**

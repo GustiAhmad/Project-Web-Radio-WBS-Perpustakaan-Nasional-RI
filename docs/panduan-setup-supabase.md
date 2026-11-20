@@ -16,7 +16,7 @@ Tier gratis mencukupi. Tidak perlu kartu kredit untuk skala katalog ini.
 
 1. Di dasbor Supabase, buka **SQL Editor**.
 2. Klik **New query**.
-3. Salih seluruh isi berkas `supabase-schema.sql` ke editor.
+3. Salih seluruh isi berkas `supabase/schema.sql` ke editor.
 4. Klik **Run**.
 5. Periksa hasil: tidak boleh ada pesan galat merah.
 
@@ -25,7 +25,7 @@ Skrip ini idempoten, jadi aman dijalankan ulang. Skrip membuat 9 tabel, 9 pengak
 ## 3. Impor katalog 331 video
 
 1. Masih di **SQL Editor**, klik **New query**.
-2. Salih seluruh isi berkas `supabase-catalog-insert.sql` ke editor.
+2. Salih seluruh isi berkas `supabase/migrations/001-catalog-insert.sql` ke editor.
 3. Klik **Run**.
 4. Periksa hasil: tidak boleh ada pesan galat merah.
 
@@ -84,21 +84,21 @@ Kolom `rowsecurity` harus `true` untuk kesepuluh tabel, termasuk `artikel`.
 Untuk basis data yang sudah memakai skema sebelum Tahap 11, jalankan migrasi ini. Skrip menghapus tabel `sesi_onair` dan `pertanyaan` beserta seluruh datanya, lalu membuat `sesi_chat` dan `chat_pesan`. Data lama **tidak** dimigrasikan.
 
 1. Di **SQL Editor**, klik **New query**.
-2. Salih seluruh isi berkas `supabase-tahap11-chat.sql` ke editor, lalu klik **Run**.
+2. Salih seluruh isi berkas `supabase/migrations/006-tahap11-chat.sql` ke editor, lalu klik **Run**.
 3. Periksa hasil: tidak boleh ada pesan galat merah.
 4. Ulangi kueri `pg_tables` dari bab 2. Pastikan `sesi_chat` dan `chat_pesan` muncul dengan `rowsecurity = true`, dan `sesi_onair` serta `pertanyaan` sudah tidak ada.
 
-Bila proyek dibuat dari `supabase-schema.sql` versi terbaru, langkah ini **tidak perlu** — kedua tabel chat sudah termasuk di dalam skema.
+Bila proyek dibuat dari `supabase/schema.sql` versi terbaru, langkah ini **tidak perlu** — kedua tabel chat sudah termasuk di dalam skema.
 
-> Berkas `supabase-qna-realtime.sql`, `supabase-qna-uji.sql`, `supabase-qna-tutup.sql`, `supabase-qna-live.sql`, dan `supabase-qna-tahap6.sql` adalah artefak Tahap 5–6 dan **sudah usang**. Jangan dijalankan lagi setelah Tahap 11. Pembukaan dan penutupan sesi kini dilakukan dari panel `/admin/chat`, bukan lewat skrip SQL.
+> Artefak SQL Tahap 5–6 untuk tanya jawab (`supabase-qna-*.sql`) sudah **dihapus dari repositori** karena usang sejak Tahap 11. Jangan dijalankan lagi. Pembukaan dan penutupan sesi kini dilakukan dari panel `/admin/chat`, bukan lewat skrip SQL.
 
 Realtime diaktifkan otomatis pada `sesi_chat` dan `chat_pesan` oleh skrip di atas. Frontend tidak meminta kolom audit `dibuka_oleh_id` atau `ditutup_oleh_id` dari sisi publik; publik hanya melihat sesi berstatus `terbuka` dan pesan berstatus `terlihat`.
 
 ## 5c. Migrasi panel admin dan laporan error (Tahap 6)
 
 1. Di **SQL Editor**, klik **New query**.
-2. Salih seluruh isi berkas `supabase-admin-tahap6.sql`, lalu klik **Run**. Berkas ini menambah kolom `nama_penyiar` pada `jadwal_tetap`.
-3. Buat query baru, salih seluruh isi berkas `supabase-laporan-error.sql`, lalu klik **Run**.
+2. Salih seluruh isi berkas `supabase/migrations/002-admin-tahap6.sql`, lalu klik **Run**. Berkas ini menambah kolom `nama_penyiar` pada `jadwal_tetap`.
+3. Buat query baru, salih seluruh isi berkas `supabase/migrations/003-laporan-error.sql`, lalu klik **Run**.
 4. Periksa **Storage**. Harus ada bucket privat bernama `laporan-error` dengan batas 2 MB dan tiga jenis MIME gambar.
 5. Periksa kembali `pg_tables`. Sekarang ada 11 tabel dengan `rowsecurity = true` (10 dari skema utama ditambah `laporan_error`).
 
@@ -111,12 +111,12 @@ Penanda `interaktif` pada `jadwal_tetap` tetap dipakai untuk menampilkan program
 Untuk basis data yang sudah berjalan sebelum Tahap 12, jalankan migrasi ini. Skrip membuat enum `kategori_artikel`, tabel `artikel`, indeks pencarian teks bahasa Indonesia, dan kebijakan RLS. Data tabel lain tidak diubah.
 
 1. Di **SQL Editor**, klik **New query**.
-2. Salih seluruh isi berkas `supabase-tahap12-artikel.sql` ke editor, lalu klik **Run**.
+2. Salih seluruh isi berkas `supabase/migrations/007-tahap12-artikel.sql` ke editor, lalu klik **Run**.
 3. Periksa hasil: tidak boleh ada pesan galat merah.
 4. Ulangi kueri `pg_tables` dari bab 2. Pastikan `artikel` muncul dengan `rowsecurity = true`.
 5. Buka **Storage** → bucket `aset-wbs`. Sampul artikel disimpan di folder `artikel/` dengan batas 2 MB dan format JPG/PNG; tidak perlu membuat bucket atau kebijakan baru.
 
-Bila proyek dibuat dari `supabase-schema.sql` versi terbaru, langkah 1–3 **tidak perlu** — tabel `artikel` sudah termasuk di dalam skema.
+Bila proyek dibuat dari `supabase/schema.sql` versi terbaru, langkah 1–3 **tidak perlu** — tabel `artikel` sudah termasuk di dalam skema.
 
 > Perbaikan: skrip Tahap 12 tidak memasang `set_timestamp_artikel` karena tabel ini memakai kolom `diubah_pada`, bukan `updated_at`. Trigger lama yang menulis `NEW.updated_at` akan menggagalkan setiap perubahan dengan pesan `record "new" has no field "updated_at"`. Jalankan ulang skrip yang sudah diperbarui, atau cukup jalankan `DROP TRIGGER IF EXISTS set_timestamp_artikel ON public.artikel;` di SQL Editor.
 
@@ -189,9 +189,9 @@ Alamat yang muncul di situlah yang akan menerima notifikasi.
    $env:RESEND_API_KEY = 're_XXXX'
    $env:EMAIL_DARI = 'WBS Perpusnas <onboarding@resend.dev>'
    $env:URL_PANEL_ADMIN = 'https://<username>.github.io/<repo>/admin/laporan-error'
-   .\pasang-resend.ps1
+   .\scripts/pasang-resend.ps1
    ```
-   Skrip `pasang-resend.ps1` membaca kunci dari variabel lingkungan, menyimpan tiga secret, lalu men-deploy fungsi. Jalankan `supabase link` sekali saja; SHA kata sandi database tidak disimpan di repositori. Berkas `supabase/config.toml` sudah menonaktifkan `verify_jwt` untuk fungsi ini.
+   Skrip `scripts/pasang-resend.ps1` membaca kunci dari variabel lingkungan, menyimpan tiga secret, lalu men-deploy fungsi. Jalankan `supabase link` sekali saja; SHA kata sandi database tidak disimpan di repositori. Berkas `supabase/config.toml` sudah menonaktifkan `verify_jwt` untuk fungsi ini.
 
 Fungsi menolak pemanggil yang tidak dikenali. Webhook database mengirim kunci proyek pada header `apikey` lewat menu **Add secret key** di langkah D. Jika Anda memakai secret kustom, daftarkan `WEBHOOK_SECRET` di tab Secrets dan kirim header `x-webhook-secret` dengan nilai yang sama persis.
 
@@ -223,7 +223,7 @@ Kunci Resend dan service role tidak pernah ditulis di `.env`, kode frontend, ata
 
 ## 7. Uji dari frontend
 
-1. Jalankan `start-server.bat` atau `npm run dev`.
+1. Jalankan `scripts/start-server.bat` atau `npm run dev`.
 2. Buka http://localhost:5173.
 3. Tekan **F12** untuk membuka Developer Tools, lalu pilih tab **Console**.
 4. Cari pesan `[WBS] Supabase terhubung. Contoh seri:` beserta tiga seri pertama.

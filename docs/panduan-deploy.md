@@ -61,7 +61,7 @@ Audit lokal terhadap build produksi sudah menghasilkan **Performance 100, Access
 Jalankan sekali pada proyek Supabase produksi lewat Supabase CLI yang sudah terhubung:
 
 ```
-supabase db query --remote --file supabase-tahap8.sql --yes
+supabase db query --remote --file supabase/migrations/004-tahap8.sql --yes
 supabase functions deploy kelola-pengguna --yes
 ```
 
@@ -74,11 +74,11 @@ Nama pengguna awal dua akun existing di-backfill dari bagian lokal alamat surel.
 Jalankan sekali pada proyek Supabase produksi:
 
 ```
-supabase db query --remote --file supabase-tahap9.sql --yes
+supabase db query --remote --file supabase/migrations/005-tahap9.sql --yes
 supabase functions deploy kelola-pengguna --yes
 ```
 
-`supabase-tahap9.sql` menambah kolom `moderator`, `narasumber`, `topik`, `seri_id`, dan `durasi_detik` pada `acara_mendatang`, lalu menyelaraskan bucket `aset-wbs` dan `laporan-error` ke batas 2 MB dengan MIME hanya `image/jpeg` dan `image/png`. Edge Function `kelola-pengguna` kini menerima kata sandi buatan Superadmin saat membuat akun dan menyediakan aksi `ubah_kata_sandi`.
+`supabase/migrations/005-tahap9.sql` menambah kolom `moderator`, `narasumber`, `topik`, `seri_id`, dan `durasi_detik` pada `acara_mendatang`, lalu menyelaraskan bucket `aset-wbs` dan `laporan-error` ke batas 2 MB dengan MIME hanya `image/jpeg` dan `image/png`. Edge Function `kelola-pengguna` kini menerima kata sandi buatan Superadmin saat membuat akun dan menyediakan aksi `ubah_kata_sandi`.
 
 Semua fitur unggah gambar memakai aturan yang sama: JPG/PNG, maksimal 2 MB. Teks syarat ini tampil di form Acara, Seri, Penyiar, Profil, dan Screenshot Laporan Error. Validasi berkas berjalan sebelum data ditulis ke basis data.
 

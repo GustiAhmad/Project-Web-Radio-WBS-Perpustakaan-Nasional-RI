@@ -1,81 +1,119 @@
-# Radio & Siniar Widya Bahana Swara (WBS) Perpustakaan Nasional RI
+# Radio & Siniar WBS Perpustakaan Nasional RI
 
-> Repositori resmi perancangan dan pembangunan **Website Layanan Radio dan Siniar WBS Perpustakaan Nasional RI**. Dikelola di bawah naungan **Pusat Jasa Informasi Perpustakaan dan Pengelolaan Naskah Nusantara (PUJASINTARA)**, Perpustakaan Nasional Republik Indonesia.
+[![Deploy ke GitHub Pages](https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/actions/workflows/deploy.yml/badge.svg)](https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/actions/workflows/deploy.yml)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Free%20Tier-3FCF8E?logo=supabase&logoColor=black)
+![Hosting](https://img.shields.io/badge/hosted%20on-GitHub%20Pages-222222?logo=github&logoColor=white)
 
----
+> Etalase resmi **Layanan Radio dan Siniar Widya Bahana Swara (WBS)** Perpustakaan Nasional RI, di bawah naungan **Pusat Jasa Informasi Perpustakaan dan Pengelolaan Naskah Nusantara (PUJASINTARA)**.
 
-## 📌 Sekilas Proyek
-
-Website ini dibangun untuk memodernisasi layanan penyiaran literasi Perpustakaan Nasional RI melalui konvergensi dua entitas:
-1. **Siaran Radio 24 Jam Non-Stop (06.00–05.59 WIB):** Pemutar audio persisten lintas halaman yang terhubung ke aliran Icecast studio (HTTPS) dengan manajemen otomasi penyiaran *Jazler RadioStar 2* di studio.
-2. **Katalog Video & Siniar Mandiri (331 Video Unik):** Etalase 21 seri program resmi (seperti *LibTalk*, *Diskusi Naskah Nusantara*, *Ruang Literasi*) dan video lepasan yang di-*embed* langsung dari YouTube resmi WBS dengan teknik optimasi *Lite YouTube Facade*.
-3. **Interaktivitas Tanya Jawab On-Air Seketika:** Formulir interaksi pendengar dengan pengiriman instan ke studio via *Supabase Realtime (CDC WebSockets)*, perlindungan *honeypot* anti-spam, dan opsi pengirim anonim.
-
----
-
-## 🛠️ Tumpukan Teknologi (*Tech Stack*)
-
-Arsitektur Jamstack modern dengan biaya operasional hosting **Rp 0 (Gratis Selamanya)**:
-
-- **Frontend:** React 18 + Vite + TypeScript (Strict Mode)
-- **Styling:** Tailwind CSS (Palet Resmi Perpusnas: Biru `#0B3B60` & Emas `#D4A017`)
-- **Ikon:** Lucide React
-- **Perutean:** React Router DOM v6 (dengan skrip SPA 404 Fallback)
-- **Backend-as-a-Service:** Supabase Free Tier (PostgreSQL 15+, Auth JWT, Storage CDN, Realtime CDC)
-- **Hosting & CI/CD:** GitHub Pages + GitHub Actions
-- **Penyedia Audio:** Icecast 2 Studio (Port 8443 / SSL Reverse Proxy)
-- **Penyedia Video:** YouTube IFrame Embed (Tanpa Autoplay)
-- **Analitik:** Google Analytics 4 (GA4 dengan IP Anonymization)
+**Demo langsung:** https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/
 
 ---
 
-## 📚 Indeks Dokumentasi Resmi (`/docs`)
+## Sekilas proyek
 
-Seluruh tahapan proyek didokumentasikan secara lengkap pada folder [`/docs`](docs/):
+Website ini memodernisasi layanan penyiaran literasi Perpusnas dengan biaya hosting **Rp 0 (gratis selamanya)**:
 
-| No | Dokumen | Keterangan |
-|:---:|---|---|
-| **01** | [`01-prd.md`](docs/01-prd.md) | **Product Requirements Document (PRD)** — v2.2 Final Disepakati |
-| **02** | [`02-peta-konten-dan-taksonomi.md`](docs/02-peta-konten-dan-taksonomi.md) | **Peta Konten & Taksonomi** (21 Seri + Keranjang Lainnya = 331 Video Unik) |
-| **03** | [`03-rancangan-data-dan-panel.md`](docs/03-rancangan-data-dan-panel.md) | **Rancangan Data & Panel Admin** (Struktur 2 Peran: Superadmin & Admin) |
-| **04** | [`04-rancangan-halaman-pengunjung.md`](docs/04-rancangan-halaman-pengunjung.md) | **Rancangan Halaman Pengunjung** (Adaptasi Kesederhanaan Pola UT Radio) |
-| **05** | [`05-kebutuhan-fungsional-dan-prioritas.md`](docs/05-kebutuhan-fungsional-dan-prioritas.md) | **Kebutuhan Fungsional (53 FR)** & Prioritas MoSCoW |
-| **06** | [`06-arsitektur-dan-kebutuhan-teknis.md`](docs/06-arsitektur-dan-kebutuhan-teknis.md) | **Arsitektur Jamstack**, Penanganan Icecast HTTPS & CI/CD |
-| **07** | [`07-model-data-dan-kamus-data.md`](docs/07-model-data-dan-kamus-data.md) | **Model Data Relasional (ERD)**, DDL 9 Tabel PostgreSQL & SQL RLS |
-| **08** | [`08-rencana-migrasi-dan-operasional.md`](docs/08-rencana-migrasi-dan-operasional.md) | **Pipeline Migrasi Data** & 7 Standar Operasional Prosedur (SOP) Pustakawan |
-| **09** | [`09-rencana-pengujian-dan-evaluasi.md`](docs/09-rencana-pengujian-dan-evaluasi.md) | **Rencana Pengujian (QA)**, 10 Skenario UAT Mandiri & Berita Acara |
-| **10** | [`10-glosarium-dan-log-keputusan.md`](docs/10-glosarium-dan-log-keputusan.md) | **Glosarium Istilah**, Log 34 Keputusan Arsitektur & Panduan Handover |
+- **Siaran radio 24 jam** — pemutar audio persisten lintas halaman, terhubung ke aliran Icecast studio (HTTPS) yang dimanajemen otomatis dengan Jazler RadioStar 2.
+- **Katalog 331 video unik** — 249 episode dari 21 seri resmi (LibTalk, Ruang Literasi, Diskusi Naskah Nusantara, dll.) plus 82 video lepasan di keranjang "Lainnya". Video di-*embed* dari YouTube resmi WBS dengan pola *Lite YouTube Facade* dan tanpa autoplay.
+- **Jadwal siaran 24 jam** — tampilan jadwal yang dikelola petugas dari panel admin (bukan pengendali pemancar).
+- **Chat live terkelola** — sesi dibuka/ditutup manual oleh petugas, real-time via Supabase Realtime, dengan honeypot, rate limit 1 pesan/30 detik, opsi anonim, dan alat moderasi.
+- **Berita & artikel** — modul kurasi konten dengan editor kaya, status draf, dan pratinjau sebelum terbit.
+
+Akses pengelola hanya dua peran: **superadmin** (akses penuh) dan **admin** (operasional harian).
 
 ---
 
-## 🤖 Panduan Pengembang & Agen AI
+## Tumpukan teknologi
 
-- **Instruksi Eksekusi Claude / Pengembang:** Baca [`CLAUDE.md`](CLAUDE.md) untuk memahami 10 aturan emas dan batasan mutlak proyek.
-- **Papan Kendali & Review Gates:** Pantau progres 7 tahap pembangunan pada [`ROADMAP-IMPLEMENTASI.md`](ROADMAP-IMPLEMENTASI.md).
+| Lapisan | Teknologi |
+|---|---|
+| Frontend | React 18, Vite 5, TypeScript (strict mode) |
+| Tata letak | Tailwind CSS 3 (palet resmi Perpusnas: biru `#0B3B60`, emas `#D4A017`) |
+| Ikon & rute | Lucide React, React Router DOM |
+| Backend | Supabase Free Tier — PostgreSQL 15+, Auth JWT, Storage, Realtime CDC |
+| Audio / Video | Icecast 2 studio (HTTPS), YouTube IFrame Embed |
+| Analitik | Google Analytics 4 (IP anonim) |
+| Hosting & CI/CD | GitHub Pages + GitHub Actions |
 
 ---
 
-## 💻 Panduan Menjalankan Proyek Lokal
+## Menjalankan proyek lokal
 
 ```bash
 # 1. Klon repositori
-git clone https://github.com/USERNAME/radio-wbs-perpusnas.git
-cd radio-wbs-perpusnas
+git clone https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI.git
+cd Project-Web-Radio-WBS-Perpustakaan-Nasional-RI
 
 # 2. Pasang dependensi
 npm install
 
-# 3. Siapkan variabel lingkungan
+# 3. Salin template variabel lingkungan, lalu isi nilainya
 cp .env.example .env
 
-# 4. Jalankan server lokal
+# 4. Jalankan server pengembangan (http://localhost:5173)
 npm run dev
+```
+
+Skrip lain: `npm run type-check`, `npm run build`, `npm run preview`.
+
+Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase. Ikuti **[panduan setup Supabase](docs/panduan-setup-supabase.md)** dan **[panduan deploy](docs/panduan-deploy.md)**. Nilai rahasia (Supabase, GA4, URL Icecast) diset sebagai GitHub Actions secrets untuk build produksi—lihat `.env.example`.
+
+---
+
+## Struktur repositori
+
+```text
+.
+├── .github/workflows/deploy.yml   # Build & deploy ke GitHub Pages
+├── docs/                          # Dokumen perencanaan, panduan, dan roadmap
+├── public/                        # Aset statis (logo SVG, favicon, sitemap, 404 fallback)
+├── scripts/                       # Migrasi katalog & helper lokal
+│   └── data/metadata_youtube.csv  # Sumber data untuk menghasilkan ulang SQL katalog
+├── src/
+│   ├── components/                # Komponen UI per fitur
+│   ├── context/                   # AudioContext & AuthContext
+│   ├── hooks/                     # Hook Realtime, sesi chat, program on-air
+│   ├── pages/                     # Halaman publik & admin
+│   ├── services/                  # Klien Supabase, audio, GA4
+│   ├── types/                     # Definisi tipe database & aplikasi
+│   └── utils/                     # Format waktu WIB, sanitasi, formatter
+├── supabase/
+│   ├── schema.sql                 # Skema lengkap untuk instalasi baru
+│   └── migrations/                # Migrasi bertahap (001–007)
+├── AGENTS.md                      # Instruksi operasional & guardrails proyek
+├── CLAUDE.md                      # Penunjuk singkat ke AGENTS.md
+└── README.md
 ```
 
 ---
 
-## 👤 Tim Proyek
+## Dokumentasi
 
-- **Penyusun & Pengembang:** Gusti Ahmad Muttahid Bilhaq (Mahasiswa Magang Teknik Informatika)
-- **Instansi:** Pusat Jasa Informasi Perpustakaan dan Pengelolaan Naskah Nusantara (PUJASINTARA)
-- **Lembaga:** Perpustakaan Nasional Republik Indonesia
+| No | Dokumen | Keterangan |
+|:--:|---|---|
+| 01 | [`01-prd.md`](docs/01-prd.md) | Product Requirements Document |
+| 02 | [`02-peta-konten-dan-taksonomi.md`](docs/02-peta-konten-dan-taksonomi.md) | Peta konten & taksonomi (21 seri + "Lainnya") |
+| 03 | [`03-rancangan-data-dan-panel.md`](docs/03-rancangan-data-dan-panel.md) | Rancangan data & panel admin (2 peran) |
+| 04 | [`04-rancangan-halaman-pengunjung.md`](docs/04-rancangan-halaman-pengunjung.md) | Rancangan halaman pengunjung |
+| 05 | [`05-kebutuhan-fungsional-dan-prioritas.md`](docs/05-kebutuhan-fungsional-dan-prioritas.md) | Kebutuhan fungsional & prioritas |
+| 06 | [`06-arsitektur-dan-kebutuhan-teknis.md`](docs/06-arsitektur-dan-kebutuhan-teknis.md) | Arsitektur Jamstack, HTTPS Icecast, CI/CD |
+| 07 | [`07-model-data-dan-kamus-data.md`](docs/07-model-data-dan-kamus-data.md) | Model data relasional & SQL RLS |
+| 08 | [`08-rencana-migrasi-dan-operasional.md`](docs/08-rencana-migrasi-dan-operasional.md) | Pipeline migrasi data & SOP |
+| 09 | [`09-rencana-pengujian-dan-evaluasi.md`](docs/09-rencana-pengujian-dan-evaluasi.md) | Rencana pengujian & UAT |
+| 10 | [`10-glosarium-dan-log-keputusan.md`](docs/10-glosarium-dan-log-keputusan.md) | Glosarium & log keputusan arsitektur |
+| 11 | [`11-panduan-youtube-data-api.md`](docs/11-panduan-youtube-data-api.md) | Panduan YouTube Data API |
+| 12 | [`12-rencana-analitik-ga4.md`](docs/12-rencana-analitik-ga4.md) | Rencana analitik GA4 |
+
+Panduan operasional: **[setup Supabase](docs/panduan-setup-supabase.md)** · **[deploy](docs/panduan-deploy.md)** · **[roadmap implementasi](docs/roadmap-implementasi.md)**.
+
+Panduan untuk agen/pengembang: **[AGENTS.md](AGENTS.md)** (sumber tunggal aturan dan alur kerja).
+
+---
+
+## Tim proyek
+
+- **Penyusun & pengembang:** Gusti Ahmad Muttahid Bilhaq — Mahasiswa Magang Teknik Informatika
+- **Penanggung jawab:** PUJASINTARA, Perpustakaan Nasional Republik Indonesia

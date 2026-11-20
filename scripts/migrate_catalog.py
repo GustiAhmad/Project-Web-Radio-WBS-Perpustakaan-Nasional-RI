@@ -6,7 +6,7 @@ Sumber:
   - docs/02-peta-konten-dan-taksonomi.md (judul baku, tanggal, durasi, topik)
 
 Output:
-  - supabase-catalog-insert.sql
+  - supabase/migrations/001-catalog-insert.sql
 
 Tidak memerlukan service_role key. SQL dijalankan manual di Supabase SQL Editor.
 """
@@ -17,9 +17,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSV_PATH = ROOT / "Persiapan Awal" / "Radio WBS Perpusnas" / "youtube_ekstrak" / "metadata_youtube.csv"
+CSV_PATH = ROOT / "scripts" / "data" / "metadata_youtube.csv"
 DOC_PATH = ROOT / "docs" / "02-peta-konten-dan-taksonomi.md"
-OUT_PATH = ROOT / "supabase-catalog-insert.sql"
+OUT_PATH = ROOT / "supabase/migrations/001-catalog-insert.sql"
 
 BULAN = {
     "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "Mei": 5, "Jun": 6,
@@ -217,7 +217,7 @@ def main():
         "-- ============================================================================",
         "-- KATALOG 331 VIDEO UNIK WBS (HASIL MIGRASI OTOMATIS)",
         "-- Sumber: metadata_youtube.csv + docs/02-peta-konten-dan-taksonomi.md",
-        "-- Jalankan setelah supabase-schema.sql. Aman dijalankan ulang.",
+        "-- Jalankan setelah supabase/schema.sql. Aman dijalankan ulang.",
         "-- ============================================================================",
         "",
         "INSERT INTO episode (",

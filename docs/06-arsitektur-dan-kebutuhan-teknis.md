@@ -1,7 +1,7 @@
 # Arsitektur dan Kebutuhan Teknis
 ## Website Radio & Siniar WBS Perpusnas
 
-> **Catatan Tahap 11:** Contoh DDL dan RLS di dokumen ini masih memakai tabel `sesi_onair`/`pertanyaan`. Sumber kebenaran terkini adalah `supabase-schema.sql` dan `supabase-tahap11-chat.sql`, yang memakai `sesi_chat` dan `chat_pesan`.
+> **Catatan Tahap 11:** Contoh DDL dan RLS di dokumen ini masih memakai tabel `sesi_onair`/`pertanyaan`. Sumber kebenaran terkini adalah `supabase/schema.sql` dan `supabase/migrations/006-tahap11-chat.sql`, yang memakai `sesi_chat` dan `chat_pesan`.
 
 | Keterangan | Isi |
 |---|---|
@@ -136,7 +136,7 @@ Untuk mengatasi hal ini, arsitektur menerapkan teknik **SPA Single-Entry Redirec
 2. Saat pengunjung mengakses rute langsung (misal: `https://domain.com/program/libtalk`), server GitHub Pages menyajikan `404.html`.
 3. Skrip di dalam `404.html` mengonversi path URL menjadi parameter query (misal: `/?p=/program/libtalk`) dan mengarahkan kembali peramban ke `index.html`.
 4. Skrip inisialisasi di `index.html` membaca parameter query tersebut dan memerintahkan *React Router* untuk me-render rute yang sesuai tanpa terlihat kedipan (*flash*) oleh pengguna.
-5. Dengan cara ini, seluruh rute publik ([Dokumen 04 Bagian 1.1](file:///C:/Project%20Radio%20WBS%20Perpusnas/docs/04-rancangan-halaman-pengunjung.md#L60-L73)) dapat di-*bookmark* dan dibagikan secara sah (*deep-linking support*).
+5. Dengan cara ini, seluruh rute publik ([Dokumen 04 Bagian 1.1](04-rancangan-halaman-pengunjung.md)) dapat di-*bookmark* dan dibagikan secara sah (*deep-linking support*).
 
 ### 2.3 Arsitektur Pemutar Audio Persisten (Persistent Audio State Engine)
 Salah satu persyaratan utama website adalah siaran radio **tidak boleh mati** saat pendengar berpindah antar-halaman (`PR-01`, `PR-44`, `FR-01`).
@@ -738,68 +738,49 @@ Mengingat aplikasi di-*serve* dari GitHub Pages, keamanan peramban diperkuat mel
 Struktur proyek ditata dengan arsitektur modular yang memisahkan urusan logika bisnis, tata letak antarmuka, dan komunikasi data:
 
 ```
-C:\Project Radio WBS Perpusnas\
+radio-wbs/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml              # Pipeline otomatisasi CI/CD ke GitHub Pages
-├── docs/                           # Dokumentasi resmi proyek (Dokumen 01 s.d. 10)
-├── public/                         # Aset statis murni
-│   ├── favicon.ico
-│   ├── 404.html                    # Skrip pengarah rute deep-linking SPA
-│   ├── robots.txt                  # Arahan perayap mesin pencari
-│   ├── sitemap.xml                 # Peta situs terstruktur
-│   └── assets/                     # Gambar statis, logo institusi Perpusnas
+│       └── deploy.yml              # Build & deploy otomatis ke GitHub Pages
+├── docs/                           # Dokumen perencanaan 01–12, panduan, dan roadmap
+├── public/                         # Aset statis: logo SVG, favicon, sitemap, 404 fallback
+├── scripts/                        # Skrip migrasi katalog & helper lokal
+│   ├── data/
+│   │   └── metadata_youtube.csv    # Sumber data untuk menghasilkan ulang SQL katalog
+│   ├── migrate_catalog.py
+│   ├── pasang-resend.ps1
+│   └── start-server.bat
 ├── src/
-│   ├── components/                 # Komponen antarmuka modular
-│   │   ├── common/                 # Header, Footer, Breadcrumb, Modal, Card
-│   │   ├── player/                 # BottomPersistentPlayer, VolumeBar, StatusBadge
-│   │   ├── home/                   # HeroSection, SchedulePreview, FeaturedSeries
-│   │   ├── schedule/               # FullDayTable, TimeIndicator, DayTabs
-│   │   ├── catalog/                # SeriesCard, EpisodeCard, CategoryFilter
-│   │   ├── interaction/            # QuestionCard, LiveQuestionList, StatusFilter
-│   │   └── admin/                  # SidebarAdmin, TableManager, FormModal
-│   ├── contexts/                   # React Context global
-│   │   ├── AudioPlayerContext.tsx  # State audio stream, persistensi audio lintas rute
-│   │   └── AuthContext.tsx         # Sesi login, token JWT, peran Superadmin/Admin
-│   ├── hooks/                      # Kustom React Hooks
-│   │   ├── useLiveQuestions.ts     # Langganan WebSocket pertanyaan On-Air
-│   │   ├── useOnAirProgram.ts      # Kalkulasi program sedang mengudara (WIB)
-│   │   └── useIcecastStatus.ts     # Pengecekan status ketersediaan aliran audio
-│   ├── lib/                        # Utilitas & integrasi pihak ketiga
-│   │   ├── supabase.ts             # Inisialisasi klien Supabase BaaS
-│   │   ├── analytics.ts            # Pembungkus pelacakan GA4
-│   │   └── utils.ts                # Pemformat tanggal Indonesia, kalkulasi durasi
-│   ├── pages/                      # Halaman rute utama aplikasi
-│   │   ├── HomePage.tsx            # Beranda (/)
-│   │   ├── SchedulePage.tsx        # Jadwal Siaran 24 Jam (/jadwal)
-│   │   ├── ProgramPage.tsx         # Katalog Program & Siniar (/program)
-│   │   ├── SeriesDetailPage.tsx    # Detail Seri (/program/:slug)
-│   │   ├── EpisodeDetailPage.tsx   # Detail Episode (/program/:slug/:episodeSlug)
-│   │   ├── SearchPage.tsx          # Hasil Pencarian (/cari)
-│   │   ├── AboutPage.tsx           # Tentang WBS (/tentang)
-│   │   ├── ContactPage.tsx         # Kontak Layanan (/kontak)
-│   │   ├── PrivacyPage.tsx         # Kebijakan Privasi (/kebijakan-privasi)
-│   │   ├── NotFoundPage.tsx        # Halaman 404
-│   │   └── admin/                  # Modul Panel Pengelola (/admin/*)
-│   │       ├── DashboardPage.tsx
-│   │       ├── ManageSchedulePage.tsx
-│   │       ├── ManageSeriesPage.tsx
-│   │       ├── ManageEpisodesPage.tsx
-│   │       ├── ManageOnAirPage.tsx
-│   │       ├── ManageEventsPage.tsx
-│   │       ├── ManageStaticPages.tsx
-│   │       ├── ManageUsersPage.tsx
-│   │       ├── ReportsPage.tsx
-│   │       └── SiteSettingsPage.tsx
-│   ├── types/                      # Definisi tipe TypeScript
-│   │   ├── index.ts
-│   │   └── supabase.ts             # Tipe skema otomatis dari database Supabase
-│   ├── App.tsx                     # Rute utama & penyusunan Layout
-│   ├── main.tsx                    # Titik masuk eksekusi React DOM
-│   └── index.css                   # Direktif Tailwind CSS & tipografi baku
+│   ├── components/                 # Komponen antarmuka modular per fitur
+│   │   ├── admin/                  # AdminLayout, AdminRoute, StatCard, formulir admin
+│   │   ├── artikel/                # Editor kaya, tampilan & pratinjau artikel
+│   │   ├── catalog/                # SeriCard, EpisodeCard, CategoryFilter, YouTubeFacade
+│   │   ├── common/                 # Header, Footer, Breadcrumbs, StateBox, Toast
+│   │   ├── home/                   # HeroOnAir, ProgramUnggulan, VideoTerbaru, dll.
+│   │   ├── interaction/            # ChatModal
+│   │   └── player/                 # PersistentPlayer (audio lintas halaman)
+│   ├── context/                    # AudioContext, AuthContext, NotifikasiContext
+│   ├── hooks/                      # useOnAirProgram, useRealtimeChat, useSesiChatAktif, dll.
+│   ├── pages/                      # Halaman publik & modul admin (/admin/*)
+│   ├── services/                   # Klien Supabase, katalog, artikel, chat, GA4
+│   ├── types/                      # Definisi tipe database, chat, dan laporan
+│   ├── utils/                      # WIB, sanitasi HTML, formatter, CSV
+│   ├── App.tsx                     # Rute utama & susunan layout
+│   ├── index.css                   # Direktif Tailwind & token resmi Perpusnas
+│   └── main.tsx                    # Titik masuk React DOM
+├── supabase/
+│   ├── schema.sql                  # Skema lengkap untuk instalasi baru
+│   ├── migrations/                 # Migrasi bertahap 001–007
+│   ├── functions/                  # Edge Function Supabase
+│   └── config.toml
+├── .env.example
+├── AGENTS.md                       # Instruksi operasional & guardrails proyek
+├── CLAUDE.md                       # Penunjuk singkat ke AGENTS.md
+├── README.md
 ├── index.html                      # Template dokumen HTML root
 ├── package.json                    # Konfigurasi dependensi Node.js
-├── tailwind.config.js              # Konfigurasi token warna & tipografi Perpusnas
+├── postcss.config.js
+├── tailwind.config.js              # Konfigurasi token warna Perpusnas
 ├── tsconfig.json                   # Konfigurasi kompilasi TypeScript
 └── vite.config.ts                  # Konfigurasi bundler Vite
 ```
