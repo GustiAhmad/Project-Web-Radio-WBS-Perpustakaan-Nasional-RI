@@ -15,6 +15,8 @@ import { ujiKoneksiSupabase } from './services/supabase'
 
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const AcaraDetailPage = lazy(() => import('./pages/AcaraDetailPage'))
+const ArtikelDetailPage = lazy(() => import('./pages/ArtikelDetailPage'))
+const BeritaPage = lazy(() => import('./pages/BeritaPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const EpisodeDetailPage = lazy(() => import('./pages/EpisodeDetailPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
@@ -25,6 +27,9 @@ const SearchPage = lazy(() => import('./pages/SearchPage'))
 const SeriesDetailPage = lazy(() => import('./pages/SeriesDetailPage'))
 const VideoTerbaruPage = lazy(() => import('./pages/VideoTerbaruPage'))
 const AdminAcaraPage = lazy(() => import('./pages/admin/AdminAcaraPage'))
+const AdminArtikelPage = lazy(() => import('./pages/admin/AdminArtikelPage'))
+const AdminArtikelFormPage = lazy(() => import('./pages/admin/AdminArtikelFormPage'))
+const AdminArtikelPratinjauPage = lazy(() => import('./pages/admin/AdminArtikelPratinjauPage'))
 const AdminChatPage = lazy(() => import('./pages/admin/AdminChatPage'))
 const AdminChatRiwayatPage = lazy(() => import('./pages/admin/AdminChatRiwayatPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
@@ -73,6 +78,8 @@ function KontenAplikasi() {
               <Route path="/program" element={<ProgramListPage />} />
               <Route path="/program/:seriSlug" element={<SeriesDetailPage />} />
               <Route path="/program/:seriSlug/:episodeSlug" element={<EpisodeDetailPage />} />
+              <Route path="/berita" element={<BeritaPage />} />
+              <Route path="/berita/:slug" element={<ArtikelDetailPage />} />
               <Route path="/cari" element={<SearchPage />} />
               <Route path="/tentang" element={<AboutPage />} />
               <Route path="/kontak" element={<ContactPage />} />
@@ -99,6 +106,10 @@ function KontenAplikasi() {
                 <Route path="seri/baru" element={<AdminSeriFormPage />} />
                 <Route path="acara" element={<AdminAcaraPage />} />
                 <Route path="halaman" element={<AdminHalamanPage />} />
+                <Route path="artikel" element={<AdminArtikelPage />} />
+                <Route path="artikel/baru" element={<AdminArtikelFormPage />} />
+                <Route path="artikel/:id/edit" element={<AdminArtikelFormPage />} />
+                <Route path="artikel/pratinjau/:id" element={<AdminArtikelPratinjauPage />} />
                 <Route path="penyiar" element={<AdminPenyiarPage />} />
                 <Route path="pengguna" element={<AdminPenggunaPage />} />
                 <Route path="laporan-error" element={<AdminLaporanErrorPage />} />

@@ -31,12 +31,12 @@ Setelah Tahap 11, GA4 juga menjawab menu mana yang paling sering diklik, episode
 
 ## 3. Event yang tersedia
 
-Tabel ini adalah daftar statistik yang tersedia setelah Tahap 11.
+Tabel ini adalah daftar statistik yang tersedia setelah Tahap 12.
 
 | Nama event | Dipicu saat | Parameter | Pertanyaan yang dijawab |
 |---|---|---|---|
 | `page_view` | Rute publik berubah *(sudah ada)* | `page_path` | Halaman mana yang paling banyak dibuka |
-| `menu_click` | Pengunjung mengklik menu Beranda, Jadwal, Program, Tentang, atau Kontak (Berita menyusul di Tahap 12) | `menu_label`, `menu_tujuan`, `posisi` (`header`/`footer`) | **Menu mana yang paling sering diklik publik** |
+| `menu_click` | Pengunjung mengklik salah satu dari keenam menu: Beranda, Jadwal, Program, Berita, Tentang, atau Kontak | `menu_label`, `menu_tujuan`, `posisi` (`header`/`footer`) | **Menu mana yang paling sering diklik publik** |
 | `masuk_click` | Tombol **Masuk** di header diklik | `posisi` | Seberapa sering pengelola mengakses panel dari situs publik |
 | `radio_play` | Tombol putar siaran ditekan *(sudah ada)* | `sumber` | Berapa kali siaran dimulai |
 | `radio_pause` | Tombol jeda ditekan | — | Berapa kali siaran dijeda |
@@ -48,6 +48,9 @@ Tabel ini adalah daftar statistik yang tersedia setelah Tahap 11.
 | `acara_view` | Detail acara mendatang dibuka | `acara_id`, `kanal` | Minat terhadap acara dan kanalnya |
 | `cari` | Form pencarian dikirim | `jumlah_hasil`, opsional `kata_kunci` | Istilah apa yang dicari pemustaka, dan berapa yang gagal |
 | `video_halaman` | Tombol Sebelumnya/Berikutnya di Video Terbaru ditekan | `halaman`, `arah` | Seberapa jauh pengunjung menjelajah katalog 331 video |
+| `artikel_filter` | Tab kategori di halaman Berita & Artikel dipilih | `kategori` | Kategori berita, artikel, atau pengumuman mana yang paling diminati |
+| `artikel_halaman` | Tombol Sebelumnya/Berikutnya di Berita & Artikel ditekan | `halaman`, `kategori` | Seberapa jauh pengunjung menjelajah daftar tulisan |
+| `artikel_view` | Halaman detail artikel/berita dibuka | `artikel_slug`, `kategori` | Tulisan mana yang paling banyak dibaca |
 | `chat_sesi_dibuka` | Tombol chat muncul di pemutar karena petugas membuka sesi | — | Berapa sesi chat live yang diadakan |
 | `chat_sesi_ditutup` | Tombol chat hilang setelah sesi ditutup | — | Berapa sesi yang berakhir |
 | `chat_dibuka` | Pemustaka membuka modal chat | `nama_sesi` | Seberapa sering modal chat dibuka |
@@ -67,8 +70,9 @@ Di GA4: **Admin → Custom definitions → Create custom dimension**.
 | `Kategori Seri` | Event | `kategori` |
 | `Halaman Tujuan` | Event | `halaman_tujuan` |
 | `Nama Sesi Chat` | Event | `nama_sesi` |
+| `Artikel` | Event | `artikel_slug` |
 
-Tanpa pendaftaran ini, parameter tetap masuk ke payload tetapi tidak bisa dipakai sebagai grup pada laporan.
+Parameter `kategori` pada event artikel memakai dimensi `Kategori Seri` yang sudah terdaftar; nama dimensinya tetap dipakai untuk laporan katalog, jadi beri filter event `artikel_*` saat memisahkan kategori artikel. Tanpa pendaftaran dimensi, parameter tetap masuk ke payload tetapi tidak bisa dipakai sebagai grup pada laporan.
 
 ## 5. Laporan dan statistik yang bisa dibuat
 
@@ -77,7 +81,7 @@ Tanpa pendaftaran ini, parameter tetap masuk ke payload tetapi tidak bisa dipaka
 - **Event:** `menu_click`
 - **Dimensi:** `Menu`, `Posisi Menu`
 - **Metrik:** Event count
-- **Hasil:** Peringkat 5 menu utama. Menjawab langsung permintaan Anda. Bisa dibandingkan antara header desktop dan footer.
+- **Hasil:** Peringkat 6 menu utama. Menjawab langsung permintaan Anda. Bisa dibandingkan antara header desktop dan footer.
 
 ### 5.2 Katalog paling diminati
 
@@ -117,6 +121,13 @@ Tanpa pendaftaran ini, parameter tetap masuk ke payload tetapi tidak bisa dipaka
 - **Event:** `radio_error`, `video_halaman`, `page_view`
 - **Hasil:** Halaman dengan tinggal keluar tertinggi, seberapa dalam pengunjung menjelajah katalog, dan gangguan audio yang muncul.
 
+### 5.8 Artikel & berita paling dibaca
+
+- **Event:** `artikel_filter`, `artikel_halaman`, `artikel_view`
+- **Dimensi:** `Artikel`, `Kategori Seri` (dari parameter `kategori` pada event artikel)
+- **Metrik:** Event count, pengguna aktif
+- **Hasil:** Tulisan dan kategori yang paling banyak dibaca, sekaligus minat terhadap kategori pengumuman.
+
 ## 6. Status penerapan
 
 | Langkah | Isi | Status |
@@ -126,9 +137,10 @@ Tanpa pendaftaran ini, parameter tetap masuk ke payload tetapi tidak bisa dipaka
 | 3 | Pasang atribut pelacakan pada Header, Footer, dan tombol Masuk | Selesai di Tahap 10 |
 | 4 | Pasang event katalog pada `EpisodeCard`, `SeriesDetailPage`, `AcaraDetailPage`, `VideoTerbaruPage` | Selesai di Tahap 10 |
 | 5 | Pasang event pada `PersistentPlayer`, `YouTubeFacade`, dan `QnAForm` | Selesai di Tahap 10; `QnAForm` digantikan `ChatModal` dan `useSesiChatAktif` di Tahap 11 |
-| 6 | Daftarkan dimensi kustom di GA4, lalu susun laporan 5.1–5.7 | Menunggu ID GA4 aktif; dilakukan di antarmuka GA4 |
+| 6 | Daftarkan dimensi kustom di GA4, lalu susun laporan 5.1–5.8 | Menunggu ID GA4 aktif; dilakukan di antarmuka GA4 |
+| 7 | Pasang event artikel pada `BeritaPage` dan `ArtikelDetailPage` | Selesai di Tahap 12 |
 
-Langkah 2–5 sudah menyertakan kode Tahap 10 dan penyesuaian chat Tahap 11. Langkah 6 baru bisa dilakukan setelah ID pengukuran terisi.
+Langkah 2–5 sudah menyertakan kode Tahap 10 dan penyesuaian chat Tahap 11; langkah 7 menambah event artikel Tahap 12. Langkah 6 baru bisa dilakukan setelah ID pengukuran terisi.
 
 ## 7. Kriteria selesai
 
@@ -141,7 +153,7 @@ Langkah 2–5 sudah menyertakan kode Tahap 10 dan penyesuaian chat Tahap 11. Lan
 
 ## 8. Cara melihat GA4 DebugView (dilaksanakan saat go-live)
 
-DebugView hanya menampilkan event dari perangkat yang mengirim mode debug. Setelah situs live, tambahkan `?ga4_debug=1` pada alamat halaman publik. Panduan ini tidak menjadi bagian uji Tahap 10 maupun Tahap 11.
+DebugView hanya menampilkan event dari perangkat yang mengirim mode debug. Setelah situs live, tambahkan `?ga4_debug=1` pada alamat halaman publik. Panduan ini tidak menjadi bagian uji Tahap 10, Tahap 11, maupun Tahap 12.
 
 1. Saat go-live, pastikan ID GA4 terisi. Buka `/admin/pengaturan` sebagai Superadmin, isi **ID Pengukuran** dengan format `G-XXXXXXXXXX`, aktifkan analitik, lalu simpan. Cara lain: isi `VITE_GA_MEASUREMENT_ID` pada berkas `.env` sebelum build.
 2. Buka alamat situs publik yang sudah live di Chrome. Klik menu **Beranda**, **Jadwal**, **Program**, **Berita**, **Tentang**, dan **Kontak** secara bergantian. Klik juga tombol putar radio, lalu buka modal chat bila sesi sedang aktif.

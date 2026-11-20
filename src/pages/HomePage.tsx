@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { CalendarDays, Radio, Youtube } from 'lucide-react'
+import { Radio, Youtube } from 'lucide-react'
 import AcaraMendatang from '../components/home/AcaraMendatang'
+import ArtikelTerbaru from '../components/home/ArtikelTerbaru'
 import HeroOnAir from '../components/home/HeroOnAir'
 import OnAirPersonalities from '../components/home/OnAirPersonalities'
 import ProgramUnggulan from '../components/home/ProgramUnggulan'
@@ -47,19 +48,8 @@ export default function HomePage() {
         <OnAirPersonalities />
         <VideoTerbaru />
         <ProgramUnggulan />
+        <ArtikelTerbaru />
       </div>
-
-      <aside className="mt-12 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-perpusnas-blue-light p-6">
-        <div className="flex items-center gap-3">
-          <CalendarDays size={22} aria-hidden="true" className="text-perpusnas-blue" />
-          <p className="text-sm text-perpusnas-gray-900">
-            Ingin tahu apa yang mengudara hari ini? Lihat jadwal siaran 24 jam.
-          </p>
-        </div>
-        <Link to="/jadwal" className="rounded-full bg-perpusnas-blue px-5 py-2 text-sm font-semibold text-white hover:bg-perpusnas-blue-dark">
-          Lihat jadwal
-        </Link>
-      </aside>
     </div>
   )
 }

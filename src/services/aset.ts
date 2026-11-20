@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-export type FolderAset = 'poster-acara' | 'seri' | 'penyiar' | 'profil'
+export type FolderAset = 'poster-acara' | 'seri' | 'penyiar' | 'profil' | 'artikel'
 
 const BUCKET = 'aset-wbs'
 const MIME_DIBENARKAN = ['image/jpeg', 'image/png']
@@ -30,4 +30,15 @@ export async function unggahGambar(folder: FolderAset, id: string, berkas: File)
 
 export function terimaBerkas(berkas: File | undefined): boolean {
   return !!berkas && MIME_DIBENARKAN.includes(berkas.type) && berkas.size <= UKURAN_MAKSIMAL
+}
+
+/** Hapus objek berdasarkan jalur penuh yang tersimpan di basis data. */
+export async function hapusGambar(jalur: string): Promise<void> {
+  if (!supabase || !jalur) return
+  const { error } = await supabase.storage.from(BUCKET).remove([jalur])
+  if (error) throw new Error(`Gagal menghapus gambar: ${error.message}`)
+}
+
+export function jalurGambar(folder: FolderAset, id: string, berkas: File): string {
+  return `${folder}/${id}.${berkas.type === 'image/png' ? 'png' : 'jpg'}`
 }

@@ -22,6 +22,105 @@
   }
 }
 
+@layer components {
+  /* Gaya isi artikel dipakai bersama oleh halaman publik dan editor. */
+  .isi-artikel {
+    @apply text-[15px] leading-8 text-perpusnas-gray-900;
+  }
+
+  .isi-artikel p {
+    @apply mb-5 text-justify;
+  }
+
+  .isi-artikel h2 {
+    @apply mb-4 mt-9 border-b border-perpusnas-blue/15 pb-2 text-2xl font-bold text-perpusnas-blue;
+  }
+
+  .isi-artikel h3 {
+    @apply mb-3 mt-7 text-xl font-bold text-perpusnas-blue;
+  }
+
+  .isi-artikel a {
+    @apply font-medium text-blue-700 underline decoration-2 underline-offset-2 hover:text-blue-900;
+  }
+
+  .isi-artikel ul {
+    @apply my-5 list-disc space-y-2 pl-7;
+  }
+
+  .isi-artikel ol {
+    @apply my-5 list-decimal space-y-2 pl-7;
+  }
+
+  .isi-artikel li {
+    @apply text-justify;
+  }
+
+  .isi-artikel blockquote {
+    @apply my-6 border-l-4 border-perpusnas-gold bg-perpusnas-gold-light px-5 py-3 italic text-perpusnas-gray-900;
+  }
+
+  .isi-artikel blockquote p:last-child {
+    @apply mb-0;
+  }
+
+  .isi-artikel figure {
+    @apply my-7 flex flex-col items-center;
+  }
+
+  .isi-artikel figure img {
+    @apply max-w-full rounded-lg shadow-sm;
+  }
+
+  .isi-artikel figcaption {
+    @apply mt-3 text-center text-sm italic text-perpusnas-gray-600;
+  }
+
+  .isi-artikel figcaption:empty::before {
+    content: attr(data-placeholder);
+    @apply text-perpusnas-gray-600;
+    pointer-events: none;
+  }
+
+  .isi-artikel > img {
+    @apply mx-auto my-7 block max-w-full rounded-lg shadow-sm;
+  }
+
+  .isi-artikel table {
+    @apply my-6 w-full border-collapse text-sm;
+  }
+
+  .isi-artikel th {
+    @apply border border-perpusnas-blue/20 bg-perpusnas-blue-light px-3 py-2 text-left font-bold text-perpusnas-blue;
+  }
+
+  .isi-artikel td {
+    @apply border border-perpusnas-blue/20 px-3 py-2 align-top;
+  }
+
+  .isi-artikel hr {
+    @apply my-9 border-0 border-t border-perpusnas-blue/20;
+  }
+
+  .isi-artikel code {
+    @apply rounded bg-perpusnas-gray-100 px-1 py-0.5 font-mono text-sm;
+  }
+
+  .isi-artikel pre {
+    @apply my-5 overflow-x-auto rounded-lg bg-perpusnas-gray-900 p-4 text-white;
+  }
+
+  .isi-artikel pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+
+  .isi-artikel p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply float-left h-0 text-perpusnas-gray-600;
+    pointer-events: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

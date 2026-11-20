@@ -462,6 +462,63 @@ export type Database = {
         }
         Relationships: []
       }
+      artikel: {
+        Row: {
+          id: string
+          judul: string
+          slug: string
+          kategori: Database['public']['Enums']['kategori_artikel']
+          ringkasan: string
+          isi: string
+          gambar_path: string | null
+          gambar_url: string | null
+          teks_alternatif: string | null
+          status: Database['public']['Enums']['status_publikasi']
+          penulis: string
+          diterbitkan_pada: string | null
+          dibuat_pada: string
+          dibuat_oleh: string | null
+          diubah_pada: string
+          diubah_oleh: string | null
+        }
+        Insert: {
+          id?: string
+          judul: string
+          slug: string
+          kategori?: Database['public']['Enums']['kategori_artikel']
+          ringkasan: string
+          isi: string
+          gambar_path?: string | null
+          gambar_url?: string | null
+          teks_alternatif?: string | null
+          status?: Database['public']['Enums']['status_publikasi']
+          penulis: string
+          diterbitkan_pada?: string | null
+          dibuat_pada?: string
+          dibuat_oleh?: string | null
+          diubah_pada?: string
+          diubah_oleh?: string | null
+        }
+        Update: {
+          id?: string
+          judul?: string
+          slug?: string
+          kategori?: Database['public']['Enums']['kategori_artikel']
+          ringkasan?: string
+          isi?: string
+          gambar_path?: string | null
+          gambar_url?: string | null
+          teks_alternatif?: string | null
+          status?: Database['public']['Enums']['status_publikasi']
+          penulis?: string
+          diterbitkan_pada?: string | null
+          dibuat_pada?: string
+          dibuat_oleh?: string | null
+          diubah_pada?: string
+          diubah_oleh?: string | null
+        }
+        Relationships: []
+      }
       pengaturan_situs: {
         Row: {
           kunci: string
@@ -513,6 +570,7 @@ export type Database = {
       status_publikasi: 'draf' | 'terbit'
       status_sesi_chat: 'terbuka' | 'tertutup'
       status_chat_pesan: 'terlihat' | 'disembunyikan'
+      kategori_artikel: 'berita' | 'artikel' | 'pengumuman'
       kanal_acara: 'youtube' | 'zoom' | 'instagram' | 'tatap_muka' | 'lainnya'
       status_laporan: 'baru' | 'diproses' | 'selesai' | 'ditolak'
       tingkat_keparahan: 'rendah' | 'sedang' | 'tinggi' | 'kritis'
@@ -527,6 +585,9 @@ export type JadwalTetap = Database['public']['Tables']['jadwal_tetap']['Row']
 export type SesiChat = Database['public']['Tables']['sesi_chat']['Row']
 export type AcaraMendatang = Database['public']['Tables']['acara_mendatang']['Row']
 export type HalamanStatis = Database['public']['Tables']['halaman_statis']['Row']
+export type Artikel = Database['public']['Tables']['artikel']['Row']
+export type KategoriArtikel = Database['public']['Enums']['kategori_artikel']
+export type StatusPublikasi = Database['public']['Enums']['status_publikasi']
 export type ChatPesan = Database['public']['Tables']['chat_pesan']['Row']
 export type Pengguna = Database['public']['Tables']['pengguna']['Row']
 export type Penyiar = Database['public']['Tables']['penyiar']['Row']

@@ -49,6 +49,10 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+  CREATE TYPE kategori_artikel AS ENUM ('berita', 'artikel', 'pengumuman');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
   CREATE TYPE kanal_acara AS ENUM ('youtube', 'zoom', 'instagram', 'tatap_muka', 'lainnya');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -236,7 +240,36 @@ BEFORE UPDATE ON halaman_statis
 FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 
 -- ----------------------------------------------------------------------------
--- 9. TABEL PENGATURAN SITUS
+-- 9. TABEL ARTIKEL & BERITA
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS artikel (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    judul VARCHAR(200) NOT NULL,
+    slug VARCHAR(200) NOT NULL UNIQUE,
+    kategori kategori_artikel NOT NULL DEFAULT 'berita',
+    ringkasan VARCHAR(300) NOT NULL,
+    isi TEXT NOT NULL,
+    gambar_path TEXT,
+    gambar_url TEXT,
+    teks_alternatif VARCHAR(200),
+    status status_publikasi NOT NULL DEFAULT 'draf',
+    penulis VARCHAR(150) NOT NULL,
+    diterbitkan_pada TIMESTAMPTZ,
+    dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    dibuat_oleh VARCHAR(150),
+    diubah_pada TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    diubah_oleh VARCHAR(150),
+    CONSTRAINT ck_artikel_judul CHECK (char_length(btrim(judul)) BETWEEN 5 AND 200),
+    CONSTRAINT ck_artikel_ringkasan CHECK (char_length(btrim(ringkasan)) BETWEEN 20 AND 300),
+    CONSTRAINT ck_artikel_isi CHECK (char_length(btrim(isi)) >= 50),
+    CONSTRAINT ck_artikel_terbit_lengkap CHECK (status = 'draf' OR diterbitkan_pada IS NOT NULL)
+);
+
+-- Tidak ada trigger set_timestamp di sini: artikel memakai kolom diubah_pada,
+-- bukan updated_at. Service artikel mengisi diubah_pada pada setiap perubahan.
+
+-- ----------------------------------------------------------------------------
+-- 10. TABEL PENGATURAN SITUS
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pengaturan_situs (
     kunci VARCHAR(100) PRIMARY KEY,
@@ -283,6 +316,13 @@ CREATE INDEX IF NOT EXISTS idx_jadwal_terbit
 ON jadwal_tetap(hari, jam_mulai ASC)
 WHERE status = 'terbit';
 
+CREATE INDEX IF NOT EXISTS idx_artikel_terbit
+ON artikel(diterbitkan_pada DESC)
+WHERE status = 'terbit';
+
+CREATE INDEX IF NOT EXISTS idx_artikel_kategori
+ON artikel(kategori, diterbitkan_pada DESC);
+
 -- ----------------------------------------------------------------------------
 -- 2.3 INDEKS FULL-TEXT SEARCH (GIN, BAHASA INDONESIA)
 -- ----------------------------------------------------------------------------
@@ -304,6 +344,15 @@ GENERATED ALWAYS AS (
 
 CREATE INDEX IF NOT EXISTS idx_seri_fts ON seri USING GIN(search_vector);
 
+ALTER TABLE artikel ADD COLUMN IF NOT EXISTS search_vector tsvector
+GENERATED ALWAYS AS (
+  setweight(to_tsvector('indonesian', coalesce(judul, '')), 'A') ||
+  setweight(to_tsvector('indonesian', coalesce(ringkasan, '')), 'B') ||
+  setweight(to_tsvector('indonesian', coalesce(isi, '')), 'D')
+) STORED;
+
+CREATE INDEX IF NOT EXISTS idx_artikel_fts ON artikel USING GIN(search_vector);
+
 -- ----------------------------------------------------------------------------
 -- 2.4 PENGAKTIFAN ROW LEVEL SECURITY PADA SEMUA TABEL
 -- ----------------------------------------------------------------------------
@@ -315,6 +364,7 @@ ALTER TABLE acara_mendatang ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sesi_chat ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_pesan ENABLE ROW LEVEL SECURITY;
 ALTER TABLE halaman_statis ENABLE ROW LEVEL SECURITY;
+ALTER TABLE artikel ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pengaturan_situs ENABLE ROW LEVEL SECURITY;
 
 -- ----------------------------------------------------------------------------
@@ -540,7 +590,36 @@ USING (auth_is_staf())
 WITH CHECK (auth_is_staf());
 
 -- ----------------------------------------------------------------------------
--- 2.14 KEBIJAKAN RLS — PENGATURAN SITUS
+-- 2.14 KEBIJAKAN RLS — ARTIKEL & BERITA
+-- ----------------------------------------------------------------------------
+DROP POLICY IF EXISTS "Publik dapat membaca artikel terbit" ON artikel;
+CREATE POLICY "Publik dapat membaca artikel terbit"
+ON artikel FOR SELECT TO anon, authenticated
+USING (status = 'terbit' AND diterbitkan_pada IS NOT NULL AND diterbitkan_pada <= NOW());
+
+DROP POLICY IF EXISTS "Staf dapat membaca semua artikel" ON artikel;
+CREATE POLICY "Staf dapat membaca semua artikel"
+ON artikel FOR SELECT TO authenticated
+USING (auth_is_staf());
+
+DROP POLICY IF EXISTS "Staf dapat menambah artikel" ON artikel;
+CREATE POLICY "Staf dapat menambah artikel"
+ON artikel FOR INSERT TO authenticated
+WITH CHECK (auth_is_staf());
+
+DROP POLICY IF EXISTS "Staf dapat menyunting artikel" ON artikel;
+CREATE POLICY "Staf dapat menyunting artikel"
+ON artikel FOR UPDATE TO authenticated
+USING (auth_is_staf())
+WITH CHECK (auth_is_staf());
+
+DROP POLICY IF EXISTS "Staf dapat menghapus artikel" ON artikel;
+CREATE POLICY "Staf dapat menghapus artikel"
+ON artikel FOR DELETE TO authenticated
+USING (auth_is_staf());
+
+-- ----------------------------------------------------------------------------
+-- 2.15 KEBIJAKAN RLS — PENGATURAN SITUS
 -- ----------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Semua dapat membaca pengaturan umum website" ON pengaturan_situs;
 CREATE POLICY "Semua dapat membaca pengaturan umum website"

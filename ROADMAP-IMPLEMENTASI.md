@@ -21,7 +21,8 @@
 - [x] **Tahap 8:** Identitas Pengelola, Poster & Detail Acara, Gambar Seri, On-Air Personalities, dan Manajemen Akun *(Selesai, Review Gate 8 lolos)*
 - [x] **Tahap 9:** Perbaikan Hasil UAT Review Gate 8 *(Selesai, Review Gate 9 lolos)*
 - [x] **Tahap 10:** Notifikasi Error, Alur Kelola Episode, Penanda Data Kosong, Identitas Admin, dan Analitik GA4 *(Selesai, Review Gate 10 lolos — commit `c9b6391`)*
-- [ ] **Tahap 11:** Chat Live Terkelola, Inisiasi Sesi Manual, dan Moderasi Pesan *(Menunggu Review Gate 11)*
+- [x] **Tahap 11:** Chat Live Terkelola, Inisiasi Sesi Manual, dan Moderasi Pesan *(Selesai, Review Gate 11 lolos — commit `fc3295a`)*
+- [ ] **Tahap 12:** Artikel & Berita — Editor Kaya, Draf & Pratinjau, Kategori, Sampul, dan Halaman Publik *(Menunggu uji ulang perbaikan toolbar & input editor)*
 
 ---
 
@@ -370,9 +371,55 @@
   - `docs/12-rencana-analitik-ga4.md` memakai `chat_sesi_dibuka`, `chat_sesi_ditutup`, `chat_dibuka`, dan `chat_pesan_kirim`; aktivasi GA4 tetap ditunda sampai go-live.
 - [x] **11.6 Verifikasi Teknis**
   - `npm run type-check` dan `npm run build` lolos tanpa galat (termasuk setelah penambahan halaman riwayat tersendiri).
-- [ ] **11.7 Review Gate 11**
-  - Panduan uji bernomor disajikan pada percakapan Review Gate 11; menunggu konfirmasi `LOLOS` sebelum commit dan push.
+- [x] **11.7 Review Gate 11**
+  - Panduan uji bernomor disajikan pada percakapan Review Gate 11 dan dinyatakan `LOLOS` oleh pengguna setelah uji ulang halaman riwayat chat.
   - Uji meliputi: buka/tutup sesi, ikon muncul/hilang, realtime <2 detik di modal dan panel, sembunyi/hapus pesan, CSV, izin hapus riwayat Superadmin, audio persisten, serta lebar 360 px dan 1280 px.
+  - 404 pada `/admin/chat/riwayat/:id` ternyata berasal dari cache transform Vite, bukan rute; diatasi dengan menyentuh ulang `src/App.tsx`.
+  - Commit dan push dilakukan setelah persetujuan pengguna: `fc3295a`.
+
+---
+
+### TAHAP 12: Artikel & Berita — Editor Kaya, Draf & Pratinjau, Kategori, Sampul, dan Halaman Publik
+
+- [x] **12.1 Ruang Lingkup**
+  - Dokumen 01–10 tidak memuat spesifikasi artikel/berita. Ruang lingkup ditetapkan dari empat keputusan pengguna: 3 kategori tetap, Admin + Superadmin kelola penuh, sampul plus tampil di beranda, dan status draf dengan pratinjau.
+  - Kategori tetap: `berita`, `artikel`, `pengumuman`. Status memakai enum `status_publikasi` (`draf`/`terbit`).
+  - Tiga artikel terbaru tampil di beranda; artikel draf tidak pernah tampil ke publik.
+- [x] **12.2 Skema & Migrasi**
+  - `supabase-tahap12-artikel.sql` membuat enum `kategori_artikel`, tabel `artikel`, indeks `idx_artikel_terbit` dan `idx_artikel_kategori`, indeks GIN FTS bahasa Indonesia, serta RLS.
+  - Publik hanya membaca artikel terbit yang waktunya sudah tiba; Admin dan Superadmin membaca, menambah, menyunting, dan menghapus semua artikel.
+  - `supabase-schema.sql` diperbarui untuk instalasi baru. Sampul memakai bucket publik `aset-wbs` folder `artikel/`; tidak ada audio/video mentah yang disimpan.
+- [x] **12.3 Tipe, Sanitasi, dan Service**
+  - `database.types.ts` menambah `Artikel`, `KategoriArtikel`, `StatusPublikasi`, dan tabel `artikel`.
+  - `sanitasiHtml.ts` membatasi tag HTML dan memaksa tautan `noopener noreferrer nofollow`; `formatArtikel.ts` menyeragamkan label kategori dan tanggal WIB.
+  - `services/artikel.ts` menangani daftar publik, detail slug, daftar admin, validasi, slug unik, unggah/hapus sampul, status terbit, dan penghapusan. `services/aset.ts` diperluas dengan folder `artikel`, `jalurGambar`, dan `hapusGambar`.
+- [x] **12.4 Antarmuka Publik**
+  - `/berita` menampilkan filter 4 tab, 6 kartu per halaman, pagination yang mempertahankan kategori, `Breadcrumbs`, `Pemuatan`, dan `Kosong`.
+  - `/berita/:slug` menampilkan judul, kategori, penulis, tanggal, sampul, dan isi HTML yang sudah disanitasi; `artikel_view` dikirim sekali per artikel.
+  - `ArtikelTerbaru` menampilkan 3 artikel terbit terbaru di beranda dan tidak merender blok saat belum ada artikel.
+  - Menu **Berita** menjadi menu ke-6 di Header dan Tautan Cepat Footer dengan `menu_click` yang konsisten.
+  - `ArtikelTampil` memakai gaya `.isi-artikel`: paragraf renggang dan rata kanan-kiri, H2/H3 menonjol, tautan biru, gambar di tengah dengan keterangan, kutipan, tabel, dan garis horizontal.
+  - Blok ajakan "Ingin tahu apa yang mengudara hari ini?" dihapus dari beranda sesuai catatan Review Gate 12.
+- [x] **12.5 Panel Pengelola**
+  - Menu "Artikel & Berita" tersedia untuk Admin dan Superadmin di `AdminLayout`.
+  - `/admin/artikel` menyaring Draf/Terbit, menerbitkan atau menarik artikel, dan menghapus dengan konfirmasi.
+  - `/admin/artikel/baru` dan `/admin/artikel/:id/edit` memakai editor Tiptap lengkap: Paragraf/H2/H3, Tebal, Miring, Garis bawah, Coret, empat pilihan alignment, daftar poin/bernomor, Kutipan, Sisipkan tautan, Sisipkan gambar dengan keterangan, Sisipkan tabel dengan tambah baris/kolom, Garis horizontal, Urungkan, dan Ulangi; tiga aksi simpan: Draf, Pratinjau, dan Terbitkan.
+  - Toolbar editor melekat (`sticky top-16`) tepat di bawah header admin, sehingga format teks tetap bisa diklik tanpa menggulir ke atas.
+  - Tombol tabel membuka pemilih ukuran 8 × 8; tabel baru disisipkan setelah pengguna memilih jumlah kolom dan baris.
+  - Input alamat tautan tampil sebagai kolom di bawah toolbar, bukan kotak notifikasi browser; tersedia Terapkan, Hapus, dan Batal.
+  - Gambar artikel memakai node `gambarBerketerangan` dengan NodeView: kolom keterangan langsung tersedia di bawah gambar di editor dan tersimpan sebagai `figcaption` yang tampil di tengah pada halaman publik.
+  - `/admin/artikel/pratinjau/:id` menampilkan artikel persis seperti tampilan publik beserta status draf/terbit dan tautan ke situs bila sudah terbit.
+  - `AdminPengaturanPage` memasukkan tabel `artikel` ke unduhan cadangan.
+- [x] **12.6 Analitik & Dokumen**
+  - `docs/12-rencana-analitik-ga4.md` menambah `artikel_filter`, `artikel_halaman`, dan `artikel_view`; `menu_click` kini mencakup Berita.
+  - `PANDUAN-SETUP-SUPABASE.md` memuat langkah migrasi Tahap 12 dan jumlah tabel terbaru.
+- [x] **12.7 Verifikasi Teknis**
+  - `npm run type-check` dan `npm run build` lolos tanpa galat setelah perbaikan editor dan gaya artikel.
+- [x] **12.8 Review Gate 12**
+  - Review Gate 12 dinyatakan `LOLOS` oleh pengguna setelah uji awal dan dua kali uji ulang terfokus. Perbaikan editor dan tampilan artikel sudah diverifikasi; commit dan push menunggu persetujuan pengguna.
+  - Uji awal meliputi: migrasi SQL, draf tidak tampil publik, pratinjau, terbitkan, filter kategori, pagination, 3 artikel di beranda, sanitasi HTML, peran Admin/Superadmin, serta lebar 360 px dan 1280 px.
+  - Uji ulang pertama meliputi: toolbar editor lengkap, spasi dan alignment paragraf, H2/H3, tautan biru, gambar tengah berketerangan, kutipan, tabel, garis horizontal, dan hilangnya blok ajakan jadwal di beranda.
+  - Uji ulang kedua meliputi: toolbar melekat saat gulir, pemilih ukuran tabel, kolom keterangan gambar di bawah gambar, dan kolom alamat tautan di bawah toolbar.
 
 ---
 

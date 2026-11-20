@@ -77,7 +77,7 @@ WHERE schemaname = 'public'
 ORDER BY tablename;
 ```
 
-Kolom `rowsecurity` harus `true` untuk kesembilan tabel.
+Kolom `rowsecurity` harus `true` untuk kesepuluh tabel, termasuk `artikel`.
 
 ## 5b. Pasang Chat live (Tahap 11)
 
@@ -100,11 +100,27 @@ Realtime diaktifkan otomatis pada `sesi_chat` dan `chat_pesan` oleh skrip di ata
 2. Salih seluruh isi berkas `supabase-admin-tahap6.sql`, lalu klik **Run**. Berkas ini menambah kolom `nama_penyiar` pada `jadwal_tetap`.
 3. Buat query baru, salih seluruh isi berkas `supabase-laporan-error.sql`, lalu klik **Run**.
 4. Periksa **Storage**. Harus ada bucket privat bernama `laporan-error` dengan batas 2 MB dan tiga jenis MIME gambar.
-5. Periksa kembali `pg_tables`. Sekarang ada 10 tabel dengan `rowsecurity = true` (9 dari skema utama ditambah `laporan_error`).
+5. Periksa kembali `pg_tables`. Sekarang ada 11 tabel dengan `rowsecurity = true` (10 dari skema utama ditambah `laporan_error`).
 
 Screenshot laporan disimpan di bucket privat. Superadmin membuka gambar lewat tautan bertanda tangan yang hanya berlaku dua menit. Tidak ada audio atau video mentah yang disimpan di server.
 
 Penanda `interaktif` pada `jadwal_tetap` tetap dipakai untuk menampilkan program on-air, bukan untuk membatasi chat. Sejak Tahap 11, sesi chat berdiri sendiri dan dibuka dari `/admin/chat` cukup dengan nama sesi — tanpa kaitan dengan jadwal maupun durasi acara.
+
+## 5d. Pasang Artikel & Berita (Tahap 12)
+
+Untuk basis data yang sudah berjalan sebelum Tahap 12, jalankan migrasi ini. Skrip membuat enum `kategori_artikel`, tabel `artikel`, indeks pencarian teks bahasa Indonesia, dan kebijakan RLS. Data tabel lain tidak diubah.
+
+1. Di **SQL Editor**, klik **New query**.
+2. Salih seluruh isi berkas `supabase-tahap12-artikel.sql` ke editor, lalu klik **Run**.
+3. Periksa hasil: tidak boleh ada pesan galat merah.
+4. Ulangi kueri `pg_tables` dari bab 2. Pastikan `artikel` muncul dengan `rowsecurity = true`.
+5. Buka **Storage** → bucket `aset-wbs`. Sampul artikel disimpan di folder `artikel/` dengan batas 2 MB dan format JPG/PNG; tidak perlu membuat bucket atau kebijakan baru.
+
+Bila proyek dibuat dari `supabase-schema.sql` versi terbaru, langkah 1–3 **tidak perlu** — tabel `artikel` sudah termasuk di dalam skema.
+
+> Perbaikan: skrip Tahap 12 tidak memasang `set_timestamp_artikel` karena tabel ini memakai kolom `diubah_pada`, bukan `updated_at`. Trigger lama yang menulis `NEW.updated_at` akan menggagalkan setiap perubahan dengan pesan `record "new" has no field "updated_at"`. Jalankan ulang skrip yang sudah diperbarui, atau cukup jalankan `DROP TRIGGER IF EXISTS set_timestamp_artikel ON public.artikel;` di SQL Editor.
+
+Publik hanya melihat artikel berstatus `terbit` yang waktunya sudah tiba. Admin dan Superadmin sama-sama membuat, menyunting, menerbitkan, dan menghapus artikel. Draf hanya bisa dilihat lewat pratinjau di panel `/admin/artikel`.
 
 ## 6. Buat akun pengelola pertama
 

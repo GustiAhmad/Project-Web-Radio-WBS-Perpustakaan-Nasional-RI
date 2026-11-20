@@ -96,6 +96,7 @@ export default function AdminPengaturanPage() {
       'sesi_chat',
       'chat_pesan',
       'halaman_statis',
+      'artikel',
       'pengaturan_situs',
       'laporan_error',
     ] as const

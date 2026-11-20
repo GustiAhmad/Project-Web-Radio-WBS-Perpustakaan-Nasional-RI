@@ -39,6 +39,9 @@ export default function Footer() {
               <Link className="hover:text-white" to="/program" onClick={() => lacakKlikMenu('Jelajah Program', '/program', 'footer')}>Jelajah Program</Link>
             </li>
             <li>
+              <Link className="hover:text-white" to="/berita" onClick={() => lacakKlikMenu('Berita & Artikel', '/berita', 'footer')}>Berita &amp; Artikel</Link>
+            </li>
+            <li>
               <Link className="hover:text-white" to="/tentang" onClick={() => lacakKlikMenu('Tentang WBS', '/tentang', 'footer')}>Tentang WBS</Link>
             </li>
             <li>

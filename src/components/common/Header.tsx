@@ -7,6 +7,7 @@ const navigasi = [
   { label: 'Beranda', ke: '/' },
   { label: 'Jadwal', ke: '/jadwal' },
   { label: 'Program', ke: '/program' },
+  { label: 'Berita', ke: '/berita' },
   { label: 'Tentang', ke: '/tentang' },
   { label: 'Kontak', ke: '/kontak' },
 ]
