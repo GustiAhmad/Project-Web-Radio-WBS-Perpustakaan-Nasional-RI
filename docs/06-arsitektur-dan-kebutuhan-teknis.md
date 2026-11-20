@@ -1,6 +1,8 @@
 # Arsitektur dan Kebutuhan Teknis
 ## Website Radio & Siniar WBS Perpusnas
 
+> **Catatan Tahap 11:** Contoh DDL dan RLS di dokumen ini masih memakai tabel `sesi_onair`/`pertanyaan`. Sumber kebenaran terkini adalah `supabase-schema.sql` dan `supabase-tahap11-chat.sql`, yang memakai `sesi_chat` dan `chat_pesan`.
+
 | Keterangan | Isi |
 |---|---|
 | **Nomor Dokumen** | 06 |

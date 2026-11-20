@@ -20,7 +20,8 @@
 - [x] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Selesai, Review Gate 7 lolos)*
 - [x] **Tahap 8:** Identitas Pengelola, Poster & Detail Acara, Gambar Seri, On-Air Personalities, dan Manajemen Akun *(Selesai, Review Gate 8 lolos)*
 - [x] **Tahap 9:** Perbaikan Hasil UAT Review Gate 8 *(Selesai, Review Gate 9 lolos)*
-- [ ] **Tahap 10:** Notifikasi Error, Alur Kelola Episode, Penanda Data Kosong, Identitas Admin, dan Analitik GA4 *(Menunggu Review Gate 10)*
+- [x] **Tahap 10:** Notifikasi Error, Alur Kelola Episode, Penanda Data Kosong, Identitas Admin, dan Analitik GA4 *(Selesai, Review Gate 10 lolos — commit `c9b6391`)*
+- [ ] **Tahap 11:** Chat Live Terkelola, Inisiasi Sesi Manual, dan Moderasi Pesan *(Menunggu Review Gate 11)*
 
 ---
 
@@ -327,8 +328,8 @@
   - Keputusan Review Gate 10: kode siap, aktivasi GA4 ditunda sampai website live untuk publik. Tanpa ID Pengukuran tidak ada event yang dikirim.
 - [x] **10.7 Verifikasi Teknis**
   - `npm run type-check` dan `npm run build` lolos tanpa galat.
-- [ ] **10.8 Review Gate 10**
-  - Panduan uji bernomor disajikan pada percakapan Review Gate 10; menunggu konfirmasi `LOLOS` sebelum commit dan push.
+- [x] **10.8 Review Gate 10**
+  - Panduan uji bernomor disajikan pada percakapan Review Gate 10 dan dinyatakan `LOLOS` oleh pengguna; commit `c9b6391` sudah di-push.
   - Putaran 1 — episode tayang tidak bisa dihapus karena RLS `DELETE` hanya mengizinkan superadmin menghapus draf. Tombol diubah menjadi **Arsipkan** (UPDATE ke `arsip_internal`), dan `ambilEpisode()` ikut memfilter `status = 'tayang'`.
   - Putaran 1 — Kelola Seri belum memiliki tambah/hapus seri. Ditambahkan tombol **Tambah Seri** dan **Hapus Seri**; saat seri dihapus, video dipindahkan ke **Lainnya** dengan `nomor_episode = null` dan notifikasi menyebut jumlah video yang dipindahkan.
   - Putaran 1 — semua kolom form seri kini punya judul terlihat di atas kolom: nama, deskripsi, gambar, teks alternatif, kategori, urutan, dan penanda unggulan.
@@ -336,6 +337,42 @@
   - Putaran 2 — tombol **Tambah Seri** mengarah ke halaman baru `/admin/seri/baru`, mengikuti pola `/admin/episode/baru`. Daftar dan sunting tetap di `/admin/seri`.
   - Putaran 2 — validasi, unggah gambar, dan penulisan seri dipindah ke `src/services/seri.ts`; form bersama dipakai halaman daftar dan halaman tambah.
   - Putaran 2 — GA4 tidak diuji pada Tahap 10; aktivasi dan DebugView dilakukan setelah situs live.
+
+---
+
+### TAHAP 11: Chat Live Terkelola, Inisiasi Sesi Manual, dan Moderasi Pesan
+
+- [x] **11.1 Skema & Migrasi Chat**
+  - Tabel lama `sesi_onair` dan `pertanyaan` dihapus beserta datanya; tidak ada migrasi data lama.
+  - Tabel baru `sesi_chat` dan `chat_pesan` dengan enum `status_sesi_chat` dan `status_chat_pesan`.
+  - `supabase-tahap11-chat.sql` untuk migrasi; `supabase-schema.sql` diperbarui untuk fresh install.
+  - RLS: publik hanya melihat sesi terbuka dan pesan `terlihat`; staf penuh; hapus riwayat sesi hanya `superadmin`.
+  - Realtime CDC diaktifkan pada kedua tabel; indeks `idx_chat_pesan_sesi_waktu`, `idx_chat_pesan_sesi_status`, dan `idx_sesi_chat_status`.
+- [x] **11.2 Tipe, Service, dan Hook Chat**
+  - `database.types.ts` memakai `SesiChat` dan `ChatPesan`; `chat.types.ts` menggantikan `qna.types.ts`.
+  - `src/services/chat.ts` menangani sesi, pesan, moderasi, dan pendukung CSV.
+  - `useSesiChatAktif.ts` mendeteksi sesi terbuka untuk tombol chat; `useRealtimeChat.ts` memuat pesan realtime.
+- [x] **11.3 Pengalaman Publik**
+  - `QnAForm.tsx` dihapus dari beranda; tombol "Sampaikan Pertanyaan" di `HeroOnAir` dihapus.
+  - `ChatModal.tsx` membuka chat di atas pemutar, menampilkan pesan sendiri dan pesan publik lain secara realtime.
+  - Honeypot, jeda 1 pesan per 30 detik per perangkat, dan opsi "Kirim sebagai Anonim" dipertahankan.
+  - `PersistentPlayer.tsx` menampilkan tombol chat **hanya saat ada sesi terbuka**; ikon hilang saat sesi ditutup.
+- [x] **11.4 Panel Pengelola**
+  - `AdminQnAPage.tsx` digantikan `AdminChatPage.tsx` di rute `/admin/chat` dengan menu "Inisiasi Sesi Chat".
+  - Form pembukaan hanya nama sesi; sistem mencatat waktu buka, akun pembuka, waktu tutup, dan akun penutup.
+  - Admin dan Superadmin sama-sama membuka, menutup, menyembunyikan/menampilkan, menghapus pesan, dan mengunduh CSV.
+  - Hanya Superadmin yang menghapus riwayat sesi; CSV menyertakan pesan tersembunyi dengan kolom status.
+  - Kolom "Pesan Chat Berlangsung" di `/admin/chat` hanya untuk sesi aktif. Tombol "Lihat Pesan" pada riwayat mengarah ke halaman tersendiri `/admin/chat/riwayat/:id` berisi arsip pesan bersifat tetap dan tombol Unduh CSV; tidak memakai ulang area chat live.
+  - `src/utils/formatChat.ts` menyatukan format waktu, label status, dan format CSV antara sesi aktif dan arsip.
+  - Dasbor, menu admin, dan daftar cadangan diperbarui ke tabel chat.
+- [x] **11.5 Dokumen Pendukung**
+  - `AGENTS.md`, `CLAUDE.md`, dan `PANDUAN-SETUP-SUPABASE.md` diselaraskan dengan terminologi Chat live dan menu Berita ke-6.
+  - `docs/12-rencana-analitik-ga4.md` memakai `chat_sesi_dibuka`, `chat_sesi_ditutup`, `chat_dibuka`, dan `chat_pesan_kirim`; aktivasi GA4 tetap ditunda sampai go-live.
+- [x] **11.6 Verifikasi Teknis**
+  - `npm run type-check` dan `npm run build` lolos tanpa galat (termasuk setelah penambahan halaman riwayat tersendiri).
+- [ ] **11.7 Review Gate 11**
+  - Panduan uji bernomor disajikan pada percakapan Review Gate 11; menunggu konfirmasi `LOLOS` sebelum commit dan push.
+  - Uji meliputi: buka/tutup sesi, ikon muncul/hilang, realtime <2 detik di modal dan panel, sembunyi/hapus pesan, CSV, izin hapus riwayat Superadmin, audio persisten, serta lebar 360 px dan 1280 px.
 
 ---
 

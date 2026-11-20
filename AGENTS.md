@@ -14,7 +14,7 @@
 - **Penyusun / Mahasiswa Magang:** Gusti Ahmad Muttahid Bilhaq (Teknik Informatika).
 - **Direktori Proyek:** `C:\Project Radio WBS Perpusnas`
 - **Repositori GitHub:** https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI
-- **Misi Website:** Menyediakan etalase modern, cepat, dan ramah pemustaka untuk mendengarkan siaran radio 24 jam secara persisten (tanpa putus saat pindah halaman), menjelajahi katalog 331 rekaman video/siniar YouTube resmi, dan mengirimkan pertanyaan interaktif langsung (*realtime*) ke studio saat program siaran berlangsung.
+- **Misi Website:** Menyediakan etalase modern, cepat, dan ramah pemustaka untuk mendengarkan siaran radio 24 jam secara persisten (tanpa putus saat pindah halaman), menjelajahi katalog 331 rekaman video/siniar YouTube resmi, mengikuti chat live saat sesi dibuka petugas, dan membaca artikel serta berita resmi WBS.
 
 ---
 
@@ -34,7 +34,7 @@ AI **DILARANG KERAS** melanggar 10 aturan mutlak berikut:
 4. **Pembakuan Istilah — Dilarang Menyingkat "Ruang Literasi" (`DR-01`):**
    - Program unggulan WBS bernama resmi **"Ruang Literasi"**. **DILARANG KERAS** memunculkan singkatan informal seperti `"Ruli"` di kode, antarmuka, basis data, maupun komentar.
 5. **Hanya 2 Peran Akun Pengelola (`M-15`, `DR-06`):**
-   - Struktur peran dibakukan hanya 2: **`superadmin`** (akses penuh seluruh modul, kelola akun, pengaturan URL Icecast & token GA4) dan **`admin`** (operasional harian: kurasi video, buka sesi tanya jawab, sunting jadwal).
+   - Struktur peran dibakukan hanya 2: **`superadmin`** (akses penuh seluruh modul, kelola akun, pengaturan URL Icecast & token GA4, hapus riwayat sesi chat) dan **`admin`** (operasional harian: kurasi video, buka dan tutup sesi chat, sunting jadwal).
    - Jangan membuat peran tambahan seperti *"Penyiar"*, *"Pustakawan Peninjau"*, atau *"Pimpinan"* sebagai akun login terpisah.
 6. **Katalog Pasti 331 Video Unik (`M-03`, `M-04`, `DR-02`):**
    - Dari 507 data mentah YouTube, hanya 337 baris publik yang diproses. Setelah 6 baris duplikat rekonsiliasi dibersihkan, katalog menghasilkan tepat **331 video unik**:
@@ -45,12 +45,14 @@ AI **DILARANG KERAS** melanggar 10 aturan mutlak berikut:
 8. **Lite YouTube Facade & Tanpa Autoplay (`FR-11`, `DR-05`):**
    - Di halaman detail episode, video YouTube **DILARANG diputar otomatis (*NO autoplay*)** agar suaranya tidak menabrak siaran audio radio yang sedang aktif didengarkan pemustaka.
    - Gunakan pola *Lite YouTube Facade* (tampilkan poster gambar WebP ringan dahulu; iframe YouTube asli baru disuntikkan saat pengunjung mengeklik tombol putar).
-9. **Formulir Tanya Jawab Terkelola & Anti-Spam (`K-3`, `FR-25`, `DR-08`):**
-   - Dilarang membuat chatbox liar tanpa batas. Formulir tanya jawab hanya tampil/aktif saat sesi dibuka oleh petugas.
+9. **Chat Live Terkelola & Anti-Spam (`K-3`, `FR-25`, `DR-08`):**
+   - Dilarang membuat chatbox liar tanpa batas. Chat live hanya aktif saat Admin atau Superadmin membuka sesi; sesi berdiri sendiri dan tidak terikat jadwal atau acara.
+   - Tombol chat di bilah pemutar radio **hanya muncul saat ada sesi terbuka**. Form chat memakai modal di atas pemutar, bukan halaman beranda.
+   - Publik melihat pesannya sendiri dan pesan publik lain secara realtime. Petugas dapat menyembunyikan atau menghapus pesan, mengunduh CSV, dan hanya Superadmin yang dapat menghapus riwayat sesi.
    - Kolom nama wajib diisi, namun sediakan opsi centang *"Kirim sebagai Anonim"* (`M-06`).
-   - Wajib menyertakan *Honeypot field* (kolom rahasia anti-bot) dan pembatasan pengiriman (*rate limit* 1 pertanyaan per 30 detik per perangkat).
+   - Wajib menyertakan *Honeypot field* (kolom rahasia anti-bot) dan pembatasan pengiriman (*rate limit* 1 pesan per 30 detik per perangkat).
 10. **Kepatuhan Desain Sederhana Pola UT Radio (`K-6`, `NG-10`):**
-    - Desain berfokus pada kecepatan dan keterbacaan: 5 menu navigasi utama (Beranda, Jadwal, Program, Tentang, Kontak).
+    - Desain berfokus pada kecepatan dan keterbacaan: 5 menu navigasi utama (Beranda, Jadwal, Program, Tentang, Kontak). Penambahan menu **Berita** sebagai menu ke-6 disetujui pada Tahap 11 dan dipasang bersama halaman Berita di Tahap 12.
     - **Dilarang memasang:** Spanduk banner carousel otomatis yang berputar sendiri, animasi parallax berat, jendela pop-up iklan, dan mode gelap (*dark mode*) agar identitas visual resmi Perpusnas tetap konsisten.
 
 ---
@@ -91,13 +93,13 @@ radio-wbs/
 │   │   ├── home/                 # HeroOnAir, AcaraMendatang, VideoTerbaru, ProgramUnggulan
 │   │   ├── catalog/              # SeriCard, EpisodeCard, YouTubeFacade, CategoryFilter
 │   │   ├── schedule/             # ScheduleTable, DayTabs, OnAirBadge
-│   │   ├── interaction/          # Formulir Tanya Jawab On-Air, LiveStatusBadge
+│   │   ├── interaction/          # ChatModal (chat live di atas pemutar), LiveStatusBadge
 │   │   └── admin/                # Sidebar, DataTable, StatCard, FormModal
 │   ├── context/                  # AudioContext.tsx & AuthContext.tsx
-│   ├── hooks/                    # useOnAirProgram.ts, useRealtimeQnA.ts, useDebounce.ts
+│   ├── hooks/                    # useOnAirProgram.ts, useSesiChatAktif.ts, useRealtimeChat.ts, useDebounce.ts
 │   ├── pages/                    # Halaman publik (/, /jadwal, /program, /cari, /tentang) & /admin
 │   ├── services/                 # supabase.ts, audioService.ts, ga4.ts
-│   ├── types/                    # database.types.ts, audio.types.ts, qna.types.ts
+│   ├── types/                    # database.types.ts, audio.types.ts, chat.types.ts
 │   ├── utils/                    # timeUtils.ts (WIB), stringUtils.ts (XSS sanitasi), formatters.ts
 │   ├── App.tsx                   # Router & Context Wrapper
 │   ├── index.css                 # Tailwind Directives & Perpusnas Tokens
@@ -152,7 +154,7 @@ AI pengembang **WAJIB** mematuhi seluruh instruksi dari 9 skill yang telah diint
 - Gunakan indeks GIN untuk pencarian teks judul dan topik bahasa Indonesia.
 - Gunakan tipe `timestamptz` untuk waktu dan `text` untuk string di PostgreSQL.
 - Hindari `SELECT *`; selalu pilih kolom yang dibutuhkan saja.
-- Cegah lock tabel pada `pertanyaan` saat WebSocket Realtime aktif.
+- Cegah lock tabel pada `chat_pesan` saat WebSocket Realtime aktif.
 
 ### SKILL 3 — Stop Slop: Teks UI Alami & Manusiawi (Sumber: `stop-slop`)
 - Hilangkan frasa basa-basi AI ("Tentu!", "Dengan senang hati!").
@@ -163,7 +165,7 @@ AI pengembang **WAJIB** mematuhi seluruh instruksi dari 9 skill yang telah diint
 - Tulis tes otomatis untuk skenario paling kritis:
   1. Audio persistence saat navigasi antar-halaman.
   2. Bebas galat Mixed Content HTTPS pada aliran Icecast.
-  3. Form tanya jawab realtime WebSocket masuk <2 detik ke panel admin.
+  3. Pesan chat realtime WebSocket masuk <2 detik ke panel admin dan ke modal publik.
   4. Proteksi rute admin dan pemisahan peran Superadmin vs Admin.
 
 ### SKILL 5 — ECC Security & Quality Standards (Sumber: `ECC-main`)

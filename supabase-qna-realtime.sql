@@ -1,4 +1,7 @@
 -- ============================================================================
+-- USANG SEJAK TAHAP 11 — JANGAN DIJALANKAN LAGI.
+-- Tabel sesi_onair dan pertanyaan sudah dihapus. Gunakan supabase-tahap11-chat.sql.
+-- ============================================================================
 -- MIGRASI TAHAP 5 — REALTIME TANYA JAWAB
 -- Jalankan di Supabase SQL Editor setelah supabase-schema.sql.
 -- Aman dijalankan ulang.

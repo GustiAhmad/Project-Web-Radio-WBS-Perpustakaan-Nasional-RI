@@ -41,11 +41,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE status_sesi AS ENUM ('terbuka', 'tertutup');
+  CREATE TYPE status_sesi_chat AS ENUM ('terbuka', 'tertutup');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE status_pertanyaan AS ENUM ('baru', 'dibacakan', 'disembunyikan');
+  CREATE TYPE status_chat_pesan AS ENUM ('terlihat', 'disembunyikan');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -181,44 +181,42 @@ BEFORE UPDATE ON acara_mendatang
 FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 
 -- ----------------------------------------------------------------------------
--- 6. TABEL SESI ON-AIR
+-- 6. TABEL SESI CHAT (Tidak terikat jadwal atau acara)
 -- ----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS sesi_onair (
+CREATE TABLE IF NOT EXISTS sesi_chat (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    tanggal DATE NOT NULL DEFAULT CURRENT_DATE,
-    nama_program VARCHAR(150) NOT NULL,
-    jadwal_id UUID REFERENCES jadwal_tetap(id) ON DELETE SET NULL,
-    acara_id UUID REFERENCES acara_mendatang(id) ON DELETE SET NULL,
-    jam_mulai TIME NOT NULL,
-    jam_selesai TIME NOT NULL,
-    status status_sesi NOT NULL DEFAULT 'terbuka',
-    dibuka_oleh VARCHAR(150),
-    ditutup_oleh VARCHAR(150),
-    catatan_internal TEXT,
+    nama_sesi VARCHAR(150) NOT NULL,
+    status status_sesi_chat NOT NULL DEFAULT 'terbuka',
+    dibuka_oleh_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    dibuka_oleh VARCHAR(150) NOT NULL,
     dibuka_pada TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ditutup_oleh_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    ditutup_oleh VARCHAR(150),
     ditutup_pada TIMESTAMPTZ,
-    CONSTRAINT ck_sesi_sumber CHECK (jadwal_id IS NOT NULL OR acara_id IS NOT NULL)
+    CONSTRAINT ck_nama_sesi CHECK (char_length(btrim(nama_sesi)) BETWEEN 3 AND 150),
+    CONSTRAINT ck_sesi_tutup_lengkap CHECK (
+        status = 'terbuka' OR (ditutup_pada IS NOT NULL AND ditutup_oleh IS NOT NULL)
+    )
 );
 
 -- ----------------------------------------------------------------------------
--- 7. TABEL PERTANYAAN
+-- 7. TABEL PESAN CHAT
 -- ----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS pertanyaan (
+CREATE TABLE IF NOT EXISTS chat_pesan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    sesi_id UUID NOT NULL REFERENCES sesi_onair(id) ON DELETE CASCADE,
-    nama_pengirim VARCHAR(100) NOT NULL DEFAULT 'Anonim',
-    isi_pertanyaan TEXT NOT NULL,
-    status status_pertanyaan NOT NULL DEFAULT 'baru',
-    catatan_petugas TEXT,
-    ditandai_oleh VARCHAR(150),
+    sesi_id UUID NOT NULL REFERENCES sesi_chat(id) ON DELETE CASCADE,
+    nama VARCHAR(100) NOT NULL DEFAULT 'Anonim',
+    isi TEXT NOT NULL,
+    status status_chat_pesan NOT NULL DEFAULT 'terlihat',
+    disembunyikan_oleh VARCHAR(150),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT ck_panjang_pertanyaan CHECK (char_length(isi_pertanyaan) >= 10 AND char_length(isi_pertanyaan) <= 500),
-    CONSTRAINT ck_panjang_nama CHECK (char_length(nama_pengirim) >= 2 AND char_length(nama_pengirim) <= 100)
+    CONSTRAINT ck_isi_chat CHECK (char_length(btrim(isi)) BETWEEN 2 AND 500),
+    CONSTRAINT ck_nama_chat CHECK (char_length(btrim(nama)) BETWEEN 2 AND 100)
 );
 
-CREATE TRIGGER set_timestamp_pertanyaan
-BEFORE UPDATE ON pertanyaan
+CREATE TRIGGER set_timestamp_chat_pesan
+BEFORE UPDATE ON chat_pesan
 FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 
 -- ----------------------------------------------------------------------------
@@ -262,9 +260,9 @@ FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 CREATE INDEX IF NOT EXISTS idx_episode_seri_id ON episode(seri_id);
 CREATE INDEX IF NOT EXISTS idx_episode_dibuat_oleh ON episode(dibuat_oleh);
 CREATE INDEX IF NOT EXISTS idx_seri_dibuat_oleh ON seri(dibuat_oleh);
-CREATE INDEX IF NOT EXISTS idx_pertanyaan_sesi_id ON pertanyaan(sesi_id);
-CREATE INDEX IF NOT EXISTS idx_sesi_jadwal_id ON sesi_onair(jadwal_id);
-CREATE INDEX IF NOT EXISTS idx_sesi_acara_id ON sesi_onair(acara_id);
+CREATE INDEX IF NOT EXISTS idx_chat_pesan_sesi_waktu ON chat_pesan(sesi_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_chat_pesan_sesi_status ON chat_pesan(sesi_id, status);
+CREATE INDEX IF NOT EXISTS idx_sesi_chat_status ON sesi_chat(status, dibuka_pada DESC);
 
 -- ----------------------------------------------------------------------------
 -- 2.2 INDEKS PARTIAL UNTUK KONTEN TAYANG / TERBIT
@@ -314,8 +312,8 @@ ALTER TABLE seri ENABLE ROW LEVEL SECURITY;
 ALTER TABLE episode ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jadwal_tetap ENABLE ROW LEVEL SECURITY;
 ALTER TABLE acara_mendatang ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sesi_onair ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pertanyaan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sesi_chat ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_pesan ENABLE ROW LEVEL SECURITY;
 ALTER TABLE halaman_statis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pengaturan_situs ENABLE ROW LEVEL SECURITY;
 
@@ -441,55 +439,90 @@ USING (auth_is_staf())
 WITH CHECK (auth_is_staf());
 
 -- ----------------------------------------------------------------------------
--- 2.11 KEBIJAKAN RLS — SESI ON-AIR
--- Publik hanya melihat sesi yang sedang terbuka; catatan internal tetap tersembunyi
--- karena tidak ada kolom SELECT publik untuk staf non-login.
+-- 2.11 KEBIJAKAN RLS — SESI CHAT
+-- Publik hanya melihat sesi terbuka. Hapus riwayat sesi hanya Superadmin.
 -- ----------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Publik dapat membaca status sesi On-Air aktif" ON sesi_onair;
-DROP POLICY IF EXISTS "Publik dapat melihat hanya sesi terbuka" ON sesi_onair;
-CREATE POLICY "Publik dapat melihat sesi hari ini dan sesi terbuka"
-ON sesi_onair FOR SELECT TO anon
-USING (status = 'terbuka' OR tanggal = CURRENT_DATE);
+DROP POLICY IF EXISTS "Publik melihat sesi chat yang terbuka" ON sesi_chat;
+CREATE POLICY "Publik melihat sesi chat yang terbuka"
+ON sesi_chat FOR SELECT TO anon
+USING (status = 'terbuka');
 
-DROP POLICY IF EXISTS "Staf dapat melihat semua sesi On-Air" ON sesi_onair;
-CREATE POLICY "Staf dapat melihat semua sesi On-Air"
-ON sesi_onair FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "Staf melihat semua sesi chat" ON sesi_chat;
+CREATE POLICY "Staf melihat semua sesi chat"
+ON sesi_chat FOR SELECT TO authenticated
 USING (auth_is_staf());
 
-DROP POLICY IF EXISTS "Staf (Superadmin & Admin) dapat membuka dan menutup sesi" ON sesi_onair;
-CREATE POLICY "Staf (Superadmin & Admin) dapat membuka dan menutup sesi"
-ON sesi_onair FOR ALL TO authenticated
+DROP POLICY IF EXISTS "Staf membuka sesi chat" ON sesi_chat;
+CREATE POLICY "Staf membuka sesi chat"
+ON sesi_chat FOR INSERT TO authenticated
+WITH CHECK (auth_is_staf());
+
+DROP POLICY IF EXISTS "Staf menutup sesi chat" ON sesi_chat;
+CREATE POLICY "Staf menutup sesi chat"
+ON sesi_chat FOR UPDATE TO authenticated
 USING (auth_is_staf())
 WITH CHECK (auth_is_staf());
 
+DROP POLICY IF EXISTS "Superadmin menghapus riwayat sesi chat" ON sesi_chat;
+CREATE POLICY "Superadmin menghapus riwayat sesi chat"
+ON sesi_chat FOR DELETE TO authenticated
+USING (auth_is_superadmin());
+
 -- ----------------------------------------------------------------------------
--- 2.12 KEBIJAKAN RLS — PERTANYAAN (PRIVASI PENDENGAR)
+-- 2.12 KEBIJAKAN RLS — PESAN CHAT
+-- Publik mengirim dan melihat pesan terlihat hanya pada sesi terbuka.
 -- ----------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Pengunjung dapat mengirim pertanyaan saat sesi terbuka" ON pertanyaan;
-CREATE POLICY "Pengunjung dapat mengirim pertanyaan saat sesi terbuka"
-ON pertanyaan FOR INSERT TO anon, authenticated
+DROP POLICY IF EXISTS "Publik mengirim pesan ke sesi chat terbuka" ON chat_pesan;
+CREATE POLICY "Publik mengirim pesan ke sesi chat terbuka"
+ON chat_pesan FOR INSERT TO anon
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM sesi_onair
-    WHERE sesi_onair.id = pertanyaan.sesi_id
-    AND sesi_onair.status = 'terbuka'
+  status = 'terlihat'
+  AND EXISTS (
+    SELECT 1 FROM sesi_chat
+    WHERE sesi_chat.id = chat_pesan.sesi_id
+    AND sesi_chat.status = 'terbuka'
   )
 );
 
-DROP POLICY IF EXISTS "Hanya staf yang dapat membaca pertanyaan pendengar" ON pertanyaan;
-CREATE POLICY "Hanya staf yang dapat membaca pertanyaan pendengar"
-ON pertanyaan FOR SELECT TO authenticated
+DROP POLICY IF EXISTS "Staf mengirim pesan ke sesi chat terbuka" ON chat_pesan;
+CREATE POLICY "Staf mengirim pesan ke sesi chat terbuka"
+ON chat_pesan FOR INSERT TO authenticated
+WITH CHECK (
+  auth_is_staf()
+  AND status = 'terlihat'
+  AND EXISTS (
+    SELECT 1 FROM sesi_chat
+    WHERE sesi_chat.id = chat_pesan.sesi_id
+    AND sesi_chat.status = 'terbuka'
+  )
+);
+
+DROP POLICY IF EXISTS "Publik melihat pesan terlihat pada sesi terbuka" ON chat_pesan;
+CREATE POLICY "Publik melihat pesan terlihat pada sesi terbuka"
+ON chat_pesan FOR SELECT TO anon
+USING (
+  status = 'terlihat'
+  AND EXISTS (
+    SELECT 1 FROM sesi_chat
+    WHERE sesi_chat.id = chat_pesan.sesi_id
+    AND sesi_chat.status = 'terbuka'
+  )
+);
+
+DROP POLICY IF EXISTS "Staf melihat semua pesan chat" ON chat_pesan;
+CREATE POLICY "Staf melihat semua pesan chat"
+ON chat_pesan FOR SELECT TO authenticated
 USING (auth_is_staf());
 
-DROP POLICY IF EXISTS "Staf dapat mengurasi dan menandai pertanyaan" ON pertanyaan;
-CREATE POLICY "Staf dapat mengurasi dan menandai pertanyaan"
-ON pertanyaan FOR UPDATE TO authenticated
+DROP POLICY IF EXISTS "Staf menyembunyikan atau menampilkan pesan chat" ON chat_pesan;
+CREATE POLICY "Staf menyembunyikan atau menampilkan pesan chat"
+ON chat_pesan FOR UPDATE TO authenticated
 USING (auth_is_staf())
 WITH CHECK (auth_is_staf());
 
-DROP POLICY IF EXISTS "Staf dapat menghapus pertanyaan atau arsip sesi" ON pertanyaan;
-CREATE POLICY "Staf dapat menghapus pertanyaan atau arsip sesi"
-ON pertanyaan FOR DELETE TO authenticated
+DROP POLICY IF EXISTS "Staf menghapus pesan chat" ON chat_pesan;
+CREATE POLICY "Staf menghapus pesan chat"
+ON chat_pesan FOR DELETE TO authenticated
 USING (auth_is_staf());
 
 -- ----------------------------------------------------------------------------
@@ -650,10 +683,8 @@ INSERT INTO pengaturan_situs (kunci, nilai, deskripsi) VALUES
 ), 'Konfigurasi Google Analytics 4 patuh privasi'),
 ('operasional', jsonb_build_object(
   'zona_waktu', 'WIB',
-  'rate_limit_pertanyaan_menit', 10,
-  'max_pertanyaan_per_sesi', 3,
-  'masa_tenggang_sesi_menit', 15
-), 'Parameter operasional sistem dan pembatasan spam')
+  'jeda_kirim_chat_detik', 30
+), 'Parameter operasional sistem dan pembatasan spam chat')
 ON CONFLICT (kunci) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
@@ -668,12 +699,12 @@ INSERT INTO halaman_statis (slug, judul, ringkasan, konten_markdown) VALUES
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO halaman_statis (slug, judul, ringkasan, konten_markdown) VALUES
-('kebijakan-privasi', 'Kebijakan Privasi Layanan', 'Pelindungan data pribadi pemustaka.', 'Formulir pertanyaan On-Air mengizinkan nama samaran. Kami tidak menyimpan alamat IP mentah di basis data aplikasi. Analitik kunjungan memakai penyamaran IP untuk statistik agregat.')
+('kebijakan-privasi', 'Kebijakan Privasi Layanan', 'Pelindungan data pribadi pemustaka.', 'Chat live mengizinkan nama samaran atau Anonim. Kami tidak menyimpan alamat IP mentah di basis data aplikasi. Analitik kunjungan memakai penyamaran IP untuk statistik agregat.')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ----------------------------------------------------------------------------
--- 3.5 REALTIME CDC — TANYA JAWAB ON-AIR
--- Diperlukan agar perubahan sesi dan pertanyaan sampai ke browser tanpa refresh.
+-- 3.5 REALTIME CDC — SESI CHAT
+-- Diperlukan agar sesi dan pesan chat sampai ke browser tanpa refresh.
 -- ----------------------------------------------------------------------------
 DO $$
 BEGIN
@@ -681,17 +712,17 @@ BEGIN
     SELECT 1 FROM pg_publication_tables
     WHERE pubname = 'supabase_realtime'
       AND schemaname = 'public'
-      AND tablename = 'sesi_onair'
+      AND tablename = 'sesi_chat'
   ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.sesi_onair;
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.sesi_chat;
   END IF;
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_publication_tables
     WHERE pubname = 'supabase_realtime'
       AND schemaname = 'public'
-      AND tablename = 'pertanyaan'
+      AND tablename = 'chat_pesan'
   ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.pertanyaan;
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_pesan;
   END IF;
 END $$;

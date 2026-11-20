@@ -11,7 +11,7 @@
 - **Nama Situs Web:** **Radio & Siniar WBS Perpusnas** (`M-01`).
 - **Instansi Penanggung Jawab:** Pusat Jasa Informasi Perpustakaan dan Pengelolaan Naskah Nusantara (PUJASINTARA), Perpustakaan Nasional RI.
 - **Penyusun Awal / Mahasiswa Magang:** Gusti Ahmad Muttahid Bilhaq (Teknik Informatika).
-- **Misi Website:** Menyediakan etalase modern, cepat, dan ramah pemustaka untuk mendengarkan siaran radio 24 jam secara persisten (tanpa putus saat pindah halaman), menjelajahi katalog 331 rekaman video/siniar YouTube resmi, dan mengirimkan pertanyaan interaktif langsung (*realtime*) ke studio saat program siaran berlangsung.
+- **Misi Website:** Menyediakan etalase modern, cepat, dan ramah pemustaka untuk mendengarkan siaran radio 24 jam secara persisten (tanpa putus saat pindah halaman), menjelajahi katalog 331 rekaman video/siniar YouTube resmi, mengikuti chat live saat sesi dibuka petugas, dan membaca artikel serta berita resmi WBS.
 
 ---
 
@@ -31,7 +31,7 @@ Claude **DILARANG KERAS** melanggar 10 aturan mutlak berikut:
 4. **Pembakuan Istilah — Dilarang Menyingkat "Ruang Literasi" (`DR-01`):**
    - Program unggulan WBS bernama resmi **"Ruang Literasi"**. **DILARANG KERAS** memunculkan singkatan informal seperti `"Ruli"` di kode, antarmuka, basis data, maupun komentar.
 5. **Hanya 2 Peran Akun Pengelola (`M-15`, `DR-06`):**
-   - Struktur peran dibakukan hanya 2: **`superadmin`** (akses penuh seluruh modul, kelola akun, pengaturan URL Icecast & token GA4) dan **`admin`** (operasional harian: kurasi video, buka sesi tanya jawab, sunting jadwal).
+   - Struktur peran dibakukan hanya 2: **`superadmin`** (akses penuh seluruh modul, kelola akun, pengaturan URL Icecast & token GA4, hapus riwayat sesi chat) dan **`admin`** (operasional harian: kurasi video, buka dan tutup sesi chat, sunting jadwal).
    - Jangan membuat peran tambahan seperti *"Penyiar"*, *"Pustakawan Peninjau"*, atau *"Pimpinan"* sebagai akun login terpisah.
 6. **Katalog Pasti 331 Video Unik (`M-03`, `M-04`, `DR-02`):**
    - Dari 507 data mentah YouTube, hanya 337 baris publik yang diproses. Setelah 6 baris duplikat rekonsiliasi dibersihkan, katalog menghasilkan tepat **331 video unik**:
@@ -42,12 +42,14 @@ Claude **DILARANG KERAS** melanggar 10 aturan mutlak berikut:
 8. **Lite YouTube Facade & Tanpa Autoplay (`FR-11`, `DR-05`):**
    - Di halaman detail episode, video YouTube **DILARANG diputar otomatis (*NO autoplay*)** agar suaranya tidak menabrak siaran audio radio yang sedang aktif didengarkan pemustaka.
    - Gunakan pola *Lite YouTube Facade* (tampilkan poster gambar WebP ringan dahulu; iframe YouTube asli baru disuntikkan saat pengunjung mengeklik tombol putar).
-9. **Formulir Tanya Jawab Terkelola & Anti-Spam (`K-3`, `FR-25`, `DR-08`):**
-   - Dilarang membuat chatbox liar tanpa batas. Formulir tanya jawab hanya tampil/aktif saat sesi dibuka oleh petugas.
+9. **Chat Live Terkelola & Anti-Spam (`K-3`, `FR-25`, `DR-08`):**
+   - Dilarang membuat chatbox liar tanpa batas. Chat live hanya aktif saat Admin atau Superadmin membuka sesi; sesi berdiri sendiri dan tidak terikat jadwal atau acara.
+   - Tombol chat di bilah pemutar radio **hanya muncul saat ada sesi terbuka**. Form chat memakai modal di atas pemutar, bukan halaman beranda.
+   - Publik melihat pesannya sendiri dan pesan publik lain secara realtime. Petugas dapat menyembunyikan atau menghapus pesan, mengunduh CSV, dan hanya Superadmin yang dapat menghapus riwayat sesi.
    - Kolom nama wajib diisi, namun sediakan opsi centang *"Kirim sebagai Anonim"* (`M-06`).
-   - Wajib menyertakan *Honeypot field* (kolom rahasia anti-bot) dan pembatasan pengiriman (*rate limit* 1 pertanyaan per 30 detik per perangkat).
+   - Wajib menyertakan *Honeypot field* (kolom rahasia anti-bot) dan pembatasan pengiriman (*rate limit* 1 pesan per 30 detik per perangkat).
 10. **Kepatuhan Desain Sederhana Pola UT Radio (`K-6`, `NG-10`):**
-    - Desain berfokus pada kecepatan dan keterbacaan: 5 menu navigasi utama (Beranda, Jadwal, Program, Tentang, Kontak).
+    - Desain berfokus pada kecepatan dan keterbacaan: 5 menu navigasi utama (Beranda, Jadwal, Program, Tentang, Kontak). Penambahan menu **Berita** sebagai menu ke-6 disetujui pada Tahap 11 dan dipasang bersama halaman Berita di Tahap 12.
     - **Dilarang memasang:** Spanduk banner carousel otomatis yang berputar sendiri, animasi parallax berat, jendela pop-up iklan, dan mode gelap (*dark mode*) agar identitas visual resmi Perpusnas tetap konsisten.
 
 ---
@@ -92,14 +94,15 @@ radio-wbs/
 │   │   ├── home/                 # Komponen khusus Beranda: HeroOnAir, AcaraMendatang, VideoTerbaru
 │   │   ├── catalog/              # Komponen Katalog: SeriCard, EpisodeCard, YouTubeFacade, CategoryFilter
 │   │   ├── schedule/             # Komponen Jadwal: ScheduleTable, DayTabs, OnAirBadge
-│   │   ├── interaction/          # Formulir Tanya Jawab On-Air, LiveStatusBadge
+│   │   ├── interaction/          # ChatModal (chat live di atas pemutar), LiveStatusBadge
 │   │   └── admin/                # Komponen panel admin: Sidebar, DataTable, StatCard, FormModal
 │   ├── context/                  # State manajemen global
 │   │   ├── AudioContext.tsx      # Global persistent audio player context & engine
 │   │   └── AuthContext.tsx       # Supabase Auth session & user role state (Superadmin/Admin)
 │   ├── hooks/                    # Kustom React Hooks
 │   │   ├── useOnAirProgram.ts    # Deteksi program on-air & program berikutnya (siklus 24 jam WIB)
-│   │   ├── useRealtimeQnA.ts     # Supabase Realtime WebSocket subscription untuk pertanyaan
+│   │   ├── useSesiChatAktif.ts   # Deteksi sesi chat terbuka untuk tombol di pemutar
+│   │   ├── useRealtimeChat.ts    # Supabase Realtime WebSocket subscription untuk pesan chat
 │   │   └── useDebounce.ts        # Pencarian kata kunci debounce
 │   ├── pages/                    # Halaman rute publik & admin
 │   │   ├── HomePage.tsx          # Beranda (/)
@@ -113,7 +116,7 @@ radio-wbs/
 │   │   └── admin/                # Halaman Panel Pengelola
 │   │       ├── AdminLoginPage.tsx      # Masuk Admin (/admin/masuk)
 │   │       ├── AdminDashboardPage.tsx  # Dasbor Ringkasan Operasional (/admin)
-│   │       ├── AdminQnAPage.tsx        # Sesi Tanya Jawab On-Air Studio (/admin/tanya-jawab)
+│   │       ├── AdminChatPage.tsx       # Inisiasi Sesi Chat & Moderasi (/admin/chat)
 │   │       ├── AdminSchedulePage.tsx   # Kelola Jadwal Siaran 24 Jam (/admin/jadwal)
 │   │       ├── AdminEpisodesPage.tsx   # Kelola Episode Video (/admin/episode)
 │   │       ├── AdminSeriesPage.tsx     # Kelola Seri Program (/admin/seri)
@@ -127,7 +130,7 @@ radio-wbs/
 │   ├── types/                    # Definisi TypeScript Interfaces & Enums
 │   │   ├── database.types.ts     # Tipe data tabel Supabase (sesuai Dokumen 07)
 │   │   ├── audio.types.ts        # Tipe state audio player
-│   │   └── qna.types.ts          # Tipe sesi & pertanyaan tanya jawab
+│   │   └── chat.types.ts         # Tipe sesi chat & pesan, konstanta jeda kirim
 │   ├── utils/                    # Utilitas pembantu
 │   │   ├── timeUtils.ts          # Konversi zona waktu WIB, kalkulasi siklus 06.00-05.59
 │   │   ├── stringUtils.ts        # Slugify, sanitasi teks anti-XSS
@@ -258,7 +261,7 @@ Skills berikut dipilih dan ditanamkan langsung dari analisis folder `C:\Kumpulan
 
 **Panduan Khusus untuk Skema 9 Tabel Proyek WBS:**
 - Baca `docs/07-model-data-dan-kamus-data.md` sebagai sumber kebenaran DDL dan kebijakan RLS.
-- Tabel `pengguna`, `seri`, `episode`, `jadwal_tetap`, `acara_mendatang`, `sesi_onair`, `pertanyaan`, `halaman_statis`, `pengaturan_situs` — semua wajib memiliki RLS aktif.
+- Tabel `pengguna`, `seri`, `episode`, `jadwal_tetap`, `acara_mendatang`, `sesi_chat`, `chat_pesan`, `halaman_statis`, `pengaturan_situs` — semua wajib memiliki RLS aktif.
 - Kolom IP address **tidak boleh ada** di tabel mana pun (sesuai `FR-53`, privasi pemustaka).
 
 ---
@@ -274,7 +277,7 @@ Skills berikut dipilih dan ditanamkan langsung dari analisis folder `C:\Kumpulan
 | **KRITIS** | Query Performance | Gunakan indeks GIN untuk pencarian teks bahasa Indonesia (sudah didefinisikan di Dok 07). Hindari `SELECT *` — selalu pilih kolom spesifik. |
 | **KRITIS** | Keamanan & RLS | Setiap perubahan skema harus melalui audit: jalankan `supabase db advisors` setelah ada perubahan DDL. |
 | **TINGGI** | Desain Skema | Gunakan tipe data yang tepat (UUID untuk PK, `timestamptz` untuk semua kolom waktu, `text` bukan `varchar` untuk Postgres). |
-| **SEDANG** | Concurrency | Hindari lock pada tabel `pertanyaan` saat Realtime WebSocket aktif; gunakan `INSERT` non-blocking. |
+| **SEDANG** | Concurrency | Hindari lock pada tabel `chat_pesan` saat Realtime WebSocket aktif; gunakan `INSERT` non-blocking. |
 
 ---
 
@@ -294,8 +297,8 @@ Skills berikut dipilih dan ditanamkan langsung dari analisis folder `C:\Kumpulan
 
 **Contoh Penerapan di Proyek WBS:**
 ```
-❌ BURUK: "Pertanyaan Anda berhasil dikirimkan dengan sukses kepada tim studio kami yang berdedikasi!"
-✅ BAIK:  "Pertanyaan terkirim ke studio."
+❌ BURUK: "Pesan Anda berhasil dikirimkan dengan sukses kepada tim studio kami yang berdedikasi!"
+✅ BAIK:  "Pesan terkirim ke studio."
 
 ❌ BURUK: "Terjadi kesalahan saat memproses permintaan Anda."
 ✅ BAIK:  "Siaran tidak terhubung. Mencoba sambung ulang..."
@@ -314,7 +317,7 @@ Skills berikut dipilih dan ditanamkan langsung dari analisis folder `C:\Kumpulan
 
 1. **Audio Persistence Test:** Putar radio → navigasi ke `/jadwal` → verifikasi audio masih memutar tanpa terputus.
 2. **Mixed Content Test:** Verifikasi tidak ada peringatan Mixed Content di konsol saat memutar audio di domain HTTPS.
-3. **QnA Realtime Test:** Kirim pertanyaan dari halaman publik → verifikasi muncul di panel admin dalam <2 detik.
+3. **Chat Realtime Test:** Kirim pesan dari modal chat publik → verifikasi muncul di panel admin dan di modal pemustaka lain dalam <2 detik.
 4. **Admin Auth Guard Test:** Akses `/admin` tanpa login → verifikasi dialihkan ke `/admin/masuk`.
 5. **Role Separation Test:** Login sebagai `admin` biasa → coba akses `/admin/pengaturan` → verifikasi akses ditolak.
 6. **YouTube No Autoplay Test:** Buka halaman detail episode → verifikasi video tidak berputar otomatis.
@@ -337,7 +340,7 @@ npx playwright show-report             # Tampilkan laporan HTML
 **Prinsip Keamanan yang Wajib Diterapkan:**
 1. **Security-First:** Validasi semua input sebelum dimasukkan ke database. Gunakan sanitasi teks untuk mencegah XSS pada konten yang dirender di panel admin.
 2. **Immutability:** Selalu buat objek baru, jangan mutasi state yang ada (penting untuk AudioContext dan AuthContext).
-3. **Plan Before Execute:** Untuk fitur kompleks (Realtime QnA, Audio Engine), buat rencana implementasi tertulis terlebih dahulu sebelum menulis kode.
+3. **Plan Before Execute:** Untuk fitur kompleks (Realtime Chat, Audio Engine), buat rencana implementasi tertulis terlebih dahulu sebelum menulis kode.
 4. **Test-Driven mindset:** Tulis kriteria penerimaan (berdasarkan Dok 09) sebelum mengimplementasikan fitur.
 5. **Never commit secrets:** `.env`, API keys, dan token Supabase tidak boleh ada dalam kode yang di-commit ke Git.
 
@@ -403,10 +406,10 @@ npx playwright show-report             # Tampilkan laporan HTML
 
 ### SKILL 8 — Security Audit & Web Protocol Defense (Sumber: `security-audit-skill`)
 
-> **Kapan Aktif:** Saat membangun autentikasi admin, formulir publik tanya jawab, dan konfigurasi API eksternal.
+> **Kapan Aktif:** Saat membangun autentikasi admin, modal chat publik, dan konfigurasi API eksternal.
 
 1. **Perlindungan Batas Akses (BOLA/IDOR):** Pastikan kueri Supabase tidak dapat dimanipulasi untuk mengakses data antar-pengguna secara tidak sah.
-2. **Sanitasi Vektor XSS:** Input teks pertanyaan dan nama pendengar harus disanitasi secara ketat sebelum dirender ke DOM panel admin penyiar.
+2. **Sanitasi Vektor XSS:** Input pesan chat dan nama pendengar harus disanitasi secara ketat sebelum dirender ke DOM panel admin dan modal publik.
 3. **Form Defense:** Honeypot anti-spam wajib disembunyikan menggunakan CSS modern (`position: absolute; opacity: 0; pointer-events: none`).
 
 ---

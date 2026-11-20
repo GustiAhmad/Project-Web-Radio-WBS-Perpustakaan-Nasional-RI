@@ -25,6 +25,8 @@ const SearchPage = lazy(() => import('./pages/SearchPage'))
 const SeriesDetailPage = lazy(() => import('./pages/SeriesDetailPage'))
 const VideoTerbaruPage = lazy(() => import('./pages/VideoTerbaruPage'))
 const AdminAcaraPage = lazy(() => import('./pages/admin/AdminAcaraPage'))
+const AdminChatPage = lazy(() => import('./pages/admin/AdminChatPage'))
+const AdminChatRiwayatPage = lazy(() => import('./pages/admin/AdminChatRiwayatPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminEpisodePage = lazy(() => import('./pages/admin/AdminEpisodePage'))
 const AdminEpisodeFormPage = lazy(() => import('./pages/admin/AdminEpisodeFormPage'))
@@ -36,7 +38,6 @@ const AdminPengaturanPage = lazy(() => import('./pages/admin/AdminPengaturanPage
 const AdminPenggunaPage = lazy(() => import('./pages/admin/AdminPenggunaPage'))
 const AdminPenyiarPage = lazy(() => import('./pages/admin/AdminPenyiarPage'))
 const AdminProfilPage = lazy(() => import('./pages/admin/AdminProfilPage'))
-const AdminQnAPage = lazy(() => import('./pages/admin/AdminQnAPage'))
 const AdminSeriFormPage = lazy(() => import('./pages/admin/AdminSeriFormPage'))
 const AdminSeriPage = lazy(() => import('./pages/admin/AdminSeriPage'))
 
@@ -88,7 +89,8 @@ function KontenAplikasi() {
               >
                 <Route index element={<AdminDashboardPage />} />
                 <Route path="profil" element={<AdminProfilPage />} />
-                <Route path="tanya-jawab" element={<AdminQnAPage />} />
+                <Route path="chat" element={<AdminChatPage />} />
+                <Route path="chat/riwayat/:id" element={<AdminChatRiwayatPage />} />
                 <Route path="jadwal" element={<AdminJadwalPage />} />
                 <Route path="episode" element={<AdminEpisodePage />} />
                 <Route path="episode/baru" element={<AdminEpisodeFormPage />} />

@@ -1,6 +1,8 @@
 # Model Data dan Kamus Data
 ## Website Radio & Siniar WBS Perpusnas
 
+> **Catatan Tahap 11 — sumber kebenaran terkini:** ERD, DDL, kamus data, dan kebijakan RLS di bawah ini masih menggambarkan model Tanya Jawab lama (`sesi_onair`, `pertanyaan`). Model yang berlaku sekarang adalah **Chat live**: `sesi_chat` dan `chat_pesan`. Lihat `supabase-schema.sql` (fresh install), `supabase-tahap11-chat.sql` (migrasi), dan `src/types/database.types.ts` sebelum mengubah skema. Rincian alasan perubahan ada di `ROADMAP-IMPLEMENTASI.md` bab Tahap 11.
+
 | Keterangan | Isi |
 |---|---|
 | **Nomor Dokumen** | 07 |

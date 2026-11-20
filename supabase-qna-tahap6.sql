@@ -1,4 +1,7 @@
 -- ============================================================================
+-- USANG SEJAK TAHAP 11 — JANGAN DIJALANKAN LAGI.
+-- Sesi chat tidak lagi terikat jadwal atau penanda interaktif.
+-- ============================================================================
 -- PENANDA SESI TANYA JAWAB — REVIEW GATE 6
 -- ============================================================================
 -- Jalankan sekali di Supabase SQL Editor setelah skema utama terpasang.

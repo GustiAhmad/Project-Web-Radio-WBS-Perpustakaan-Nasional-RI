@@ -1,4 +1,7 @@
 -- ============================================================================
+-- USANG SEJAK TAHAP 11 — JANGAN DIJALANKAN LAGI.
+-- Sesi chat dibuka dari panel /admin/chat, bukan lewat skrip ini.
+-- ============================================================================
 -- DATA UJI TAHAP 5 — BUKA SESI
 -- Jalankan seluruh isi berkas ini di Supabase SQL Editor sebelum menguji
 -- formulir di beranda.

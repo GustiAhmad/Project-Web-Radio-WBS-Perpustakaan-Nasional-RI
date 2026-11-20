@@ -31,7 +31,7 @@ type MenuItem = {
 const menuUtama: MenuItem[] = [
   { ke: '/admin', label: 'Dasbor', ikon: LayoutDashboard, akhir: true },
   { ke: '/admin/profil', label: 'Profil Saya', ikon: UserRound, akhir: false },
-  { ke: '/admin/tanya-jawab', label: 'Tanya Jawab On-Air', ikon: MessagesSquare, akhir: false },
+  { ke: '/admin/chat', label: 'Inisiasi Sesi Chat', ikon: MessagesSquare, akhir: false },
   { ke: '/admin/jadwal', label: 'Jadwal Siaran', ikon: CalendarDays, akhir: false },
   { ke: '/admin/episode', label: 'Kelola Episode', ikon: Video, akhir: false },
   { ke: '/admin/seri', label: 'Kelola Seri', ikon: Layers3, akhir: false },

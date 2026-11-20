@@ -1,6 +1,8 @@
 # Glosarium Istilah dan Log Keputusan Arsitektur
 ## Website Radio & Siniar WBS Perpusnas
 
+> **Catatan Tahap 11:** Istilah Tanya Jawab On-Air dan tabel `sesi_onair`/`pertanyaan` dalam log ini sudah digantikan oleh **Chat live** (`sesi_chat`, `chat_pesan`). Penambahan menu **Berita** sebagai menu ke-6 juga disetujui pada Tahap 11. Lihat `ROADMAP-IMPLEMENTASI.md` bab Tahap 11 untuk keputusan terbaru.
+
 | Keterangan | Isi |
 |---|---|
 | **Nomor Dokumen** | 10 |

@@ -1,4 +1,7 @@
 -- ============================================================================
+-- USANG SEJAK TAHAP 11 — JANGAN DIJALANKAN LAGI.
+-- Tabel sesi_onair sudah dihapus. Sesi chat dibuka dari panel /admin/chat.
+-- ============================================================================
 -- UJI TAHAP 5 — MODE LIVE YOUTUBE (M-19)
 -- Jalankan seluruh isi berkas ini setelah sesi uji biasa ditutup.
 -- Untuk menutup sesi ini, jalankan berkas supabase-qna-tutup.sql.

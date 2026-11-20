@@ -1,6 +1,8 @@
 # Rencana Pengujian dan Evaluasi
 ## Website Radio & Siniar WBS Perpusnas
 
+> **Catatan Tahap 11:** Kasus uji TC-22 s.d. TC-29 di bawah ini masih mengacu pada formulir Tanya Jawab di beranda. Setelah Tahap 11, uji Chat live memakai modal di atas pemutar dan panel `/admin/chat`; panduan uji terkini ada di `ROADMAP-IMPLEMENTASI.md` bab Tahap 11.
+
 | Keterangan | Isi |
 |---|---|
 | **Nomor Dokumen** | 09 |

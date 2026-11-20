@@ -303,88 +303,70 @@ export type Database = {
         }
         Relationships: []
       }
-      sesi_onair: {
+      sesi_chat: {
         Row: {
           id: string
-          tanggal: string
-          nama_program: string
-          jadwal_id: string | null
-          acara_id: string | null
-          jam_mulai: string
-          jam_selesai: string
-          status: Database['public']['Enums']['status_sesi']
-          dibuka_oleh: string | null
-          ditutup_oleh: string | null
-          catatan_internal: string | null
+          nama_sesi: string
+          status: Database['public']['Enums']['status_sesi_chat']
+          dibuka_oleh_id: string | null
+          dibuka_oleh: string
           dibuka_pada: string
+          ditutup_oleh_id: string | null
+          ditutup_oleh: string | null
           ditutup_pada: string | null
         }
         Insert: {
           id?: string
-          tanggal?: string
-          nama_program: string
-          jadwal_id?: string | null
-          acara_id?: string | null
-          jam_mulai: string
-          jam_selesai: string
-          status?: Database['public']['Enums']['status_sesi']
-          dibuka_oleh?: string | null
-          ditutup_oleh?: string | null
-          catatan_internal?: string | null
+          nama_sesi: string
+          status?: Database['public']['Enums']['status_sesi_chat']
+          dibuka_oleh_id?: string | null
+          dibuka_oleh: string
           dibuka_pada?: string
+          ditutup_oleh_id?: string | null
+          ditutup_oleh?: string | null
           ditutup_pada?: string | null
         }
         Update: {
           id?: string
-          tanggal?: string
-          nama_program?: string
-          jadwal_id?: string | null
-          acara_id?: string | null
-          jam_mulai?: string
-          jam_selesai?: string
-          status?: Database['public']['Enums']['status_sesi']
-          dibuka_oleh?: string | null
-          ditutup_oleh?: string | null
-          catatan_internal?: string | null
+          nama_sesi?: string
+          status?: Database['public']['Enums']['status_sesi_chat']
+          dibuka_oleh_id?: string | null
+          dibuka_oleh?: string
           dibuka_pada?: string
+          ditutup_oleh_id?: string | null
+          ditutup_oleh?: string | null
           ditutup_pada?: string | null
         }
         Relationships: []
       }
-      pertanyaan: {
+      chat_pesan: {
         Row: {
           id: string
           sesi_id: string
-          nama_pengirim: string
-          isi_pertanyaan: string
-          status: Database['public']['Enums']['status_pertanyaan']
-          disorot: boolean
-          catatan_petugas: string | null
-          ditandai_oleh: string | null
+          nama: string
+          isi: string
+          status: Database['public']['Enums']['status_chat_pesan']
+          disembunyikan_oleh: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           sesi_id: string
-          nama_pengirim?: string
-          isi_pertanyaan: string
-          status?: Database['public']['Enums']['status_pertanyaan']
-          disorot?: boolean
-          catatan_petugas?: string | null
-          ditandai_oleh?: string | null
+          nama?: string
+          isi: string
+          status?: Database['public']['Enums']['status_chat_pesan']
+          disembunyikan_oleh?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           sesi_id?: string
-          nama_pengirim?: string
-          isi_pertanyaan?: string
-          status?: Database['public']['Enums']['status_pertanyaan']
-          disorot?: boolean
-          catatan_petugas?: string | null
-          ditandai_oleh?: string | null
+          nama?: string
+          isi?: string
+          status?: Database['public']['Enums']['status_chat_pesan']
+          disembunyikan_oleh?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -529,8 +511,8 @@ export type Database = {
       status_episode: 'draf' | 'tayang' | 'arsip_internal'
       jenis_hari: 'hari_kerja' | 'sabtu' | 'minggu'
       status_publikasi: 'draf' | 'terbit'
-      status_sesi: 'terbuka' | 'tertutup'
-      status_pertanyaan: 'baru' | 'dibacakan' | 'disembunyikan'
+      status_sesi_chat: 'terbuka' | 'tertutup'
+      status_chat_pesan: 'terlihat' | 'disembunyikan'
       kanal_acara: 'youtube' | 'zoom' | 'instagram' | 'tatap_muka' | 'lainnya'
       status_laporan: 'baru' | 'diproses' | 'selesai' | 'ditolak'
       tingkat_keparahan: 'rendah' | 'sedang' | 'tinggi' | 'kritis'
@@ -542,10 +524,10 @@ export type Database = {
 export type Seri = Database['public']['Tables']['seri']['Row']
 export type Episode = Database['public']['Tables']['episode']['Row']
 export type JadwalTetap = Database['public']['Tables']['jadwal_tetap']['Row']
-export type SesiOnAir = Database['public']['Tables']['sesi_onair']['Row']
+export type SesiChat = Database['public']['Tables']['sesi_chat']['Row']
 export type AcaraMendatang = Database['public']['Tables']['acara_mendatang']['Row']
 export type HalamanStatis = Database['public']['Tables']['halaman_statis']['Row']
-export type Pertanyaan = Database['public']['Tables']['pertanyaan']['Row']
+export type ChatPesan = Database['public']['Tables']['chat_pesan']['Row']
 export type Pengguna = Database['public']['Tables']['pengguna']['Row']
 export type Penyiar = Database['public']['Tables']['penyiar']['Row']
 export type LaporanError = Database['public']['Tables']['laporan_error']['Row']

@@ -79,28 +79,32 @@ ORDER BY tablename;
 
 Kolom `rowsecurity` harus `true` untuk kesembilan tabel.
 
-## 5b. Aktifkan Realtime tanya jawab (Tahap 5)
+## 5b. Pasang Chat live (Tahap 11)
+
+Untuk basis data yang sudah memakai skema sebelum Tahap 11, jalankan migrasi ini. Skrip menghapus tabel `sesi_onair` dan `pertanyaan` beserta seluruh datanya, lalu membuat `sesi_chat` dan `chat_pesan`. Data lama **tidak** dimigrasikan.
 
 1. Di **SQL Editor**, klik **New query**.
-2. Salih seluruh isi berkas `supabase-qna-realtime.sql` ke editor, lalu klik **Run**.
-3. Salih seluruh isi berkas `supabase-qna-uji.sql` hanya saat menguji formulir di beranda, lalu klik **Run**.
-4. Untuk menutup sesi, jalankan seluruh isi berkas `supabase-qna-tutup.sql`. Berkas ini menutup semua sesi dengan awalan `Uji`.
-5. Untuk menguji label live YouTube, jalankan seluruh isi berkas `supabase-qna-live.sql`, lalu tutup kembali dengan `supabase-qna-tutup.sql`.
+2. Salih seluruh isi berkas `supabase-tahap11-chat.sql` ke editor, lalu klik **Run**.
+3. Periksa hasil: tidak boleh ada pesan galat merah.
+4. Ulangi kueri `pg_tables` dari bab 2. Pastikan `sesi_chat` dan `chat_pesan` muncul dengan `rowsecurity = true`, dan `sesi_onair` serta `pertanyaan` sudah tidak ada.
 
-Berkas `supabase-qna-realtime.sql` menambahkan `sesi_onair` dan `pertanyaan` ke publication `supabase_realtime`, serta mengizinkan publik melihat sesi hari ini yang sudah ditutup. Tanpa itu, kartu formulir tidak menerima kabar penutupan sesi tanpa refresh. Frontend tidak pernah meminta kolom `catatan_internal`, `dibuka_oleh`, atau `ditutup_oleh`.
+Bila proyek dibuat dari `supabase-schema.sql` versi terbaru, langkah ini **tidak perlu** — kedua tabel chat sudah termasuk di dalam skema.
+
+> Berkas `supabase-qna-realtime.sql`, `supabase-qna-uji.sql`, `supabase-qna-tutup.sql`, `supabase-qna-live.sql`, dan `supabase-qna-tahap6.sql` adalah artefak Tahap 5–6 dan **sudah usang**. Jangan dijalankan lagi setelah Tahap 11. Pembukaan dan penutupan sesi kini dilakukan dari panel `/admin/chat`, bukan lewat skrip SQL.
+
+Realtime diaktifkan otomatis pada `sesi_chat` dan `chat_pesan` oleh skrip di atas. Frontend tidak meminta kolom audit `dibuka_oleh_id` atau `ditutup_oleh_id` dari sisi publik; publik hanya melihat sesi berstatus `terbuka` dan pesan berstatus `terlihat`.
 
 ## 5c. Migrasi panel admin dan laporan error (Tahap 6)
 
 1. Di **SQL Editor**, klik **New query**.
-2. Salih seluruh isi berkas `supabase-admin-tahap6.sql`, lalu klik **Run**. Berkas ini menambah kolom `nama_penyiar` pada `jadwal_tetap` dan `disorot` pada `pertanyaan`.
+2. Salih seluruh isi berkas `supabase-admin-tahap6.sql`, lalu klik **Run**. Berkas ini menambah kolom `nama_penyiar` pada `jadwal_tetap`.
 3. Buat query baru, salih seluruh isi berkas `supabase-laporan-error.sql`, lalu klik **Run**.
-4. Buat query baru, salih seluruh isi berkas `supabase-qna-tahap6.sql`, lalu klik **Run**. Berkas ini menandai tiga program unggulan sebagai sesi tanya jawab dan mematikan penanda program lain, termasuk **Opening**.
-5. Periksa **Storage**. Harus ada bucket privat bernama `laporan-error` dengan batas 2 MB dan tiga jenis MIME gambar.
-6. Periksa kembali `pg_tables`. Sekarang ada 11 tabel dengan `rowsecurity = true`.
+4. Periksa **Storage**. Harus ada bucket privat bernama `laporan-error` dengan batas 2 MB dan tiga jenis MIME gambar.
+5. Periksa kembali `pg_tables`. Sekarang ada 10 tabel dengan `rowsecurity = true` (9 dari skema utama ditambah `laporan_error`).
 
 Screenshot laporan disimpan di bucket privat. Superadmin membuka gambar lewat tautan bertanda tangan yang hanya berlaku dua menit. Tidak ada audio atau video mentah yang disimpan di server.
 
-Dropdown **Tanya Jawab On-Air** hanya menampilkan program berpenanda `interaktif = true` untuk hari WIB berjalan, dengan **Indonesia Pagi Ini**, **Pesona Nusantara**, dan **Ruang Literasi** di urutan teratas. Program tanpa penanda tidak bisa membuka sesi. Centang penanda ini di menu **Jadwal Siaran** bila diperlukan. Saat membuka sesi, petugas mengisi target durasi dalam menit; jam selesai sesi dihitung dari jam mulai ditambah durasi tersebut, sehingga acara panjang tidak terpotong lebih awal.
+Penanda `interaktif` pada `jadwal_tetap` tetap dipakai untuk menampilkan program on-air, bukan untuk membatasi chat. Sejak Tahap 11, sesi chat berdiri sendiri dan dibuka dari `/admin/chat` cukup dengan nama sesi — tanpa kaitan dengan jadwal maupun durasi acara.
 
 ## 6. Buat akun pengelola pertama
 
@@ -211,7 +215,8 @@ Kunci Resend dan service role tidak pernah ditulis di `.env`, kode frontend, ata
 
 ## Catatan keamanan
 
-- Publik hanya bisa membaca episode berstatus `tayang`, jadwal dan acara berstatus `terbit`, serta sesi On-Air hari ini atau yang sedang `terbuka` tanpa kolom internal.
-- Publik tidak bisa membaca pertanyaan pendengar. Pertanyaan hanya bisa dikirim saat sesi terbuka.
+- Publik hanya bisa membaca episode berstatus `tayang`, jadwal dan acara berstatus `terbit`, serta sesi chat yang sedang `terbuka`.
+- Publik hanya melihat pesan chat berstatus `terlihat` pada sesi terbuka. Pesan yang disembunyikan petugas tetap tersimpan dan ikut diekspor ke CSV.
+- Admin dan Superadmin dapat membuka, menutup, memoderasi, dan mengunduh CSV. Hanya Superadmin yang dapat menghapus riwayat sesi.
 - Hanya `superadmin` yang bisa mengubah pengaturan situs dan mengelola akun.
 - Semua kredensial berada di `.env` dan tidak masuk ke repositori Git.

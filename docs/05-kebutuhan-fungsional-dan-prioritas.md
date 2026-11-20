@@ -1,6 +1,8 @@
 # Kebutuhan Fungsional dan Prioritas
 ## Website Radio & Siniar WBS Perpusnas
 
+> **Catatan Tahap 11:** Dokumen ini memuat rancangan awal dengan istilah Tanya Jawab On-Air dan tabel `sesi_onair`/`pertanyaan`. Sejak Tahap 11, fitur aktifnya adalah **Chat live** dengan tabel `sesi_chat` dan `chat_pesan`. Rincian perubahan ada di `ROADMAP-IMPLEMENTASI.md` bab Tahap 11.
+
 | Keterangan | Isi |
 |---|---|
 | **Nomor Dokumen** | 05 |

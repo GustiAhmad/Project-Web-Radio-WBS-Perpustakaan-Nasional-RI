@@ -8,8 +8,7 @@
 -- Kolom ini nullable agar 72 baris jadwal lama tetap berlaku.
 ALTER TABLE jadwal_tetap ADD COLUMN IF NOT EXISTS nama_penyiar VARCHAR(150);
 
--- Panel studio perlu menyorot pertanyaan yang sedang dibacakan penyiar.
-ALTER TABLE pertanyaan ADD COLUMN IF NOT EXISTS disorot BOOLEAN NOT NULL DEFAULT false;
+-- Catatan Tahap 11: kolom `disorot` pada tabel `pertanyaan` lama dihapus bersama
+-- tabel tersebut. Moderasi chat memakai kolom `status` pada `chat_pesan`.
 
 COMMENT ON COLUMN jadwal_tetap.nama_penyiar IS 'Nama penyiar bertugas, disunting dari panel admin jadwal.';
-COMMENT ON COLUMN pertanyaan.disorot IS 'Penanda pertanyaan yang disorot di layar studio.';
