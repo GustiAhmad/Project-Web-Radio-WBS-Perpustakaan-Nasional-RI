@@ -59,7 +59,7 @@ npm run dev
 
 Skrip lain: `npm run type-check`, `npm run build`, `npm run preview`.
 
-Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase. Ikuti **[panduan setup Supabase](docs/panduan-setup-supabase.md)** dan **[panduan deploy](docs/panduan-deploy.md)**. Nilai rahasia (Supabase, GA4, URL Icecast) diset sebagai GitHub Actions secrets untuk build produksi—lihat `.env.example`.
+Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase. Ikuti **[panduan setup Supabase](docs/panduan-setup-supabase.md)** dan **[panduan deploy](docs/panduan-deploy.md)**. Konfigurasi Vercel sudah siap di `vercel.json`; nilai rahasia (Supabase, GA4, URL Icecast) diisi lewat dashboard Vercel atau GitHub Actions secrets—lihat `.env.example`.
 
 ---
 
@@ -83,9 +83,17 @@ Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase.
 ├── supabase/
 │   ├── schema.sql                 # Skema lengkap untuk instalasi baru
 │   └── migrations/                # Migrasi bertahap (001–007)
+├── .env.example                   # Template variabel lingkungan publik
 ├── AGENTS.md                      # Instruksi operasional & guardrails proyek
 ├── CLAUDE.md                      # Penunjuk singkat ke AGENTS.md
-└── README.md
+├── README.md
+├── index.html                     # Template HTML, favicon & metadata OG
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+├── tsconfig.json
+├── vite.config.ts
+└── vercel.json                    # Rewrite SPA & base path untuk Vercel
 ```
 
 ---

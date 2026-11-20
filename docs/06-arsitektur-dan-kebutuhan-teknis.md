@@ -782,7 +782,8 @@ radio-wbs/
 ├── postcss.config.js
 ├── tailwind.config.js              # Konfigurasi token warna Perpusnas
 ├── tsconfig.json                   # Konfigurasi kompilasi TypeScript
-└── vite.config.ts                  # Konfigurasi bundler Vite
+├── vite.config.ts                  # Konfigurasi bundler Vite
+└── vercel.json                     # Rewrite SPA & base path untuk Vercel
 ```
 
 ### 9.2 Alur Otomatisasi CI/CD (*GitHub Actions Workflow*)
