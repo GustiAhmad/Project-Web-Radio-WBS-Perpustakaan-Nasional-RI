@@ -244,7 +244,7 @@
   - Buat berkas alur kerja GitHub Actions `.github/workflows/deploy.yml` untuk build dan deploy otomatis lewat GitHub Pages Actions (environment `github-pages`).
 - [x] **7.4 Verifikasi Produksi & Tanda Tangan Berita Acara UAT**
   - Panduan uji produksi tersedia di `panduan-deploy.md`; lembar pengesahan ada di `docs/09-rencana-pengujian-dan-evaluasi.md` Bagian 9.
-  - Deploy produksi hijau di `https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/`; refresh deep link `/jadwal` terbukti status 200.
+  - Deploy produksi hijau di `https://radio-perpusnas.github.io/`; refresh deep link `/jadwal` terbukti status 200.
   - Berita acara UAT final diisi bersama pustakawan setelah Review Gate 8.
 
 ---

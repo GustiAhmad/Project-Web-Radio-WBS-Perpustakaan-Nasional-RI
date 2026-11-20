@@ -1,6 +1,6 @@
 # Radio & Siniar WBS Perpustakaan Nasional RI
 
-[![Deploy ke GitHub Pages](https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/actions/workflows/deploy.yml/badge.svg)](https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/actions/workflows/deploy.yml)
+[![Deploy ke GitHub Pages](https://github.com/radio-perpusnas/radio-perpusnas.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/radio-perpusnas/radio-perpusnas.github.io/actions/workflows/deploy.yml)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Free%20Tier-3FCF8E?logo=supabase&logoColor=black)
@@ -8,7 +8,7 @@
 
 > Etalase resmi **Layanan Radio dan Siniar Widya Bahana Swara (WBS)** Perpustakaan Nasional RI, di bawah naungan **Pusat Jasa Informasi Perpustakaan dan Pengelolaan Naskah Nusantara (PUJASINTARA)**.
 
-**Demo langsung:** https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/
+**Demo langsung:** https://radio-perpusnas.github.io/
 
 ---
 
@@ -44,8 +44,8 @@ Akses pengelola hanya dua peran: **superadmin** (akses penuh) dan **admin** (ope
 
 ```bash
 # 1. Klon repositori
-git clone https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI.git
-cd Project-Web-Radio-WBS-Perpustakaan-Nasional-RI
+git clone https://github.com/radio-perpusnas/radio-perpusnas.github.io.git
+cd radio-perpusnas.github.io
 
 # 2. Pasang dependensi
 npm install
@@ -59,7 +59,7 @@ npm run dev
 
 Skrip lain: `npm run type-check`, `npm run build`, `npm run preview`.
 
-Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase. Ikuti **[panduan setup Supabase](docs/panduan-setup-supabase.md)** dan **[panduan deploy](docs/panduan-deploy.md)**. Konfigurasi Vercel sudah siap di `vercel.json`; nilai rahasia (Supabase, GA4, URL Icecast) diisi lewat dashboard Vercel atau GitHub Actions secrets—lihat `.env.example`.
+Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase. Ikuti **[panduan setup Supabase](docs/panduan-setup-supabase.md)** dan **[panduan deploy](docs/panduan-deploy.md)**. Nilai rahasia (Supabase, GA4, URL Icecast) diisi lewat GitHub Actions secrets; lihat `.env.example`.
 
 ---
 
@@ -93,7 +93,7 @@ Sebelum aplikasi dapat memakai data, jalankan skema dan migrasi SQL di Supabase.
 ├── tailwind.config.js
 ├── tsconfig.json
 ├── vite.config.ts
-└── vercel.json                    # Rewrite SPA & base path untuk Vercel
+└── vercel.json                    # Konfigurasi lama, tidak dipakai oleh deploy GitHub Pages
 ```
 
 ---

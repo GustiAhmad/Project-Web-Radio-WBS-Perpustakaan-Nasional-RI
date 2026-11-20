@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 
-Sitemap: https://gustiahmad.github.io/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/sitemap.xml
+Sitemap: https://radio-perpusnas.github.io/sitemap.xml

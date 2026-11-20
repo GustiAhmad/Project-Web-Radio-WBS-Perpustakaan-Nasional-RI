@@ -13,7 +13,7 @@
 - **Instansi Penanggung Jawab:** Pusat Jasa Informasi Perpustakaan dan Pengelolaan Naskah Nusantara (PUJASINTARA), Perpustakaan Nasional RI.
 - **Penyusun / Mahasiswa Magang:** Gusti Ahmad Muttahid Bilhaq (Teknik Informatika).
 - **Direktori Proyek:** `C:\Project Radio WBS Perpusnas`
-- **Repositori GitHub:** https://github.com/GustiAhmad/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI
+- **Repositori GitHub:** https://github.com/radio-perpusnas/radio-perpusnas.github.io
 - **Misi Website:** Menyediakan etalase modern, cepat, dan ramah pemustaka untuk mendengarkan siaran radio 24 jam secara persisten (tanpa putus saat pindah halaman), menjelajahi katalog 331 rekaman video/siniar YouTube resmi, mengikuti chat live saat sesi dibuka petugas, dan membaca artikel serta berita resmi WBS.
 
 ---

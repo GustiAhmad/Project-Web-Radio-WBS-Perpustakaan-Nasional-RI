@@ -6,8 +6,8 @@
     <title>Mengalihkan...</title>
     <script>
       (function () {
-        // Base GitHub Pages project site. Perbarui juga VITE_BASE_PATH bila memakai domain kustom.
-        var BASE = '/Project-Web-Radio-WBS-Perpustakaan-Nasional-RI/';
+        // Org site radio-perpusnas.github.io memakai root sebagai base.
+        var BASE = '/';
         var path = window.location.pathname;
         path = path.indexOf(BASE) === 0 ? path.substring(BASE.length) : path.replace(/^\//, '');
         window.location.replace(BASE + '?p=' + encodeURIComponent('/' + path) + window.location.search);

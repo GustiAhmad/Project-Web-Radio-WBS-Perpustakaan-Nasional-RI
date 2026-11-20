@@ -88,7 +88,7 @@ Pengujian dilakukan pada dua lingkungan terpisah untuk mencegah data uji mencema
 
 | Komponen | Lingkungan Pratinjau (*Staging / Preview*) | Lingkungan Produksi (*Production*) |
 |---|---|---|
-| **Hosting Frontend** | Vercel Preview / GitHub Branch `staging` | GitHub Pages (`main` branch) |
+| **Hosting Frontend** | Deploy pratinjau GitHub Actions dari branch `staging` | GitHub Pages `radio-perpusnas.github.io` (branch `main`) |
 | **Basis Data BaaS** | Supabase Project `wbs-radio-dev` | Supabase Project `wbs-radio-prod` |
 | **Aliran Audio Icecast** | URL Aliran Uji Studio / Icecast Proxy Dev | URL Aliran Resmi Icecast Studio (Port 8443 / SSL Proxy) |
 | **Kanal YouTube** | Video Uji Publik & Video Sampel | 331 Episode Publik Resmi WBS |
