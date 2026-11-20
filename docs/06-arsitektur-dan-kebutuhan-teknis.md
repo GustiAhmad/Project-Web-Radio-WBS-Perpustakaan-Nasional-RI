@@ -817,12 +817,12 @@ jobs:
 
     steps:
       - name: 1. Checkout Kode Sumber
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: 2. Persiapkan Lingkungan Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: 3. Pasang Dependensi
@@ -844,13 +844,13 @@ jobs:
         run: cp dist/index.html dist/404.html
 
       - name: 7. Unggah Artefak GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: './dist'
 
       - name: 8. Luncurkan ke GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
 ```
 
 ---
