@@ -8,11 +8,14 @@ import { supabase } from '../../services/supabase'
 import type { Pengguna } from '../../types/database.types'
 import { formatTanggal } from '../../utils/formatters'
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminPenggunaPage() {
   const { profil, peran } = useAuth()
   const [daftar, setDaftar] = useState<Pengguna[]>([])
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
   const [memproses, setMemproses] = useState(false)
 

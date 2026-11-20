@@ -3,6 +3,8 @@ import { Pemuatan } from '../../components/common/StateBox'
 import { supabase } from '../../services/supabase'
 import type { HalamanStatis } from '../../types/database.types'
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminHalamanPage() {
   const [halaman, setHalaman] = useState<HalamanStatis[]>([])
   const [pilih, setPilih] = useState('')
@@ -11,6 +13,7 @@ export default function AdminHalamanPage() {
   const [konten, setKonten] = useState('')
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
 
   async function muat(): Promise<void> {

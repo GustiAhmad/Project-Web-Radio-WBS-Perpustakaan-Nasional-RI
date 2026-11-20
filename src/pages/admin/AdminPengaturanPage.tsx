@@ -10,6 +10,8 @@ function sebagaiObjek(nilai: Json | undefined): ObjekJson {
   return nilai && typeof nilai === 'object' && !Array.isArray(nilai) ? (nilai as ObjekJson) : {}
 }
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminPengaturanPage() {
   const [streamUrl, setStreamUrl] = useState('')
   const [pesanGangguan, setPesanGangguan] = useState('')
@@ -17,6 +19,7 @@ export default function AdminPengaturanPage() {
   const [analitikAktif, setAnalitikAktif] = useState(false)
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
   const [mengunduh, setMengunduh] = useState(false)
 

@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { ExternalLink, ImageOff, Play } from 'lucide-react'
+import { lacakEvent } from '../../services/ga4'
 import { posterYouTube } from '../../utils/formatters'
 
 type Props = {
   videoId: string
   judul: string
+  episodeSlug?: string
 }
 
-export default function YouTubeFacade({ videoId, judul }: Props) {
+export default function YouTubeFacade({ videoId, judul, episodeSlug }: Props) {
   const [aktif, setAktif] = useState(false)
   const [webpGagal, setWebpGagal] = useState(false)
   const [posterGagal, setPosterGagal] = useState(false)
@@ -32,7 +34,13 @@ export default function YouTubeFacade({ videoId, judul }: Props) {
         ) : (
           <button
             type="button"
-            onClick={() => setAktif(true)}
+            onClick={() => {
+              lacakEvent('video_facade_click', {
+                episode_slug: episodeSlug ?? '',
+                video_id: videoId,
+              })
+              setAktif(true)
+            }}
             aria-label={`Putar video ${judul}`}
             className="group relative block h-full w-full"
           >

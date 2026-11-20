@@ -122,7 +122,12 @@ export async function ambilEpisodeSeri(seriId: string): Promise<EpisodeKatalog[]
 
 export async function ambilEpisode(slug: string): Promise<EpisodeKatalog | null> {
   if (!supabase) return null
-  const { data, error } = await supabase.from('episode').select(kolomEpisode).eq('slug', slug).maybeSingle()
+  const { data, error } = await supabase
+    .from('episode')
+    .select(kolomEpisode)
+    .eq('slug', slug)
+    .eq('status', 'tayang')
+    .maybeSingle()
   if (error) {
     gagal('memuat detail episode', error.message)
     return null

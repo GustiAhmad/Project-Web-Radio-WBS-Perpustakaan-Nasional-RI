@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Mail, Youtube } from 'lucide-react'
+import { lacakKlikMenu } from '../../services/ga4'
 
 const mediaSosial = [
   { label: 'YouTube WBS', href: 'https://www.youtube.com/@WBSRadioPerpusnas', ikon: Youtube },
@@ -31,11 +32,21 @@ export default function Footer() {
         <div>
           <h2 className="text-sm font-bold uppercase tracking-wide text-perpusnas-gold">Tautan Cepat</h2>
           <ul className="mt-4 space-y-2 text-sm text-white/70">
-            <li><Link className="hover:text-white" to="/jadwal">Jadwal Siaran</Link></li>
-            <li><Link className="hover:text-white" to="/program">Jelajah Program</Link></li>
-            <li><Link className="hover:text-white" to="/tentang">Tentang WBS</Link></li>
-            <li><Link className="hover:text-white" to="/kontak">Kontak &amp; WhatsApp</Link></li>
-            <li><Link className="hover:text-white" to="/kebijakan-privasi">Kebijakan Privasi</Link></li>
+            <li>
+              <Link className="hover:text-white" to="/jadwal" onClick={() => lacakKlikMenu('Jadwal Siaran', '/jadwal', 'footer')}>Jadwal Siaran</Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" to="/program" onClick={() => lacakKlikMenu('Jelajah Program', '/program', 'footer')}>Jelajah Program</Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" to="/tentang" onClick={() => lacakKlikMenu('Tentang WBS', '/tentang', 'footer')}>Tentang WBS</Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" to="/kontak" onClick={() => lacakKlikMenu('Kontak & WhatsApp', '/kontak', 'footer')}>Kontak &amp; WhatsApp</Link>
+            </li>
+            <li>
+              <Link className="hover:text-white" to="/kebijakan-privasi" onClick={() => lacakKlikMenu('Kebijakan Privasi', '/kebijakan-privasi', 'footer')}>Kebijakan Privasi</Link>
+            </li>
           </ul>
         </div>
 

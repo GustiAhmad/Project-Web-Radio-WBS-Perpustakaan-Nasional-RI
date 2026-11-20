@@ -27,7 +27,13 @@ export function initGA4(id: string = ID_DARI_ENV): void {
     window.dataLayer?.push(argumen)
   }
   window.gtag('js', new Date())
-  window.gtag('config', bersih, { anonymize_ip: true, send_page_view: false })
+  // Mode debug dipakai saat verifikasi GA4 setelah situs live, lewat ?ga4_debug=1.
+  const modeDebug = new URLSearchParams(window.location.search).has('ga4_debug')
+  window.gtag('config', bersih, {
+    anonymize_ip: true,
+    send_page_view: false,
+    ...(modeDebug ? { debug_mode: true } : {}),
+  })
 
   const skrip = document.createElement('script')
   skrip.async = true
@@ -37,7 +43,17 @@ export function initGA4(id: string = ID_DARI_ENV): void {
 
 export function lacakEvent(nama: string, parameter: ParameterEvent = {}): void {
   if (!idAktif || typeof window.gtag !== 'function') return
+  if (typeof window.location !== 'undefined' && /(^|\/)admin(\/|$)/.test(window.location.pathname)) return
   window.gtag('event', nama, { ...parameter, send_to: idAktif })
+}
+
+/** Satu tempat untuk event menu, supaya label dan posisinya konsisten. */
+export function lacakKlikMenu(label: string, tujuan: string, posisi: 'header' | 'footer'): void {
+  lacakEvent('menu_click', {
+    menu_label: label,
+    menu_tujuan: tujuan,
+    posisi,
+  })
 }
 
 /** Panel admin dapat mengisi ID GA4 tanpa mengubah berkas .env. */

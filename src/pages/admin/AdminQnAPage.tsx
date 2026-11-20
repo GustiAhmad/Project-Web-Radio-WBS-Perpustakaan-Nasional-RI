@@ -38,6 +38,8 @@ const statusPertanyaan: Record<Pertanyaan['status'], string> = {
   disembunyikan: 'Disembunyikan',
 }
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminQnAPage() {
   const { profil } = useAuth()
   const [sesi, setSesi] = useState<SesiOnAir | null>(null)
@@ -51,6 +53,7 @@ export default function AdminQnAPage() {
   const [memuat, setMuat] = useState(true)
   const [memproses, setMemproses] = useState(false)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
 
   const muatSesi = useCallback(async (): Promise<void> => {

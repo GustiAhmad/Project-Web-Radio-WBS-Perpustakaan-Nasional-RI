@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { LogIn, Menu, Search, X } from 'lucide-react'
+import { lacakEvent, lacakKlikMenu } from '../../services/ga4'
 
 const navigasi = [
   { label: 'Beranda', ke: '/' },
@@ -63,6 +64,7 @@ export default function Header() {
               to={item.ke}
               end={item.ke === '/'}
               className={({ isActive }) => kelasTautan(isActive)}
+              onClick={() => lacakKlikMenu(item.label, item.ke, 'header')}
             >
               {item.label}
             </NavLink>
@@ -89,6 +91,7 @@ export default function Header() {
 
         <Link
           to="/admin/masuk"
+          onClick={() => lacakEvent('masuk_click', { posisi: 'header' })}
           className="ml-auto hidden shrink-0 items-center gap-1.5 rounded-full border border-perpusnas-blue/20 px-3 py-2 text-xs font-semibold text-perpusnas-blue transition hover:bg-perpusnas-blue-light lg:inline-flex"
         >
           <LogIn size={15} aria-hidden="true" />
@@ -133,7 +136,10 @@ export default function Header() {
                 to={item.ke}
                 end={item.ke === '/'}
                 className={({ isActive }) => kelasTautan(isActive, true)}
-                onClick={() => setMenuBuka(false)}
+                onClick={() => {
+                  setMenuBuka(false)
+                  lacakKlikMenu(item.label, item.ke, 'header')
+                }}
               >
                 {item.label}
               </NavLink>
@@ -141,7 +147,10 @@ export default function Header() {
           </nav>
           <Link
             to="/admin/masuk"
-            onClick={() => setMenuBuka(false)}
+            onClick={() => {
+              setMenuBuka(false)
+              lacakEvent('masuk_click', { posisi: 'header' })
+            }}
             className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-perpusnas-blue px-4 py-3 text-sm font-semibold text-white"
           >
             <LogIn size={16} aria-hidden="true" />

@@ -14,11 +14,14 @@ type Status = Database['public']['Enums']['status_publikasi']
 
 const daftarKanal: Kanal[] = ['youtube', 'zoom', 'instagram', 'tatap_muka', 'lainnya']
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminAcaraPage() {
   const [acara, setAcara] = useState<AcaraMendatang[]>([])
   const [seri, setSeri] = useState<Seri[]>([])
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
   const [menampilkanForm, setMenampilkanForm] = useState(false)
   const [suntingId, setSuntingId] = useState<string | null>(null)

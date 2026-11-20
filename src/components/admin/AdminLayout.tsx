@@ -75,9 +75,13 @@ export default function AdminLayout() {
           } bg-perpusnas-blue-dark lg:sticky lg:top-0 lg:block lg:h-screen lg:w-64 lg:shrink-0`}
         >
           <div className="flex items-center gap-3 px-5 py-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-perpusnas-gold text-sm font-bold text-perpusnas-blue-dark">
-              WBS
-            </span>
+            <img
+              src={`${import.meta.env.BASE_URL}LOGO-PERPUSNAS.svg`}
+              alt="Logo Perpustakaan Nasional RI"
+              width={40}
+              height={40}
+              className="h-10 w-10 shrink-0 rounded-lg bg-white object-contain p-1"
+            />
             <span className="leading-tight text-white">
               <span className="block text-sm font-bold">Panel Pengelola</span>
               <span className="block text-[11px] text-white/60">Radio &amp; Siniar WBS</span>

@@ -5,6 +5,7 @@ import Breadcrumbs from '../components/common/Breadcrumbs'
 import EpisodeCard from '../components/catalog/EpisodeCard'
 import { Kosong, Pemuatan } from '../components/common/StateBox'
 import { ambilHalamanVideoTerbaru, ambilSemuaSeri, type EpisodeKatalog, type SeriKatalog } from '../services/catalog'
+import { lacakEvent } from '../services/ga4'
 
 const VIDEO_PER_HALAMAN = 12
 
@@ -45,6 +46,10 @@ export default function VideoTerbaruPage() {
   const petaSeri = new Map(seri.map((item) => [item.id, item]))
 
   function bukaHalaman(nomor: number): void {
+    lacakEvent('video_halaman', {
+      halaman: nomor,
+      arah: nomor > halaman ? 'maju' : 'mundur',
+    })
     setParams(nomor === 1 ? {} : { halaman: String(nomor) })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }

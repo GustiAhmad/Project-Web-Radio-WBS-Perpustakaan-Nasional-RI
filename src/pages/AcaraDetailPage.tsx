@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowUpRight, CalendarDays, Clock3 } from 'lucide-react'
 import { Kosong, Pemuatan } from '../components/common/StateBox'
 import { ambilAcaraDetail, type AcaraMendatang } from '../services/catalog'
+import { lacakEvent } from '../services/ga4'
 import { formatTanggal, labelKanal } from '../utils/formatters'
 import { pecahNarasumber } from '../utils/stringUtils'
 
@@ -12,6 +13,13 @@ export default function AcaraDetailPage() {
   const { id = '' } = useParams()
   const [acara, setAcara] = useState<AcaraMendatang | null>(null)
   const [memuat, setMuat] = useState(true)
+  const acaraDilacakRef = useRef('')
+
+  useEffect(() => {
+    if (!acara || acaraDilacakRef.current === acara.id) return
+    acaraDilacakRef.current = acara.id
+    lacakEvent('acara_view', { acara_id: acara.id, kanal: acara.kanal })
+  }, [acara])
 
   useEffect(() => {
     let masihAktif = true

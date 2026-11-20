@@ -19,6 +19,8 @@
 - [x] **Tahap 6:** Antarmuka Panel Pengelola (Dasbor Admin & Superadmin) *(Selesai, Review Gate 6 lolos)*
 - [x] **Tahap 7:** Optimasi Performa, Integrasi Analitik & Deployment GitHub Pages *(Selesai, Review Gate 7 lolos)*
 - [x] **Tahap 8:** Identitas Pengelola, Poster & Detail Acara, Gambar Seri, On-Air Personalities, dan Manajemen Akun *(Selesai, Review Gate 8 lolos)*
+- [x] **Tahap 9:** Perbaikan Hasil UAT Review Gate 8 *(Selesai, Review Gate 9 lolos)*
+- [ ] **Tahap 10:** Notifikasi Error, Alur Kelola Episode, Penanda Data Kosong, Identitas Admin, dan Analitik GA4 *(Menunggu Review Gate 10)*
 
 ---
 
@@ -297,8 +299,43 @@
   - `supabase db query --remote --file supabase-tahap9.sql --yes` berhasil; kedua bucket terverifikasi 2 MB dan JPG/PNG.
   - Edge Function `kelola-pengguna` di-deploy ulang dengan aksi `ubah_kata_sandi`.
   - `npm run type-check` dan `npm run build` lolos tanpa galat.
-- [ ] **9.6 Review Gate 9**
-  - Panduan uji bernomor disajikan pada percakapan Review Gate 9; menunggu konfirmasi `LOLOS` dari pengguna sebelum commit dan push.
+- [x] **9.6 Review Gate 9**
+  - Panduan uji bernomor disajikan pada percakapan Review Gate 9 dan dinyatakan `LOLOS` oleh pengguna; commit `4fac915` sudah di-push.
+
+---
+
+### TAHAP 10: Notifikasi Error, Alur Kelola Episode, Penanda Data Kosong, Identitas Admin, dan Analitik GA4
+
+- [x] **10.1 Notifikasi Error Global**
+  - `NotifikasiProvider` + `ToastNotifikasi` menampilkan pesan galat, sukses, dan info di semua halaman.
+  - Pesan galat otomatis menggulir layar ke atas; hook `useNotifikasiGalat` dipasang di seluruh halaman panel pengelola.
+- [x] **10.2 Alur Kelola Episode yang Terpisah**
+  - `/admin/episode` menampilkan episode tayang sebagai halaman awal, dengan filter status dan pencarian.
+  - Tombol **Tambah Episode** di kanan atas menuju `/admin/episode/baru`; tiap baris memiliki tombol **Edit** dan **Hapus**.
+  - `/admin/episode/baru` dan `/admin/episode/:id/edit` memakai form yang sama; Admin dan Superadmin dapat mengubah judul, narasumber, moderator, topik, durasi, tautan, dan status.
+- [x] **10.3 Penanda Data Kosong**
+  - Daftar episode menandai narasumber dan moderator yang kosong.
+  - Daftar seri menandai seri yang belum memiliki gambar sampul.
+- [x] **10.4 Identitas Panel Pengelola**
+  - Logo kotak "WBS" di sidebar admin diganti logo resmi Perpustakaan Nasional RI.
+- [x] **10.5 Dokumen Pendukung**
+  - `docs/11-panduan-youtube-data-api.md` berisi panduan API key tanpa implementasi (catatan ditunda).
+  - `docs/12-rencana-analitik-ga4.md` berisi daftar event, dimensi, laporan, dan aturan privasi.
+- [x] **10.6 Wiring Analitik GA4**
+  - `ga4.ts` dilengkapi pengaman rute `/admin/*` dan helper `lacakKlikMenu`.
+  - Event dipasang: `menu_click`, `masuk_click`, `radio_pause`, `radio_error`, `radio_persisten`, `video_facade_click`, `episode_view`, `series_view`, `acara_view`, `cari`, `video_halaman`, dan `qna_sesi_dibuka`.
+  - Keputusan Review Gate 10: kode siap, aktivasi GA4 ditunda sampai website live untuk publik. Tanpa ID Pengukuran tidak ada event yang dikirim.
+- [x] **10.7 Verifikasi Teknis**
+  - `npm run type-check` dan `npm run build` lolos tanpa galat.
+- [ ] **10.8 Review Gate 10**
+  - Panduan uji bernomor disajikan pada percakapan Review Gate 10; menunggu konfirmasi `LOLOS` sebelum commit dan push.
+  - Putaran 1 — episode tayang tidak bisa dihapus karena RLS `DELETE` hanya mengizinkan superadmin menghapus draf. Tombol diubah menjadi **Arsipkan** (UPDATE ke `arsip_internal`), dan `ambilEpisode()` ikut memfilter `status = 'tayang'`.
+  - Putaran 1 — Kelola Seri belum memiliki tambah/hapus seri. Ditambahkan tombol **Tambah Seri** dan **Hapus Seri**; saat seri dihapus, video dipindahkan ke **Lainnya** dengan `nomor_episode = null` dan notifikasi menyebut jumlah video yang dipindahkan.
+  - Putaran 1 — semua kolom form seri kini punya judul terlihat di atas kolom: nama, deskripsi, gambar, teks alternatif, kategori, urutan, dan penanda unggulan.
+  - Putaran 1 — `docs/12-rencana-analitik-ga4.md` dilengkapi panduan GA4 DebugView dan uji responsif 360 px / 1280 px.
+  - Putaran 2 — tombol **Tambah Seri** mengarah ke halaman baru `/admin/seri/baru`, mengikuti pola `/admin/episode/baru`. Daftar dan sunting tetap di `/admin/seri`.
+  - Putaran 2 — validasi, unggah gambar, dan penulisan seri dipindah ke `src/services/seri.ts`; form bersama dipakai halaman daftar dan halaman tambah.
+  - Putaran 2 — GA4 tidak diuji pada Tahap 10; aktivasi dan DebugView dilakukan setelah situs live.
 
 ---
 

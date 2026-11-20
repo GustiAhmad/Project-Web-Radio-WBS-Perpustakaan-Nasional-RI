@@ -18,3 +18,11 @@ export function Kosong({ judul, pesan }: { judul: string; pesan: string }) {
     </div>
   )
 }
+
+export function PenandaKosong({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+      {label} kosong
+    </span>
+  )
+}

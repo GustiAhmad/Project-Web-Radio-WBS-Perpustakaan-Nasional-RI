@@ -9,6 +9,7 @@ import PersistentPlayer from './components/player/PersistentPlayer'
 import HomePage from './pages/HomePage'
 import { AudioProvider } from './context/AudioContext'
 import { AuthProvider } from './context/AuthContext'
+import { NotifikasiProvider } from './context/NotifikasiContext'
 import { lacakEvent, muatPengaturanAnalitik } from './services/ga4'
 import { ujiKoneksiSupabase } from './services/supabase'
 
@@ -26,6 +27,7 @@ const VideoTerbaruPage = lazy(() => import('./pages/VideoTerbaruPage'))
 const AdminAcaraPage = lazy(() => import('./pages/admin/AdminAcaraPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminEpisodePage = lazy(() => import('./pages/admin/AdminEpisodePage'))
+const AdminEpisodeFormPage = lazy(() => import('./pages/admin/AdminEpisodeFormPage'))
 const AdminHalamanPage = lazy(() => import('./pages/admin/AdminHalamanPage'))
 const AdminJadwalPage = lazy(() => import('./pages/admin/AdminJadwalPage'))
 const AdminLaporanErrorPage = lazy(() => import('./pages/admin/AdminLaporanErrorPage'))
@@ -35,6 +37,7 @@ const AdminPenggunaPage = lazy(() => import('./pages/admin/AdminPenggunaPage'))
 const AdminPenyiarPage = lazy(() => import('./pages/admin/AdminPenyiarPage'))
 const AdminProfilPage = lazy(() => import('./pages/admin/AdminProfilPage'))
 const AdminQnAPage = lazy(() => import('./pages/admin/AdminQnAPage'))
+const AdminSeriFormPage = lazy(() => import('./pages/admin/AdminSeriFormPage'))
 const AdminSeriPage = lazy(() => import('./pages/admin/AdminSeriPage'))
 
 function KontenAplikasi() {
@@ -88,7 +91,10 @@ function KontenAplikasi() {
                 <Route path="tanya-jawab" element={<AdminQnAPage />} />
                 <Route path="jadwal" element={<AdminJadwalPage />} />
                 <Route path="episode" element={<AdminEpisodePage />} />
+                <Route path="episode/baru" element={<AdminEpisodeFormPage />} />
+                <Route path="episode/:id/edit" element={<AdminEpisodeFormPage />} />
                 <Route path="seri" element={<AdminSeriPage />} />
+                <Route path="seri/baru" element={<AdminSeriFormPage />} />
                 <Route path="acara" element={<AdminAcaraPage />} />
                 <Route path="halaman" element={<AdminHalamanPage />} />
                 <Route path="penyiar" element={<AdminPenyiarPage />} />
@@ -124,7 +130,9 @@ export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <AuthProvider>
-        <KontenAplikasi />
+        <NotifikasiProvider>
+          <KontenAplikasi />
+        </NotifikasiProvider>
       </AuthProvider>
     </BrowserRouter>
   )

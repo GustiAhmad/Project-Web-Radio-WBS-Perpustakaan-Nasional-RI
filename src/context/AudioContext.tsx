@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useLocation } from 'react-router-dom'
 import { lacakEvent } from '../services/ga4'
 
 type StatusAudio = 'idle' | 'buffering' | 'playing' | 'paused' | 'offline'
@@ -33,6 +34,8 @@ const BATAS_PERCOBAAN = 3
 const AudioContext = createContext<NilaiAudio | null>(null)
 
 export function AudioProvider({ children }: { children: ReactNode }) {
+  const lokasi = useLocation()
+  const lokasiSebelumnyaRef = useRef(lokasi.pathname)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const inginPutarRef = useRef(false)
   const sudahLacakPutarRef = useRef(false)
@@ -44,6 +47,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  useEffect(() => {
+    const sebelumnya = lokasiSebelumnyaRef.current
+    if (sebelumnya === lokasi.pathname) return
+    lokasiSebelumnyaRef.current = lokasi.pathname
+    if (!inginPutarRef.current) return
+    lacakEvent('radio_persisten', { halaman_tujuan: lokasi.pathname })
+  }, [lokasi.pathname])
+
   const jadwalkanUlang = useCallback(() => {
     const audio = audioRef.current
     if (!audio || !inginPutarRef.current) return
@@ -52,6 +63,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       setStatus('offline')
       setError('Gagal memuat siaran. Periksa koneksi internet Anda.')
       inginPutarRef.current = false
+      lacakEvent('radio_error', { alasan: 'percobaan_habis' })
       return
     }
 
@@ -126,6 +138,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, [jadwalkanUlang])
 
   const jeda = useCallback(() => {
+    if (inginPutarRef.current) lacakEvent('radio_pause')
     inginPutarRef.current = false
     sudahLacakPutarRef.current = false
     if (timerRef.current !== null) {

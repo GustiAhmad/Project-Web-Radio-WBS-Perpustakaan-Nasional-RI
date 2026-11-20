@@ -1,47 +1,30 @@
 import { useEffect, useState } from 'react'
-import { Check, Pencil, X } from 'lucide-react'
-import { Kosong, Pemuatan } from '../../components/common/StateBox'
-import UnggahGambarField from '../../components/admin/UnggahGambarField'
-import { PESAN_GAMBAR_TIDAK_VALID, terimaBerkas, unggahGambar } from '../../services/aset'
+import { Link } from 'react-router-dom'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Kosong, PenandaKosong, Pemuatan } from '../../components/common/StateBox'
+import FormulirSeri from '../../components/admin/FormulirSeri'
+import { useAuth } from '../../context/AuthContext'
+import { useNotifikasi } from '../../context/NotifikasiContext'
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
 import { supabase } from '../../services/supabase'
-import type { Database, Seri } from '../../types/database.types'
-
-type Kategori = Database['public']['Enums']['kategori_topik']
-
-const daftarKategori: Kategori[] = [
-  'layanan_perpustakaan',
-  'naskah_nusantara',
-  'literasi_keluarga',
-  'sejarah_kebudayaan',
-  'semua_kategori',
-]
-
-const labelKategori: Record<Kategori, string> = {
-  layanan_perpustakaan: 'Layanan Perpustakaan',
-  naskah_nusantara: 'Naskah Nusantara',
-  literasi_keluarga: 'Literasi Keluarga',
-  sejarah_kebudayaan: 'Sejarah & Kebudayaan',
-  semua_kategori: 'Semua Kategori',
-}
-
-type Draft = {
-  nama: string
-  deskripsi: string
-  kategori: Kategori
-  urutan: number
-  unggulan: boolean
-  gambarUrl: string | null
-  gambar: File | null
-  teksAlternatif: string
-}
+import { labelKategori, simpanSeri, validasiDraftSeri, type DraftSeri } from '../../services/seri'
+import type { Seri } from '../../types/database.types'
+import { adaIsi } from '../../utils/stringUtils'
 
 export default function AdminSeriPage() {
+  const { peran } = useAuth()
+  const { beriNotifikasi } = useNotifikasi()
   const [seri, setSeri] = useState<Seri[]>([])
   const [memuat, setMuat] = useState(true)
-  const [sunting, setSunting] = useState<string | null>(null)
-  const [draft, setDraft] = useState<Draft | null>(null)
+  const [idSunting, setIdSunting] = useState<string | null>(null)
+  const [draft, setDraft] = useState<DraftSeri | null>(null)
   const [galat, setGalat] = useState('')
-  const [pesan, setPesan] = useState('')
+  const [sedangMenyimpan, setSedangMenyimpan] = useState(false)
+  const [sedangMenghapus, setSedangMenghapus] = useState<string | null>(null)
+  useNotifikasiGalat(galat)
+
+  const superadmin = peran === 'superadmin'
+  const penampung = seri.find((item) => item.jenis === 'keranjang') ?? seri.find((item) => item.slug === 'lainnya')
 
   async function muat(): Promise<void> {
     if (!supabase) {
@@ -59,66 +42,128 @@ export default function AdminSeriPage() {
     void muat()
   }, [])
 
-  async function simpan(id: string): Promise<void> {
-    if (!supabase || !draft) return
-    if (draft.gambar && !terimaBerkas(draft.gambar)) {
-      setGalat(PESAN_GAMBAR_TIDAK_VALID)
-      return
-    }
-    const { error } = await supabase
-      .from('seri')
-      .update({
-        nama: draft.nama.trim(),
-        deskripsi: draft.deskripsi.trim(),
-        kategori: draft.kategori,
-        urutan: draft.urutan,
-        unggulan: draft.unggulan,
-      })
-      .eq('id', id)
-    if (error) {
-      setGalat(`Gagal menyimpan seri: ${error.message}`)
-      return
-    }
+  function mulaiSunting(item: Seri): void {
+    setGalat('')
+    setIdSunting(item.id)
+    setDraft({
+      nama: item.nama,
+      deskripsi: item.deskripsi,
+      kategori: item.kategori,
+      urutan: item.urutan,
+      unggulan: item.unggulan,
+      gambarUrl: item.gambar_url,
+      gambar: null,
+      teksAlternatif: item.teks_alternatif ?? '',
+    })
+  }
 
-    let urlGambar = draft.gambarUrl
-    if (draft.gambar) {
-      try {
-        urlGambar = await unggahGambar('seri', id, draft.gambar)
-      } catch (galatUnggah) {
-        setGalat(galatUnggah instanceof Error ? galatUnggah.message : 'Gambar seri gagal diunggah.')
+  function batalkan(): void {
+    setIdSunting(null)
+    setDraft(null)
+  }
+
+  async function simpan(): Promise<void> {
+    if (!draft || !idSunting) return
+    const pesanGalat = validasiDraftSeri(draft, seri, idSunting)
+    if (pesanGalat) {
+      setGalat(pesanGalat)
+      return
+    }
+    setGalat('')
+    setSedangMenyimpan(true)
+    try {
+      await simpanSeri(draft, seri, idSunting)
+      batalkan()
+      beriNotifikasi('sukses', 'Seri tersimpan.')
+      await muat()
+    } catch (galatSimpan) {
+      setGalat(galatSimpan instanceof Error ? galatSimpan.message : 'Seri gagal disimpan.')
+    } finally {
+      setSedangMenyimpan(false)
+    }
+  }
+
+  async function hapusSeri(item: Seri): Promise<void> {
+    if (!supabase || !superadmin) return
+    if (item.jenis === 'keranjang' || item.slug === 'lainnya') {
+      setGalat('Seri Lainnya tidak dapat dihapus karena menjadi penampung video.')
+      return
+    }
+    if (!penampung) {
+      setGalat('Seri Lainnya belum tersedia. Jalankan migrasi Tahap 2 terlebih dahulu.')
+      return
+    }
+    const setuju = window.confirm(
+      `Hapus seri "${item.nama}"? Video di dalamnya akan dipindahkan ke seri Lainnya.`
+    )
+    if (!setuju) return
+
+    setGalat('')
+    setSedangMenghapus(item.id)
+    try {
+      const { count, error: galatHitung } = await supabase
+        .from('episode')
+        .select('id', { count: 'exact', head: true })
+        .eq('seri_id', item.id)
+      if (galatHitung) {
+        setGalat(`Gagal menghitung video dalam seri: ${galatHitung.message}`)
         return
       }
-    }
-    const { error: galatGambar } = await supabase
-      .from('seri')
-      .update({
-        gambar_url: urlGambar,
-        teks_alternatif: draft.teksAlternatif.trim() || null,
-      })
-      .eq('id', id)
-    if (galatGambar) {
-      setGalat(`Gambar seri gagal disimpan: ${galatGambar.message}`)
-      return
-    }
+      const jumlah = count ?? 0
 
-    setSunting(null)
-    setDraft(null)
-    setPesan('Seri tersimpan.')
-    await muat()
+      const { error: galatPindah } = await supabase
+        .from('episode')
+        .update({ seri_id: penampung.id, nomor_episode: null })
+        .eq('seri_id', item.id)
+      if (galatPindah) {
+        setGalat(`Gagal memindahkan video ke Lainnya: ${galatPindah.message}`)
+        return
+      }
+
+      const { error: galatHapus } = await supabase.from('seri').delete().eq('id', item.id)
+      if (galatHapus) {
+        setGalat(`Gagal menghapus seri: ${galatHapus.message}`)
+        return
+      }
+
+      beriNotifikasi(
+        'sukses',
+        jumlah > 0
+          ? `Seri "${item.nama}" dihapus. ${jumlah} video dipindahkan ke Lainnya.`
+          : `Seri "${item.nama}" dihapus. Tidak ada video yang perlu dipindahkan.`
+      )
+      await muat()
+    } finally {
+      setSedangMenghapus(null)
+    }
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-perpusnas-blue">Kelola Seri</h1>
-      <p className="mt-2 text-sm text-perpusnas-gray-600">
-        Sunting nama, kategori, urutan, dan status unggulan dari 22 seri resmi WBS.
-      </p>
-      {galat && (
-        <p role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{galat}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-perpusnas-blue">Kelola Seri</h1>
+          <p className="mt-2 text-sm text-perpusnas-gray-600">
+            Daftar seri menjadi halaman awal. Sunting nama, kategori, urutan, dan unggulan langsung pada kartu seri.
+          </p>
+        </div>
+        {superadmin && (
+          <Link
+            to="/admin/seri/baru"
+            className="inline-flex items-center gap-2 rounded-full bg-perpusnas-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-perpusnas-blue-dark"
+          >
+            <Plus size={16} aria-hidden="true" />
+            Tambah Seri
+          </Link>
+        )}
+      </div>
+
+      {!superadmin && (
+        <p className="mt-4 rounded-lg border border-perpusnas-blue/10 bg-perpusnas-blue-light px-4 py-3 text-sm text-perpusnas-blue">
+          Akun Admin dapat menyunting seri. Penambahan dan penghapusan seri memerlukan akun Superadmin.
+        </p>
       )}
-      {pesan && (
-        <p role="status" className="mt-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{pesan}</p>
-      )}
+
       <div className="mt-6">
         {memuat ? (
           <Pemuatan pesan="Memuat seri..." />
@@ -127,80 +172,22 @@ export default function AdminSeriPage() {
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {seri.map((item) => {
-              const aktif = sunting === item.id && draft
+              const aktif = idSunting === item.id && draft
               return (
                 <article key={item.id} className="rounded-xl border border-perpusnas-blue/10 bg-white p-5 shadow-sm">
                   {aktif ? (
-                    <div className="space-y-3">
-                      <input
-                        aria-label="Nama seri"
-                        value={draft.nama}
-                        onChange={(e) => setDraft({ ...draft, nama: e.target.value })}
-                        className="w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm"
+                    <>
+                      <h2 className="mb-4 font-bold text-perpusnas-blue">Sunting: {item.nama}</h2>
+                      <FormulirSeri
+                        draft={draft}
+                        padaUbah={(perubahan) => setDraft({ ...draft, ...perubahan })}
+                        padaSimpan={() => void simpan()}
+                        padaBatal={batalkan}
+                        sedangMenyimpan={sedangMenyimpan}
+                        id={item.id}
+                        teksTombol="Simpan Perubahan"
                       />
-                      <textarea
-                        aria-label="Deskripsi seri"
-                        rows={3}
-                        value={draft.deskripsi}
-                        onChange={(e) => setDraft({ ...draft, deskripsi: e.target.value })}
-                        className="w-full resize-y rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm"
-                      />
-                      <UnggahGambarField
-                        id={`gambar-seri-${item.id}`}
-                        label="Gambar seri"
-                        nilai={draft.gambarUrl}
-                        berkas={draft.gambar}
-                        padaPilih={(berkas) => setDraft({ ...draft, gambar: berkas })}
-                        padaHapus={() => setDraft({ ...draft, gambarUrl: null })}
-                        placeholder={`${import.meta.env.BASE_URL}placeholder-poster.svg`}
-                        bantuan="Sampul tampil di kartu program. Kosongkan untuk memakai placeholder."
-                      />
-                      <label className="block text-sm font-semibold text-perpusnas-gray-900">
-                        Teks alternatif gambar
-                        <input
-                          aria-label="Teks alternatif gambar seri"
-                          value={draft.teksAlternatif}
-                          onChange={(e) => setDraft({ ...draft, teksAlternatif: e.target.value })}
-                          placeholder="Misalnya: Sampul seri Naskah Nusantara"
-                          className="mt-2 w-full rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm font-normal"
-                        />
-                      </label>
-                      <div className="flex flex-wrap gap-3">
-                        <select
-                          aria-label="Kategori seri"
-                          value={draft.kategori}
-                          onChange={(e) => setDraft({ ...draft, kategori: e.target.value as Kategori })}
-                          className="rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm"
-                        >
-                          {daftarKategori.map((nilai) => (
-                            <option key={nilai} value={nilai}>{labelKategori[nilai]}</option>
-                          ))}
-                        </select>
-                        <input
-                          aria-label="Urutan seri"
-                          type="number"
-                          value={draft.urutan}
-                          onChange={(e) => setDraft({ ...draft, urutan: Number(e.target.value) })}
-                          className="w-24 rounded-lg border border-perpusnas-blue/20 px-3 py-2 text-sm"
-                        />
-                        <label className="flex items-center gap-2 text-xs text-perpusnas-gray-600">
-                          <input
-                            type="checkbox"
-                            checked={draft.unggulan}
-                            onChange={(e) => setDraft({ ...draft, unggulan: e.target.checked })}
-                          />
-                          Unggulan
-                        </label>
-                      </div>
-                      <div className="flex gap-2">
-                        <button type="button" onClick={() => void simpan(item.id)} className="rounded-lg bg-perpusnas-blue p-2 text-white" aria-label="Simpan seri">
-                          <Check size={16} aria-hidden="true" />
-                        </button>
-                        <button type="button" onClick={() => { setSunting(null); setDraft(null) }} className="rounded-lg bg-perpusnas-gray-100 p-2 text-perpusnas-gray-600" aria-label="Batal sunting">
-                          <X size={16} aria-hidden="true" />
-                        </button>
-                      </div>
-                    </div>
+                    </>
                   ) : (
                     <>
                       <div className="flex items-start justify-between gap-3">
@@ -210,31 +197,35 @@ export default function AdminSeriPage() {
                             {labelKategori[item.kategori]} - urutan {item.urutan}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSunting(item.id)
-                            setDraft({
-                              nama: item.nama,
-                              deskripsi: item.deskripsi,
-                              kategori: item.kategori,
-                              urutan: item.urutan,
-                              unggulan: item.unggulan,
-                              gambarUrl: item.gambar_url,
-                              gambar: null,
-                              teksAlternatif: item.teks_alternatif ?? '',
-                            })
-                          }}
-                          aria-label={`Sunting ${item.nama}`}
-                          className="rounded-lg bg-perpusnas-blue-light p-2 text-perpusnas-blue"
-                        >
-                          <Pencil size={15} aria-hidden="true" />
-                        </button>
+                        <div className="flex shrink-0 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => mulaiSunting(item)}
+                            aria-label={`Sunting ${item.nama}`}
+                            className="rounded-lg bg-perpusnas-blue-light p-2 text-perpusnas-blue"
+                          >
+                            <Pencil size={15} aria-hidden="true" />
+                          </button>
+                          {superadmin && item.jenis !== 'keranjang' && item.slug !== 'lainnya' && (
+                            <button
+                              type="button"
+                              onClick={() => void hapusSeri(item)}
+                              disabled={sedangMenghapus === item.id}
+                              aria-label={`Hapus ${item.nama}`}
+                              className="rounded-lg bg-red-50 p-2 text-red-800 disabled:opacity-50"
+                            >
+                              <Trash2 size={15} aria-hidden="true" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <p className="mt-3 line-clamp-3 text-sm text-perpusnas-gray-600">{item.deskripsi}</p>
-                      <p className="mt-3 text-xs text-perpusnas-gray-600">
-                        {item.jenis === 'keranjang' ? 'Keranjang Lainnya' : item.unggulan ? 'Unggulan' : 'Seri reguler'}
-                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <p className="text-xs text-perpusnas-gray-600">
+                          {item.jenis === 'keranjang' ? 'Keranjang Lainnya' : item.unggulan ? 'Unggulan' : 'Seri reguler'}
+                        </p>
+                        {!adaIsi(item.gambar_url) && <PenandaKosong label="Gambar" />}
+                      </div>
                     </>
                   )}
                 </article>

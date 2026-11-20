@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import EpisodeCard from '../components/catalog/EpisodeCard'
 import SeriCard from '../components/catalog/SeriCard'
@@ -9,7 +9,9 @@ import {
   type EpisodeKatalog,
   type SeriKatalog,
 } from '../services/catalog'
+import { lacakEvent } from '../services/ga4'
 import { labelKategori } from '../utils/formatters'
+import { bersihkanTeks } from '../utils/stringUtils'
 
 export default function SearchPage() {
   const [params] = useSearchParams()
@@ -58,6 +60,16 @@ export default function SearchPage() {
   )
 
   const petaSeri = useMemo(() => new Map(seri.map((item) => [item.id, item])), [seri])
+  const kunciDilacakRef = useRef('')
+
+  useEffect(() => {
+    if (memuat || !kunci || kunciDilacakRef.current === kunci) return
+    kunciDilacakRef.current = kunci
+    lacakEvent('cari', {
+      jumlah_hasil: hasilSeri.length + hasilEpisode.length,
+      kata_kunci: bersihkanTeks(kataKunci, 40).toLowerCase(),
+    })
+  }, [memuat, kunci, kataKunci, hasilSeri.length, hasilEpisode.length])
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

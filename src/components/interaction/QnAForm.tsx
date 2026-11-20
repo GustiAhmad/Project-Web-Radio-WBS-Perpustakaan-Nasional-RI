@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { AlertCircle, CheckCircle2, LockKeyhole, Radio, Send, Youtube } from 'lucide-react'
 import { useRealtimeQnA } from '../../hooks/useRealtimeQnA'
 import { lacakEvent } from '../../services/ga4'
@@ -32,6 +32,13 @@ export default function QnAForm() {
   const [pesan, setPesan] = useState('')
   const [terakhirKirim, setTerakhirKirim] = useState(bacaJedaTersimpan)
   const [sisaDetik, setSisaDetik] = useState(0)
+  const sesiDilacakRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (memuat || !sesi || sesiDilacakRef.current === sesi.id) return
+    sesiDilacakRef.current = sesi.id
+    lacakEvent('qna_sesi_dibuka')
+  }, [sesi, memuat])
 
   useEffect(() => {
     function perbarui(): void {

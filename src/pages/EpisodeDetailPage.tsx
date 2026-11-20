@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CalendarDays, Check, Clock3, Copy, Lightbulb, Mic2, Tag, UserRound } from 'lucide-react'
 import Breadcrumbs from '../components/common/Breadcrumbs'
 import { Kosong, Pemuatan } from '../components/common/StateBox'
 import YouTubeFacade from '../components/catalog/YouTubeFacade'
 import { ambilEpisode, type EpisodeKatalog, type SeriKatalog } from '../services/catalog'
+import { lacakEvent } from '../services/ga4'
 import { supabase } from '../services/supabase'
 import { formatDurasi, formatTanggal, labelKategori } from '../utils/formatters'
 
@@ -14,6 +15,19 @@ export default function EpisodeDetailPage() {
   const [seri, setSeri] = useState<SeriKatalog | null>(null)
   const [memuat, setMuat] = useState(true)
   const [statusSalin, setStatusSalin] = useState<'idle' | 'sukses' | 'gagal'>('idle')
+  const episodeDilacakRef = useRef('')
+
+  useEffect(() => {
+    if (!episode || !seri || seri.slug !== seriSlug) return
+    const kunci = `${seri.slug}/${episode.slug}`
+    if (episodeDilacakRef.current === kunci) return
+    episodeDilacakRef.current = kunci
+    lacakEvent('episode_view', {
+      episode_slug: episode.slug,
+      seri_slug: seri.slug,
+      nomor_episode: episode.nomor_episode,
+    })
+  }, [episode, seri, seriSlug])
 
   useEffect(() => {
     let masihAktif = true
@@ -76,7 +90,7 @@ export default function EpisodeDetailPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div>
-          <YouTubeFacade videoId={episode.video_id} judul={episode.judul} />
+          <YouTubeFacade videoId={episode.video_id} judul={episode.judul} episodeSlug={episode.slug} />
           <h1 className="mt-6 text-2xl font-bold text-perpusnas-blue sm:text-3xl">{episode.judul}</h1>
           <p className="mt-2 text-sm font-semibold text-perpusnas-gray-600">
             {seri.nama}

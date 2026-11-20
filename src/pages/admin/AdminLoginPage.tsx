@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { AlertCircle, LockKeyhole } from 'lucide-react'
 import KolomSandi from '../../components/admin/KolomSandi'
 import { useAuth } from '../../context/AuthContext'
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
 
 export default function AdminLoginPage() {
   const { masuk, penggunaAuth, profil, memuat, galatProfil, keluar } = useAuth()
@@ -10,6 +11,8 @@ export default function AdminLoginPage() {
   const [kataSandi, setKataSandi] = useState('')
   const [galat, setGalat] = useState('')
   const [memproses, setMemproses] = useState(false)
+  useNotifikasiGalat(galat)
+  useNotifikasiGalat(galatProfil ?? '')
   const navigate = useNavigate()
 
   if (!memuat && penggunaAuth && profil?.status_aktif) return <Navigate to="/admin" replace />

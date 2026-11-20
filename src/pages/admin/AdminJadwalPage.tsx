@@ -22,6 +22,8 @@ type Draft = {
   status: Database['public']['Enums']['status_publikasi']
 }
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminJadwalPage() {
   const [jadwal, setJadwal] = useState<JadwalTetap[]>([])
   const [hariAktif, setHariAktif] = useState<JenisHari>('hari_kerja')
@@ -29,6 +31,7 @@ export default function AdminJadwalPage() {
   const [sedangSunting, setSedangSunting] = useState<string | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
 
   async function muat(): Promise<void> {

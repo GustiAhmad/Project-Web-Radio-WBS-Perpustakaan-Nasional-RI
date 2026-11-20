@@ -6,6 +6,8 @@ import { useAuth } from '../../context/AuthContext'
 import { PESAN_GAMBAR_TIDAK_VALID, terimaBerkas, unggahGambar } from '../../services/aset'
 import { panggilKelolaPengguna } from '../../services/pengguna'
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminProfilPage() {
   const { profil, segarProfil } = useAuth()
   const [namaSaya, setNamaSaya] = useState('')
@@ -14,6 +16,7 @@ export default function AdminProfilPage() {
   const [sandiBaru, setSandiBaru] = useState('')
   const [memproses, setMemproses] = useState(false)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
 
   useEffect(() => {

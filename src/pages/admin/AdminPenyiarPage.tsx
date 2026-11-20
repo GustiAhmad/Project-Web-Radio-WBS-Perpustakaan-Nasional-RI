@@ -7,10 +7,13 @@ import { supabase } from '../../services/supabase'
 import type { Penyiar } from '../../types/database.types'
 import { slugify } from '../../utils/stringUtils'
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminPenyiarPage() {
   const [penyiar, setPenyiar] = useState<Penyiar[]>([])
   const [memuat, setMuat] = useState(true)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
   const [pesan, setPesan] = useState('')
   const [menampilkanForm, setMenampilkanForm] = useState(false)
   const [suntingId, setSuntingId] = useState<string | null>(null)

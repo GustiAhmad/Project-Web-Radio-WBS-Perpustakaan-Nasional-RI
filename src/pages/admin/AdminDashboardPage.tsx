@@ -14,11 +14,14 @@ type Ringkasan = {
   laporanBaru: number
 }
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminDashboardPage() {
   const { profil, peran } = useAuth()
   const { program, jam } = useOnAirProgram()
   const [ringkasan, setRingkasan] = useState<Ringkasan | null>(null)
   const [galat, setGalat] = useState('')
+  useNotifikasiGalat(galat)
 
   useEffect(() => {
     if (!supabase) {

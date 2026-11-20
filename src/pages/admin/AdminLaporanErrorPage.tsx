@@ -18,11 +18,14 @@ import type { Database, LaporanError, StatusLaporan, TingkatKeparahan } from '..
 import { Kosong, Pemuatan } from '../../components/common/StateBox'
 import { formatTanggal } from '../../utils/formatters'
 
+import { useNotifikasiGalat } from '../../hooks/useNotifikasiGalat'
+
 export default function AdminLaporanErrorPage() {
   const { profil, peran, penggunaAuth } = useAuth()
   const [laporan, setLaporan] = useState<LaporanError[]>([])
   const [memuat, setMuat] = useState(true)
   const [galatDaftar, setGalatDaftar] = useState('')
+  useNotifikasiGalat(galatDaftar)
 
   const [judul, setJudul] = useState('')
   const [deskripsi, setDeskripsi] = useState('')
@@ -34,6 +37,7 @@ export default function AdminLaporanErrorPage() {
   const [mengirim, setMengirim] = useState(false)
   const [pesan, setPesan] = useState('')
   const [gagal, setGagal] = useState('')
+  useNotifikasiGalat(gagal)
 
   async function muatLaporan(): Promise<void> {
     if (!supabase || !profil) return

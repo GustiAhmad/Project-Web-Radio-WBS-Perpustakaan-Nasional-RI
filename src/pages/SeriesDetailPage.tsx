@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, Clock3, ImageOff, PlayCircle } from 'lucide-react'
 import Breadcrumbs from '../components/common/Breadcrumbs'
@@ -9,6 +9,7 @@ import {
   type EpisodeKatalog,
   type SeriKatalog,
 } from '../services/catalog'
+import { lacakEvent } from '../services/ga4'
 import { formatDurasi, formatTanggal, labelKategori, posterYouTube } from '../utils/formatters'
 
 const BATAS_AWAL = 12
@@ -20,6 +21,13 @@ export default function SeriesDetailPage() {
   const [batas, setBatas] = useState(BATAS_AWAL)
   const [memuat, setMuat] = useState(true)
   const [coverGagal, setCoverGagal] = useState(false)
+  const seriDilacakRef = useRef('')
+
+  useEffect(() => {
+    if (!seri || seriDilacakRef.current === seri.slug) return
+    seriDilacakRef.current = seri.slug
+    lacakEvent('series_view', { seri_slug: seri.slug, kategori: seri.kategori })
+  }, [seri])
 
   useEffect(() => {
     let masihAktif = true

@@ -37,6 +37,13 @@ export function pecahNarasumber(nilai: string | null | undefined): string[] {
   return daftar.length > 0 ? daftar : ['']
 }
 
+const NILAI_TIDAK_ADA = new Set(['', '-', '--', 'belum tercatat', 'tidak ada', 'n/a', 'null', 'tidak diketahui'])
+
+/** Dipakai panel admin untuk menandai metadata yang belum diisi. */
+export function adaIsi(nilai: string | null | undefined): boolean {
+  return Boolean(nilai && !NILAI_TIDAK_ADA.has(nilai.trim().toLowerCase()))
+}
+
 export function videoIdDariTautan(tautan: string): string | null {
   const nilai = tautan.trim()
   const pola = /(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
