@@ -33,6 +33,8 @@ build/
 # Berkas Riwayat Sesi & Log Sementara
 # ========================================================
 opencode/
+deepseek harrness/
+*.jsonl
 *.log
 lighthouse.json
 
